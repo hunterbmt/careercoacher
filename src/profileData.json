@@ -1,0 +1,230 @@
+[
+  {
+    "name": "Son Tang",
+    "title": "EM",
+    "summary":"Sơn is young, talented and passionate geeky who had more than five years in full-stack web development and around two years in product/project management. He has earned Software Engineering degree from the FPT University and taking MBA course of Western Sydney University from ISB. Before starting at EgoPulse, he worked for Atlassian as Senior Software Engineer and later on as Development Lead which allow him to hands-on in product management for Jira",
+    "skills": ["Java", "JS", "MongoDB", "ReactJS", "AngularJS"],
+    "historical": [
+      {
+        "time": "12/2016",
+        "changelog": [
+          "Increasing programming language proficiency to level 4",
+          "Increasing web back-end proficiency to level 3",
+          "Increasing source control proficiency to level 3",
+          "Test proficiency remain at level 0"
+        ]
+      },
+      {
+        "time": "04/2016",
+        "changelog": [
+          "Promoted to SSE"
+        ]
+      }
+    ],
+    "compentencies": {
+      "Programming Language": 3,
+      "Source Control": 4,
+      "Web back-end": 3,
+      "Web front-end": 4,
+      "Mobile": 0,
+      "Desktop": 0,
+      "Database": 0,
+      "Enterprise": 0,
+      "Cloud": 3,
+      "DevOps": 3,
+      "Test": 1,
+      "Report": 0,
+      "ETL": 0,
+      "Big Data": 0,
+      "Effective Communication": 3,
+      "Customer Focus": 2,
+      "Achievement Orientation": 2,
+      "Developing Others": 2,
+      "Self Development": 2
+    }
+  },
+  {
+    "name": "Dat Ho",
+    "title": "EM",
+    "summary":"Dat Ho's summary",
+    "skills": ["Java", "MongoDB", "Jenkin"],
+    "historical": [
+      {
+        "time": "12/2016",
+        "changelog": [
+          "Increasing programming language proficiency to level 4",
+          "Increasing web back-end proficiency to level 3",
+          "Increasing source control proficiency to level 3",
+          "Test proficiency remain at level 0"
+        ]
+      },
+      {
+        "time": "04/2016",
+        "changelog": [
+          "Promoted to EM"
+        ]
+      }
+    ],
+    "compentencies": {
+      "Programming Language": 2,
+      "Source Control": 3,
+      "Web back-end": 2,
+      "Web front-end": 2,
+      "Mobile": 0,
+      "Desktop": 0,
+      "Database": 0,
+      "Enterprise": 0,
+      "Cloud": 3,
+      "DevOps": 3,
+      "Test": 1,
+      "Report": 0,
+      "ETL": 2,
+      "Big Data": 3,
+      "Effective Communication": 3,
+      "Customer Focus": 2,
+      "Achievement Orientation": 2,
+      "Developing Others": 2,
+      "Self Development": 2
+    }
+  },
+  {
+    "name": "Duong Vo",
+    "title": "SSE",
+    "summary":"Duong Vo's summary",
+    "skills": ["Java", "JS"],
+    "historical": [
+      {
+        "time": "12/2016",
+        "changelog": [
+          "Increasing programming language proficiency to level 4",
+          "Increasing web back-end proficiency to level 3",
+          "Increasing source control proficiency to level 3",
+          "Test proficiency remain at level 0"
+        ]
+      },
+      {
+        "time": "04/2016",
+        "changelog": [
+          "Promoted to SSE"
+        ]
+      }
+    ],
+    "compentencies": {
+      "Programming Language": 2,
+      "Source Control": 2,
+      "Web back-end": 3,
+      "Web front-end": 1,
+      "Mobile": 0,
+      "Desktop": 0,
+      "Database": 0,
+      "Enterprise": 0,
+      "Cloud": 3,
+      "DevOps": 3,
+      "Test": 1,
+      "Report": 0,
+      "ETL": 0,
+      "Big Data": 0,
+      "Effective Communication": 2,
+      "Customer Focus": 2,
+      "Achievement Orientation": 2,
+      "Developing Others": 2,
+      "Self Development": 2
+    }
+  },
+  {
+    "name": "AVG SSE",
+    "compentencies": {
+      "Programming Language": 3,
+      "Source Control": 3,
+      "Web back-end": 2,
+      "Web front-end": 2,
+      "Mobile": 2,
+      "Desktop": 2,
+      "Database": 2,
+      "Enterprise": 2,
+      "Cloud": 2,
+      "DevOps": 2,
+      "Test": 1,
+      "Report": 1,
+      "ETL": 1,
+      "Big Data": 2,
+      "Effective Communication": 2,
+      "Customer Focus": 2,
+      "Achievement Orientation": 2,
+      "Developing Others": 2,
+      "Self Development": 2
+    }
+  },
+  {
+    "name": "AVG SE",
+    "compentencies": {
+      "Programming Language": 2,
+      "Source Control": 2,
+      "Web back-end": 1,
+      "Web front-end": 1,
+      "Mobile": 1,
+      "Desktop": 1,
+      "Database": 1,
+      "Enterprise": 1,
+      "Cloud": 1,
+      "DevOps": 1,
+      "Test": 1,
+      "Report": 0,
+      "ETL": 0,
+      "Big Data": 0,
+      "Effective Communication": 1,
+      "Customer Focus": 2,
+      "Achievement Orientation": 2,
+      "Developing Others": 1,
+      "Self Development": 1
+    }
+  },
+  {
+    "name": "AVG SA",
+    "compentencies": {
+      "Programming Language": 4,
+      "Source Control": 4,
+      "Web back-end": 4,
+      "Web front-end": 4,
+      "Mobile": 4,
+      "Desktop": 4,
+      "Database": 4,
+      "Enterprise": 4,
+      "Cloud": 4,
+      "DevOps": 4,
+      "Test": 4,
+      "Report": 4,
+      "ETL": 4,
+      "Big Data": 4,
+      "Effective Communication": 3,
+      "Customer Focus": 3,
+      "Achievement Orientation": 3,
+      "Developing Others": 3,
+      "Self Development": 4
+    }
+  },
+  {
+    "name": "Previous PA",
+    "compentencies": {
+      "Programming Language": 3,
+      "Source Control": 3,
+      "Web back-end": 2,
+      "Web front-end": 4,
+      "Mobile": 0,
+      "Desktop": 0,
+      "Database": 0,
+      "Enterprise": 0,
+      "Cloud": 3,
+      "DevOps": 3,
+      "Test": 1,
+      "Report": 0,
+      "ETL": 0,
+      "Big Data": 0,
+      "Effective Communication": 2,
+      "Customer Focus": 2,
+      "Achievement Orientation": 2,
+      "Developing Others": 2,
+      "Self Development": 2
+    }
+  }
+]
