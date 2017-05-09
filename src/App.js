@@ -7,6 +7,7 @@ import MainPage from './MainPage';
 import SelfAssessment from './SelfAssessment';
 import CompareAssessment from './CompareAssessment';
 import FinishPage from './FinishPage';
+import ProfilePage from './ProfilePage';
 
 import './App.css';
 
@@ -24,6 +25,8 @@ class App extends Component {
           <Location path='/selfassessment/:name' handler={SelfAssessment} />
           <Location path='/:manager/assessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name' handler={CompareAssessment} />
+          <Location path='/:name' handler={ProfilePage} />
+          <Location path='/profiles/:profile' handler={ProfilePage} />
         </Locations>
       </LocaleProvider>
     );

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import _ from 'lodash';
 import { Layout, Row, Col, Button} from 'antd';
 import QuestionInput from './QuestionInput';
-
+import {getData, update, database} from './firebase';
 import logo from './logo.png';
 const { Header, Content } = Layout;
 
@@ -58,6 +58,35 @@ const conflicts = [
 ]
 
 class CompareAssessment extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selfAnswer : [],
+      managerAnswer : [],
+      conflicts : []
+    }
+  }
+
+  componentDidMount() {
+    this.getSelfAnswerDataToState(this.props.name);
+    this.getManagerAnswerDataToState(this.props.name);
+
+  }
+
+  getSelfAnswerDataToState = (name) => {
+    getData(`answers/${name}`)
+    .then((answer) =>
+    this.setState({
+      selfAnswer: answer
+    }));
+  }
+  getManagerAnswerDataToState = (name) => {
+    getData(`answers/${name}_manager`)
+    .then((answer) =>
+    this.setState({
+      managerAnswer: answer
+    }));
+  }
   render() {
     return (
       <Layout style={{height: '100%'}}>
@@ -75,6 +104,7 @@ class CompareAssessment extends Component {
             </Row>
             <Row type='flex' justify='center' style={{padding: '10px 0'}}>
               <h3>Please discuss and resolve conflict below </h3>
+              <getData />
             </Row>
             <div className='steps-content'>
               <Row type='flex'>
