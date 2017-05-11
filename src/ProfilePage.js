@@ -28,7 +28,8 @@ const compentencies = [
   'Customer Focus',
   'Achievement Orientation',
   'Developing Others',
-  'Self Development'
+  'Self Development',
+  'Something i dont know'
 ]
 
 const getSelectedCompentencies = (profile) => {
@@ -75,8 +76,9 @@ export default class ProfilePage extends Component {
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
-    const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
+    //const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
     const selectedCompentencies = getSelectedCompentencies(profile);
+
     return (
       <Row type="flex" style={{padding: '20px 10px 10px'}}>
         <Col span={14}>
@@ -99,10 +101,7 @@ export default class ProfilePage extends Component {
             </Select>
           </Row>
           <Row type="flex" justify="center">
-            <CompentencyRadar
-              data={radarData}
-              compentencies={selectedCompentencies}
-            />
+
           </Row>
         </Col>
         <Col span={9} offset={1}>
@@ -174,6 +173,6 @@ export default class ProfilePage extends Component {
     this.updateConfiguratedCompentencies(configuratedCompentencies);
   }
   updateConfiguratedCompentencies = (configuratedCompentencies) => {
-    update(`/profiles/${this.props.profile}/configuratedCompentencies`, configuratedCompentencies)
+    update(`/profiles/${this.props.profile}/configuratedCompetencies`, configuratedCompentencies)
   }
 };

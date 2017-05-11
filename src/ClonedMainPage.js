@@ -6,11 +6,12 @@ import Loading from './Loading';
 import './App.css';
 import logo from './logo.png';
 import {getData} from './firebase';
+import GroupManagement from './GroupManagement';
 
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
 
-class MainPage extends Component {
+class ClonedMainPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -20,11 +21,11 @@ class MainPage extends Component {
     };
   }
   componentDidMount() {
-    Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
+    Promise.all([getData('baseline'), getData('BU_projects')]).then(([baseline, projectList]) =>
       this.setState({
         baseline,
-        profileList,
-        selectedProfile: _.first(profileList),
+        projectList,
+        selectedProject: _.first(Object.keys(projectList)),
         loading: false
       })
     );
@@ -35,9 +36,9 @@ class MainPage extends Component {
       mode: collapsed ? 'vertical' : 'inline',
     });
   }
-  onSelectProfile = (e) => {
+  onSelectProject = (e) => {
     this.setState({
-      selectedProfile: e.key,
+      selectedProject: e.key,
     });
   }
   render() {
@@ -62,15 +63,15 @@ class MainPage extends Component {
           >
             <Menu theme="dark"
               mode={this.state.mode}
-              onClick={this.onSelectProfile}
-              selectedKeys={[this.state.selectedProfile]}
+              onClick={this.onSelectProject}
+              selectedKeys={[this.state.selectedProject]}
             >
               <SubMenu
                 key="sub1"
-                title={<span><Icon type="user" /><span className="nav-text">Members</span></span>}
+                title={<span><Icon type="user" /><span className="nav-text">BU_projects</span></span>}
               >
                 {
-                  _.map(this.state.profileList, (profile) => <Menu.Item key={profile}>{profile}</Menu.Item>)
+                  _.map(Object.keys(this.state.projectList), (project) => <Menu.Item key={project}>{project}</Menu.Item>)
                 }
               </SubMenu>
               <Menu.Item key='Report'>
@@ -83,9 +84,8 @@ class MainPage extends Component {
           </Sider>
           <Layout>
             <Content style={{ margin: '0 16px' }}>
-              <ProfilePage
-                baseline={this.state.baseline}
-                profile={this.state.selectedProfile}
+              <GroupManagement
+                project={this.state.selectedProject}
               />
             </Content>
           </Layout>
@@ -140,4 +140,4 @@ class AddNewProfilePopup extends Component {
   }
 }
 
-export default MainPage;
+export default ClonedMainPage;

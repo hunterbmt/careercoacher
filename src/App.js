@@ -7,6 +7,9 @@ import MainPage from './MainPage';
 import SelfAssessment from './SelfAssessment';
 import CompareAssessment from './CompareAssessment';
 import FinishPage from './FinishPage';
+import ProfilePage from './ProfilePage';
+import GroupManagement from './GroupManagement';
+import ClonedMainPage from './ClonedMainPage';
 
 import './App.css';
 
@@ -19,11 +22,13 @@ class App extends Component {
     return (
       <LocaleProvider locale={enUS}>
         <Locations hash style={{height: '100%'}}>
-          <Location path='/' handler={MainPage} />
+          <Location path='/' handler={ClonedMainPage} />
           <Location path='/finish' handler={FinishPage} />
           <Location path='/selfassessment/:name' handler={SelfAssessment} />
           <Location path='/:manager/assessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name' handler={CompareAssessment} />
+          <Location path='/profiles/:profile' handler={ProfilePage} />
+          <Location path='/projects/:project' handler={GroupManagement} />
         </Locations>
       </LocaleProvider>
     );
