@@ -31,6 +31,15 @@ class CompareAssessment extends Component {
   eachCompetencyQuestion(question, competency) {
     for(var i=0 ; i< question.length; i++) {
       if(this.state.selfAnswers[i] === this.state.managerAnswers[i]) {
+        this.setState({
+          finalAnswers: {
+            ...this.state.finalAnswers,
+            [competency]: {
+              ...(this.state.finalAnswers[competency] || {}),
+              [i]: this.state.managerAnswers[i]
+            }
+          }
+        });
         continue;
       }
       switch (question[i].type) {
