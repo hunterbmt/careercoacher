@@ -72,6 +72,7 @@ class MainPage extends Component {
                 {
                   _.map(this.state.profileList, (profile) => <Menu.Item key={profile}>{profile}</Menu.Item>)
                 }
+                 
               </SubMenu>
               <Menu.Item key='Report'>
                 <span>
@@ -86,7 +87,7 @@ class MainPage extends Component {
               <ProfilePage
                 baseline={this.state.baseline}
                 profile={this.state.selectedProfile}
-              />
+              />              
             </Content>
           </Layout>
         </Layout>
@@ -129,7 +130,7 @@ class AddNewProfilePopup extends Component {
             <Button key="back" size="large" onClick={this.handleCancel}>Return</Button>,
             <Button key="submit" type="primary" size="large" loading={this.state.loading} onClick={this.handleOk}>
               Submit
-            </Button>,
+            </Button>
           ]}
         >
           <p>Group Name: </p>

@@ -7,6 +7,7 @@ import './App.css';
 import logo from './logo.png';
 import {getData} from './firebase';
 import GroupManagement from './GroupManagement';
+import {Router, Link} from 'react-router-component';
 
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -68,7 +69,7 @@ class ClonedMainPage extends Component {
             >
               <SubMenu
                 key="sub1"
-                title={<span><Icon type="user" /><span className="nav-text">BU_projects</span></span>}
+                title={<span><Icon type="database" /><span className="nav-text">BU_projects</span></span>}
               >
                 {
                   _.map(Object.keys(this.state.projectList), (project) => <Menu.Item key={project}>{project}</Menu.Item>)
@@ -79,6 +80,12 @@ class ClonedMainPage extends Component {
                   <Icon type="area-chart" />
                   <span className="nav-text">Report</span>
                 </span>
+              </Menu.Item>
+              <Menu.Item>
+                <Link href='/roleProfile'>
+                <Icon type="user" />
+                <span>Role Profile</span>
+                </Link>
               </Menu.Item>
             </Menu>
           </Sider>

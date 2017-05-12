@@ -10,6 +10,7 @@ import FinishPage from './FinishPage';
 import ProfilePage from './ProfilePage';
 import GroupManagement from './GroupManagement';
 import ClonedMainPage from './ClonedMainPage';
+import RoleProfile from './RoleProfile';
 
 import './App.css';
 
@@ -29,6 +30,7 @@ class App extends Component {
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/profiles/:profile' handler={ProfilePage} />
           <Location path='/projects/:project' handler={GroupManagement} />
+          <Location path='/roleProfile' handler={RoleProfile} />
         </Locations>
       </LocaleProvider>
     );
