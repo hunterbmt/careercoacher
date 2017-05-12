@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import _ from 'lodash';
-import { Layout, Row, Col, Button} from 'antd';
+import { Layout, Steps, Row, Col, Button} from 'antd';
 import QuestionInput from './QuestionInput';
 import {getData, update, database, insert} from './firebase';
 import logo from './logo.png';
 import Loading from './Loading';
 
 const { Header, Content } = Layout;
-
+const Step = Steps.Step;
 class CompareAssessment extends Component {
   constructor(props) {
     super(props);
@@ -17,7 +17,8 @@ class CompareAssessment extends Component {
     selfAnswers: [],
     conflicts : [],
     loading : true,
-    finalAnswers: {}
+    finalAnswers: {},
+    current: 0
   }
 
   componentDidMount() {
@@ -71,6 +72,14 @@ class CompareAssessment extends Component {
           console.log("No idea");
       }
     }
+  }
+  next() {
+    const current = this.state.current + 1;
+    this.setState({ current });
+  }
+  prev() {
+    const current = this.state.current - 1;
+    this.setState({ current });
   }
   openHint(hint) {
     this.setState({
