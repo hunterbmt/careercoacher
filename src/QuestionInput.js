@@ -9,7 +9,7 @@ const QuestionInput = (props) => {
     case 'scale':
       return <Scale value={props.value} disabled={props.disabled} onChange={props.onChange}/>;
     case 'option':
-      if (_.isEmpty(props.options) && props.value) return <Radio defaultChecked disabled>{props.value}</Radio>
+      if (_.isEmpty(props.options) && props.value) return <Radio style={{whiteSpace: 'pre-wrap'}} defaultChecked disabled>{props.value}</Radio>
       return <RadioGroup
         style={{
           display: 'flex',

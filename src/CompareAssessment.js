@@ -2,92 +2,123 @@ import React, {Component} from 'react';
 import _ from 'lodash';
 import { Layout, Row, Col, Button} from 'antd';
 import QuestionInput from './QuestionInput';
-import {getData, update, database} from './firebase';
+import {getData, update, database, insert} from './firebase';
 import logo from './logo.png';
-const { Header, Content } = Layout;
+import Loading from './Loading';
 
-const conflicts = [
-  {
-    compentency: 'Programming Language',
-    question: 'How confident you are with your ability in task performing without helps or instructions',
-    type: 'scale',
-    selfAssessment: 4,
-    managerAssessment: 3
-  },
-  {
-    compentency: 'Programming Language',
-    question: 'How you evaluate your awareness about common performance issues in JS',
-    type: 'scale',
-    selfAssessment: 2,
-    managerAssessment: 3
-  },
-  {
-    compentency: 'Programming Language',
-    question: 'How confident you are with code designing tasks',
-    type: 'scale',
-    selfAssessment: 3,
-    managerAssessment: 4
-  },
-  {
-    compentency: 'Programming Language',
-    type: 'option',
-    desc: 'How about another/ advances programming paradigms',
-    options: [
-      "I don't know any other programming paradigms",
-      "I hear about some others paradigms such as OOP or functional programming",
-      "I have good knowledge about others paradigms but not yet apply them into projects",
-      "I apply others paradigms in projects and can see clearly benefit of applying those"
-    ],
-    selfAssessment: 'I have good knowledge about others paradigms but not yet apply them into projects',
-    managerAssessment: 'I hear about some others paradigms such as OOP or functional programming'
-  },
-  {
-    compentency: 'Source Control',
-    question: 'Conflict example question 5',
-    type: 'scale',
-    selfAssessment: 3,
-    managerAssessment: 1
-  },
-  {
-    compentency: 'Web backend',
-    question: 'Conflict example question 6',
-    type: 'scale',
-    selfAssessment: 2,
-    managerAssessment: 1
-  }
-]
+const { Header, Content } = Layout;
 
 class CompareAssessment extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selfAnswer : [],
-      managerAnswer : [],
-      conflicts : []
-    }
+  }
+  state = {
+    managerAnswers: [],
+    selfAnswers: [],
+    conflicts : [],
+    loading : true,
+    finalAnswers: {}
   }
 
   componentDidMount() {
-    this.getSelfAnswerDataToState(this.props.name);
-    this.getManagerAnswerDataToState(this.props.name);
-
+    this.getSelectedCompetenciesDataToState(this.props.name);
+    this.setState({
+      loading : false
+    });
   }
 
-  getSelfAnswerDataToState = (name) => {
+  eachCompetencyQuestion(question, competency) {
+    for(var i=0 ; i< question.length; i++) {
+      switch (question[i].type) {
+        case 'option':
+          this.state.conflicts.push({
+            competency: competency,
+            type: 'option',
+            question: question[i].desc,
+            options: question[i].options,
+            selfAssessment: this.state.selfAnswers[i],
+            managerAssessment: this.state.managerAnswers[i]
+          });
+          break;
+        case 'scale':
+          this.state.conflicts.push({
+            competency: competency,
+            type: 'scale',
+            question: question[i].desc,
+            selfAssessment: this.state.selfAnswers[i],
+            managerAssessment: this.state.managerAnswers[i]
+          });
+          break;
+        case 'switch':
+          this.state.conflicts.push({
+            competency: competency,
+            type: 'switch',
+            question: question[i].desc,
+            selfAssessment: this.state.selfAnswers[i],
+            managerAssessment: this.state.managerAnswers[i]
+        });
+          break;
+        case 'freetext':
+          this.state.conflicts.push({
+            competency: competency,
+            type: 'freetext',
+            question: question[i].desc,
+            selfAssessment: this.state.selfAnswers[i],
+            managerAssessment: this.state.managerAnswers[i]
+        });
+            break;
+        default:
+          console.log("No idea");
+      }
+    }
+  }
+  openHint(hint) {
+    this.setState({
+      visible: true,
+      hint
+    });
+  }
+  closeHint = () => {
+    this.setState({
+      visible: false
+    });
+  }
+  getQuestion(competency) {
+    getData(`answers/${this.props.name}/${competency}`)
+    .then((answer) =>
+    this.setState({
+        selfAnswers: answer
+    }));
+    getData(`answers/${this.props.name}_manager/${competency}`)
+    .then((answer) =>
+      this.setState({
+          managerAnswers: answer
+      }));
+    getData(`competencies/${competency}/questions`)
+    .then((ques) => this.eachCompetencyQuestion(ques, competency)
+    );
+  }
+
+  handle(answer) {
+    var competencies = Object.keys(answer);
+    Object.values(competencies).map((competency) => this.getQuestion(competency));
+  }
+
+  getSelectedCompetenciesDataToState = (name) => {
     getData(`answers/${name}`)
-    .then((answer) =>
-    this.setState({
-      selfAnswer: answer
-    }));
+    .then((answer) => this.handle(answer)
+    );
   }
-  getManagerAnswerDataToState = (name) => {
-    getData(`answers/${name}_manager`)
-    .then((answer) =>
-    this.setState({
-      managerAnswer: answer
-    }));
+
+  saveFinalAnswers(finalAnswers) {
+    insert(`answers/${this.props.name}_final`,this.state.finalAnswers);
+    window.location.replace(`/#/compare/${this.props.name}/final`);
   }
+
   render() {
+    if (this.state.loading) return <Loading />;
+
+    const conflicts = this.state.conflicts;
     return (
       <Layout style={{height: '100%'}}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -111,7 +142,7 @@ class CompareAssessment extends Component {
                 {
                   _.map(conflicts, (conflict, index) =>
                     <Col span={12} className='question-content'>
-                      <h3>Question {index + 1}: {conflict.question} ({conflict.compentency})</h3>
+                      <h3>Question {index + 1}: {conflict.question} ({conflict.competency})</h3>
                       <div style={{width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15}}>
                         <div>
                           <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled/>
@@ -121,7 +152,17 @@ class CompareAssessment extends Component {
                         </div>
                       </div>
                       <div style={{marginTop: 10}}>
-                        <h4>Final result</h4> <QuestionInput type={conflict.type} options={conflict.options}/>
+                        <h4>Final result</h4> <QuestionInput type={conflict.type} options={conflict.options} onChange={(value) => this.setState({
+                          finalAnswers: {
+                            ...this.state.finalAnswers,
+                            [conflict.competency]: {
+                              ...(this.state.finalAnswers[conflict.competency] || {}),
+                              [index]: value
+                            }
+                          }
+                        })}
+                        value={_.get(this.state.finalAnswers, `${conflict.competency}.${index}`)}
+                        />
                       </div>
                     </Col>
                   )
@@ -135,6 +176,7 @@ class CompareAssessment extends Component {
                 style={{
                   width: 80
                 }}
+                onClick={() => this.saveFinalAnswers(this.state.finalAnswers)}
               >
                 Resolve
               </Button>

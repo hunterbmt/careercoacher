@@ -23,6 +23,7 @@ class App extends Component {
           <Location path='/' handler={MainPage} />
           <Location path='/finish' handler={FinishPage} />
           <Location path='/selfassessment/:name' handler={SelfAssessment} />
+          <Location path='/compare/:name/final' handler={SelfAssessment} />
           <Location path='/:manager/assessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/:name' handler={ProfilePage} />
