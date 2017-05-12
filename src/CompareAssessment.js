@@ -30,19 +30,23 @@ class CompareAssessment extends Component {
 
   eachCompetencyQuestion(question, competency) {
     for(var i=0 ; i< question.length; i++) {
+      if(this.state.selfAnswers[i] === this.state.managerAnswers[i]) {
+        continue;
+      }
       switch (question[i].type) {
         case 'option':
           this.setState({
             conflicts:{
               ...this.state.conflicts,
               [competency]: {
-                ...(this.state.conflicts[competency]),
-                type: 'option',
-                question: question[i].desc,
-                options: question[i].options,
-                selfAssessment: this.state.selfAnswers[i],
-                managerAssessment: this.state.managerAnswers[i],
-                index: i
+                ...this.state.conflicts[competency],
+                [i]: {
+                  type: 'option',
+                  question: question[i].desc,
+                  options: question[i].options,
+                  selfAssessment: this.state.selfAnswers[i],
+                  managerAssessment: this.state.managerAnswers[i]
+                }
               }
             }});
           break;
@@ -52,10 +56,12 @@ class CompareAssessment extends Component {
               ...this.state.conflicts,
               [competency]: {
                 ...(this.state.conflicts[competency]),
-                type: 'scale',
-                question: question[i].desc,
-                selfAssessment: this.state.selfAnswers[i],
-                managerAssessment: this.state.managerAnswers[i]
+                [i]: {
+                  type: 'scale',
+                  question: question[i].desc,
+                  selfAssessment: this.state.selfAnswers[i],
+                  managerAssessment: this.state.managerAnswers[i]
+                }
               }
             }});
           break;
@@ -66,28 +72,17 @@ class CompareAssessment extends Component {
               ...this.state.conflicts,
               [competency]: {
                 ...(this.state.conflicts[competency]),
-                type: 'switch',
-                question: question[i].desc,
-                selfAssessment: this.state.selfAnswers[i],
-                managerAssessment: this.state.managerAnswers[i]
+                [i]: {
+                  type: 'switch',
+                  question: question[i].desc,
+                  selfAssessment: this.state.selfAnswers[i],
+                  managerAssessment: this.state.managerAnswers[i]
+                }
               }
             }});
             break;
-        case 'freetext':
-        this.setState({
-          conflicts:{
-            ...this.state.conflicts,
-            [competency]: {
-              ...(this.state.conflicts[competency]),
-              type: 'freetext',
-              question: question[i].desc,
-              selfAssessment: this.state.selfAnswers[i],
-              managerAssessment: this.state.managerAnswers[i]
-            }
-          }});
-          break;
         default:
-          console.log("No idea");
+
       }
     }
   }
@@ -144,8 +139,9 @@ class CompareAssessment extends Component {
 
   render() {
     if (this.state.loading) return <Loading />;
-
-    const conflicts = this.state.conflicts;
+    const compentenciesName = Object.keys(this.state.conflicts);
+    const listConflicts = Object.values(this.state.conflicts);
+    const currentCompentenciesName = compentenciesName[this.state.current];
     return (
       <Layout style={{height: '100%'}}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -166,17 +162,17 @@ class CompareAssessment extends Component {
             </Row>
             <Row style={{padding: '20px 0'}} type='flex'>
               <Steps current={this.state.current}>
-                {_.map(conflicts, (conflict) =>
-                  <Step title={conflict.competency} />
+                {_.map(compentenciesName, (name) =>
+                  <Step title={name} />
                 )}
               </Steps>
             </Row>
             <div className='steps-content'>
               <Row type='flex'>
                 {
-                  _.map(conflicts, (conflict, index) =>
+                  _.map(listConflicts[this.state.current], (conflict, index) =>
                     <Col span={12} className='question-content'>
-                      <h3>Question {index + 1}: {conflict.question} ({conflict.competency})</h3>
+                      <h3>Question {index+1}: {conflict.question} ({compentenciesName[this.state.current]})</h3>
                       <div style={{width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15}}>
                         <div>
                           <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled/>
@@ -189,13 +185,13 @@ class CompareAssessment extends Component {
                         <h4>Final result</h4> <QuestionInput type={conflict.type} options={conflict.options} onChange={(value) => this.setState({
                           finalAnswers: {
                             ...this.state.finalAnswers,
-                            [conflict.competency]: {
-                              ...(this.state.finalAnswers[conflict.competency] || {}),
+                            [currentCompentenciesName]: {
+                              ...(this.state.finalAnswers[currentCompentenciesName] || {}),
                               [index]: value
                             }
                           }
                         })}
-                        value={_.get(this.state.finalAnswers, `${conflict.competency}.${index}`)}
+                        value={_.get(this.state.finalAnswers, `${currentCompentenciesName}.${index}`)}
                         />
                       </div>
                     </Col>
@@ -204,25 +200,42 @@ class CompareAssessment extends Component {
               </Row>
             </div>
             <div className='steps-action'>
-              <Button
-                type='primary'
-                size='large'
-                style={{
-                  width: 80
-                }}
-                onClick={() => this.saveFinalAnswers(this.state.finalAnswers)}
-              >
-                Resolve
-              </Button>
-              <Button
-                size='large'
-                style={{
-                  marginLeft: 20,
-                  width: 80
-                }}
-              >
-                Close
-              </Button>
+              {
+                this.state.current > 0
+                &&
+                <Button
+                  style={{ marginRight: 8 }}
+                  size='large'
+                  onClick={() => this.prev()}
+                >
+                  Previous
+                </Button>
+              }
+              {
+                this.state.current < compentenciesName.length - 1
+                &&
+                <Button
+                  type='primary'
+                  size='large'
+                  onClick={() => this.next()}
+                >
+                  Next
+                </Button>
+              }
+              {
+                this.state.current === compentenciesName.length - 1
+                &&
+                <Button
+                  type="primary"
+                  size='large'
+                  style={{
+                    width: 80
+                  }}
+                  onClick={() => this.saveFinalAnswers(this.state.finalAnswers)}
+                >
+                  Resolve
+                </Button>
+              }
             </div>
           </Content>
         </Layout>
