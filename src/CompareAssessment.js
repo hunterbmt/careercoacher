@@ -15,7 +15,7 @@ class CompareAssessment extends Component {
   state = {
     managerAnswers: [],
     selfAnswers: [],
-    conflicts : [],
+    conflicts : {},
     loading : true,
     finalAnswers: {},
     current: 0
@@ -32,42 +32,60 @@ class CompareAssessment extends Component {
     for(var i=0 ; i< question.length; i++) {
       switch (question[i].type) {
         case 'option':
-          this.state.conflicts.push({
-            competency: competency,
-            type: 'option',
-            question: question[i].desc,
-            options: question[i].options,
-            selfAssessment: this.state.selfAnswers[i],
-            managerAssessment: this.state.managerAnswers[i]
-          });
+          this.setState({
+            conflicts:{
+              ...this.state.conflicts,
+              [competency]: {
+                ...(this.state.conflicts[competency]),
+                type: 'option',
+                question: question[i].desc,
+                options: question[i].options,
+                selfAssessment: this.state.selfAnswers[i],
+                managerAssessment: this.state.managerAnswers[i],
+                index: i
+              }
+            }});
           break;
         case 'scale':
-          this.state.conflicts.push({
-            competency: competency,
-            type: 'scale',
-            question: question[i].desc,
-            selfAssessment: this.state.selfAnswers[i],
-            managerAssessment: this.state.managerAnswers[i]
-          });
+          this.setState({
+            conflicts:{
+              ...this.state.conflicts,
+              [competency]: {
+                ...(this.state.conflicts[competency]),
+                type: 'scale',
+                question: question[i].desc,
+                selfAssessment: this.state.selfAnswers[i],
+                managerAssessment: this.state.managerAnswers[i]
+              }
+            }});
           break;
+
         case 'switch':
-          this.state.conflicts.push({
-            competency: competency,
-            type: 'switch',
-            question: question[i].desc,
-            selfAssessment: this.state.selfAnswers[i],
-            managerAssessment: this.state.managerAnswers[i]
-        });
-          break;
-        case 'freetext':
-          this.state.conflicts.push({
-            competency: competency,
-            type: 'freetext',
-            question: question[i].desc,
-            selfAssessment: this.state.selfAnswers[i],
-            managerAssessment: this.state.managerAnswers[i]
-        });
+          this.setState({
+            conflicts:{
+              ...this.state.conflicts,
+              [competency]: {
+                ...(this.state.conflicts[competency]),
+                type: 'switch',
+                question: question[i].desc,
+                selfAssessment: this.state.selfAnswers[i],
+                managerAssessment: this.state.managerAnswers[i]
+              }
+            }});
             break;
+        case 'freetext':
+        this.setState({
+          conflicts:{
+            ...this.state.conflicts,
+            [competency]: {
+              ...(this.state.conflicts[competency]),
+              type: 'freetext',
+              question: question[i].desc,
+              selfAssessment: this.state.selfAnswers[i],
+              managerAssessment: this.state.managerAnswers[i]
+            }
+          }});
+          break;
         default:
           console.log("No idea");
       }
@@ -145,6 +163,13 @@ class CompareAssessment extends Component {
             <Row type='flex' justify='center' style={{padding: '10px 0'}}>
               <h3>Please discuss and resolve conflict below </h3>
               <getData />
+            </Row>
+            <Row style={{padding: '20px 0'}} type='flex'>
+              <Steps current={this.state.current}>
+                {_.map(conflicts, (conflict) =>
+                  <Step title={conflict.competency} />
+                )}
+              </Steps>
             </Row>
             <div className='steps-content'>
               <Row type='flex'>
