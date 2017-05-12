@@ -141,7 +141,7 @@ class CompareAssessment extends Component {
     if (this.state.loading) return <Loading />;
     const compentenciesName = Object.keys(this.state.conflicts);
     const listConflicts = Object.values(this.state.conflicts);
-    const currentCompentenciesName = compentenciesName[this.state.current];
+    const currentCompentencyName = compentenciesName[this.state.current];
     return (
       <Layout style={{height: '100%'}}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -186,12 +186,12 @@ class CompareAssessment extends Component {
                           finalAnswers: {
                             ...this.state.finalAnswers,
                             [currentCompentenciesName]: {
-                              ...(this.state.finalAnswers[currentCompentenciesName] || {}),
+                              ...(this.state.finalAnswers[currentCompentencyName] || {}),
                               [index]: value
                             }
                           }
                         })}
-                        value={_.get(this.state.finalAnswers, `${currentCompentenciesName}.${index}`)}
+                        value={_.get(this.state.finalAnswers, `${currentCompentencyName}.${index}`)}
                         />
                       </div>
                     </Col>
