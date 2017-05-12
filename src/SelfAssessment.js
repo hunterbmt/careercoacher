@@ -84,7 +84,7 @@ class SelfAssessment extends Component {
                   <h2>Welcome {this.props.manager}</h2>
                 </Row>
                 <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h3>Please answer questions below for {this.props.name}'s assement </h3>
+                  <h3>Please answer questions below for {this.props.name} s assement </h3>
                 </Row>
               </Row>
             }
