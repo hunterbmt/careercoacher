@@ -121,6 +121,8 @@ class SelfAssessment extends Component {
                     <Col span={12} className='question-content'>
                       <h3>Question {index + 1}: <span style={{whiteSpace: 'pre-wrap'}}>{question.desc}</span> {!_.isEmpty(question.hint) ? <Button shape="circle" icon="question" size="small" onClick={() => this.openHint(question.hint)}/> : null}</h3>
                       <div style={{width: '100%'}}>
+                        {
+                        _.isNull(this.state.isFinalPage)?
                         <QuestionInput {...question} onChange={(value) => this.setState({
                           answers: {
                             ...this.state.answers,
@@ -132,6 +134,11 @@ class SelfAssessment extends Component {
                         })}
                         value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)}
                         />
+                        :
+                        <QuestionInput {...question} disabled
+                        value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)} 
+                        />
+                        }
                       </div>
                     </Col>
                   )
