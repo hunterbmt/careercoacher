@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { Modal,Switch, Icon, Button,Input } from 'antd';
-import {getData,insert,listenData} from './firebase';
+import {getData,insert} from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
 import './competency.css';
