@@ -13,17 +13,7 @@ var list;
 
 class Competencies extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = { loading: true };
-  }
-
-  componentDidMount() {
-    this.setState({ loading: false })
-  }
-
   render() {
-    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -205,14 +195,12 @@ class Competency extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { checked: false };
+    this.state = { checked: false,loading: true};
   }
 
-
-  onChange() {
-    this.setState({ checked: !this.state.checked });
+  saveActivatedCompetency(checked){
     var updateDataCompetency = {
-      "activated": this.state.checked,
+      "activated": checked,
       "questions": [{
         "desc": "Please describe your ability to learn and research basic features of programming language. The ability on developing the programming solutions with technologies (Single or multiples). Example added below is for your reference.",
         "hint": "Your ability on recognizing and applying on I/O, ADO.NET/JDBC, Threading, Collection and data structure in C#/JAVA. Visualize and/or explain knowledge of common algorithms, data structure in problem solving. And be able to identify and implements the best solution for each problem.",
@@ -268,12 +256,19 @@ class Competency extends Component {
       }]
     }
     insert(`competencies1/${this.props.name}`, updateDataCompetency);
+  }
 
+  onChange() {
+   this.setState({
+     checked : !this.state.checked
+   });
+   this.saveActivatedCompetency(this.state.checked);
   }
 
   handleSetChecked(competency) {
     this.setState({
-      checked: competency.activated
+      checked: competency.activated,
+      loading : false
     });
   }
 
@@ -282,13 +277,16 @@ class Competency extends Component {
       .then((competency) =>
         this.handleSetChecked(competency)
       );
+      
   }
 
   componentDidMount() {
     this.getActivatedCompetency(this.props.name);
+    
   }
 
   render() {
+    if (this.state.loading) return <div style={{ height: 150 }}><Loading /> </div>;
     return (
       <div className="div-note">
         <h1>{this.props.name}</h1>
