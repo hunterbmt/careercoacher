@@ -28,7 +28,7 @@ class App extends Component {
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/:name' handler={ProfilePage} />
           <Location path='/profiles/:profile' handler={ProfilePage} />
-          <Location path='/competencies/:name' handler={SetWeight} />
+          <Location path='/competencies/:name/:title' handler={SetWeight} />
         </Locations>
       </LocaleProvider>
     );
