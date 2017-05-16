@@ -142,7 +142,6 @@ class CompareAssessment extends Component {
   }
 
   saveFinalAnswers(finalAnswers) {
-    console.log(this.state.finalAnswers);
     update(`answers/${this.props.name}_final`,this.state.finalAnswers);
     window.location.replace(`/#/compare/${this.props.name}/final`);
   }
