@@ -7,7 +7,9 @@ import QuestionInput from './QuestionInput';
 import Scale from './Scale';
 import ReactDOM from 'react-dom';
 import logo from './logo.png';
+
 const { Header, Content } = Layout;
+
 
 const Option = Select.Option;
 
@@ -16,6 +18,8 @@ class QuestionCompetency extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      visibleEdit: false,
+      showEditPopup: false,
       visible: false,
       selectValue: 'scale',
       question: '',
@@ -25,8 +29,11 @@ class QuestionCompetency extends Component {
       answer4: '',
       answer5: '',
       hint: '',
+      selectedIndex : 0,
       dataQuestion: [],
       dataSource: [],
+      questionDataDetail: {},
+      loading: true
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeQuestion = this.handleChangeQuestion.bind(this);
@@ -39,7 +46,7 @@ class QuestionCompetency extends Component {
 
   handleChangeQuestion(e) {
     this.setState({ question: e.target.value });
-    console.log(this.state.question);
+
   }
 
   handleChangeAnswer1(e) {
@@ -107,12 +114,16 @@ class QuestionCompetency extends Component {
   }
 
 
-  componentDidMount(){
+  componentDidMount() {
     getData(`competencies1/${this.props.name}/questions`)
-    .then((data) => this.setState({
-      dataQuestion :data
-    }));
+      .then((data) => this.setState({
+        dataQuestion: data,
+        loading: false
+      }));
+
+
   }
+
 
 
   showModal = () => {
@@ -135,7 +146,49 @@ class QuestionCompetency extends Component {
     });
   }
 
-  optionQuetionType(type) {
+
+  editOption(index) {
+    var newDataOption = {
+      "desc": this.state.question,
+      "hint": this.state.hint,
+      "options": [this.state.answer1, this.state.answer2, this.state.answer3, this.state.answer4, this.state.answer5],
+      "type": this.state.selectValue
+    }
+
+    update(`competencies1/${this.props.name}/questions/${index}`, newDataOption);
+
+  }
+
+   saveOthers(index) {
+    var newDataOthers = {
+      "desc": this.state.question,
+      "hint": this.state.hint,
+      "type": this.state.selectValue
+    }
+
+    console.log(newDataOthers);
+
+    update(`competencies1/${this.props.name}/questions/${index}`, newDataOthers);
+
+  }
+
+
+  handleEdit = (e) => {
+    this.setState({
+      showEditPopup: false
+    });
+  }
+
+  handleEditCancel = (e) => {
+
+    this.setState({
+      showEditPopup: false,
+    });
+  }
+
+
+
+  optionQuestionType(type) {
     if (type === "option") {
       return (
         <div>
@@ -165,7 +218,6 @@ class QuestionCompetency extends Component {
         </div>
       );
     }
-
   }
 
   columns = [{
@@ -181,21 +233,73 @@ class QuestionCompetency extends Component {
     key: 'action',
     render: (text, record) => (
       <span>
-        <a href="#">Edit</a>
+        <a onClick={() => this.onSelectQuestion(record.no)}>Edit</a>
         <span className="ant-divider" />
-        <a href="#">Delete</a>
+        <a onClick={this.showModalDelete}>Delete</a>
       </span>
     ),
   }];
 
-  render() {
+  onSelectQuestion(index) {
+    var realIndex = index - 1 ;
+    getData(`competencies1/${this.props.name}/questions/${realIndex}`)
+      .then((detailQuestionData) =>this.setState({
+        questionDataDetail: detailQuestionData,
+        showEditPopup: true
+      }));  
+  }
+
+
+
+
+   renderOptionQuestionType(detailQuestion) {
+  if (detailQuestion.type === "option") {
+      return (
+        <div>
+          <h3>Question</h3>
+          <Input type="textarea" defaultValue={detailQuestion.desc}  onChange={this.handleChangeQuestion} />
+          <h3>Hint</h3>
+          <Input type="textarea" defaultValue={detailQuestion.hint}  onChange={this.handleChangeHint}  />
+          <h3>First answer :</h3>
+          <Input type="textarea" defaultValue={_.nth(detailQuestion.options,0)}  onChange={this.handleChangeAnswer1} />
+          <h3>Second answer :</h3>
+          <Input type="textarea" defaultValue={_.nth(detailQuestion.options,1)}  onChange={this.handleChangeAnswer2} />
+          <h3>Third answer :</h3>
+          <Input type="textarea" defaultValue={_.nth(detailQuestion.options,2)}  onChange={this.handleChangeAnswer3} />
+          <h3>Fourth answer :</h3>
+          <Input type="textarea" defaultValue={_.nth(detailQuestion.options,3)}  onChange={this.handleChangeAnswer4} />
+          <h3>Fifth answer :</h3>
+          <Input type="textarea" defaultValue={_.nth(detailQuestion.options,4)}  onChange={this.handleChangeAnswer5} />
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <h3>Question</h3>
+          <Input type="textarea" defaultValue={detailQuestion.desc}  />
+          <h3>Hint</h3>
+          <Input type="textarea" defaultValue={detailQuestion.hint} />
+        </div>
+      );
+    }
+  }
+
+ 
+  getDataSouce() {
     _.map(this.state.dataQuestion, (item, index) => {
       var object = {
-        no : index,
-        question : item.desc
+        no: index + 1,
+        question: item.type
       }
       this.state.dataSource.push(object);
     })
+   
+  }
+
+
+  render() {
+    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
+    this.getDataSouce();
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -220,11 +324,17 @@ class QuestionCompetency extends Component {
                 <Option value="freetext">freetext</Option>
                 <Option value="switch">Switch</Option>
               </Select>
-              {this.optionQuetionType(this.state.selectValue)}
+              {this.optionQuestionType(this.state.selectValue)}
+            </Modal>
+            <Modal title="Edit question" visible={this.state.showEditPopup}
+              onOk={this.handleEdit} onCancel={this.handleEditCancel}>
+              {
+               this.renderOptionQuestionType(this.state.questionDataDetail)
+              }            
             </Modal>
           </Col>
         </Row>
-        <Row style={{margin : 200}}>
+        <Row style={{ margin: 100 }}>
           <Col><Table columns={this.columns} dataSource={this.state.dataSource} /></Col>
         </Row>
       </Layout>
@@ -232,8 +342,6 @@ class QuestionCompetency extends Component {
     );
   }
 }
-
-
 
 
 export default QuestionCompetency;
