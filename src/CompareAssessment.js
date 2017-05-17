@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import _ from 'lodash';
-import { Layout, Steps, Row, Col, Button} from 'antd';
+import { Layout, Steps, Row, Col, Button } from 'antd';
 import QuestionInput from './QuestionInput';
-import {getData, update, database, insert} from './firebase';
+import { getData, update, database, insert } from './firebase';
 import logo from './logo.png';
 import Loading from './Loading';
 
@@ -15,8 +15,8 @@ class CompareAssessment extends Component {
   state = {
     managerAnswers: [],
     selfAnswers: [],
-    conflicts : {},
-    loading : true,
+    conflicts: {},
+    loading: true,
     finalAnswers: {},
     current: 0
   }
@@ -24,13 +24,13 @@ class CompareAssessment extends Component {
   componentDidMount() {
     this.getSelectedCompetenciesDataToState(this.props.name);
     this.setState({
-      loading : false
+      loading: false
     });
   }
 
   eachCompetencyQuestion(question, competency) {
-    for(var i=0 ; i< question.length; i++) {
-      if(this.state.selfAnswers[i] === this.state.managerAnswers[i]) {
+    for (var i = 0; i < question.length; i++) {
+      if (this.state.selfAnswers[i] === this.state.managerAnswers[i]) {
         this.setState({
           finalAnswers: {
             ...this.state.finalAnswers,
@@ -45,7 +45,7 @@ class CompareAssessment extends Component {
       switch (question[i].type) {
         case 'option':
           this.setState({
-            conflicts:{
+            conflicts: {
               ...this.state.conflicts,
               [competency]: {
                 ...this.state.conflicts[competency],
@@ -57,11 +57,12 @@ class CompareAssessment extends Component {
                   managerAssessment: this.state.managerAnswers[i]
                 }
               }
-            }});
+            }
+          });
           break;
         case 'scale':
           this.setState({
-            conflicts:{
+            conflicts: {
               ...this.state.conflicts,
               [competency]: {
                 ...(this.state.conflicts[competency]),
@@ -72,12 +73,13 @@ class CompareAssessment extends Component {
                   managerAssessment: this.state.managerAnswers[i]
                 }
               }
-            }});
+            }
+          });
           break;
 
         case 'switch':
           this.setState({
-            conflicts:{
+            conflicts: {
               ...this.state.conflicts,
               [competency]: {
                 ...(this.state.conflicts[competency]),
@@ -88,8 +90,9 @@ class CompareAssessment extends Component {
                   managerAssessment: this.state.managerAnswers[i]
                 }
               }
-            }});
-            break;
+            }
+          });
+          break;
         default:
 
       }
@@ -114,35 +117,44 @@ class CompareAssessment extends Component {
       visible: false
     });
   }
-  getQuestion(competency) {
+
+  findQuestionsByCompetencyName(ques, competency) {
     getData(`answers/${this.props.name}/${competency}`)
-    .then((answer) =>
-    this.setState({
-        selfAnswers: answer
-    }));
+      .then((answer) =>
+        this.setState({
+          selfAnswers: answer
+        }));
     getData(`answers/${this.props.name}_manager/${competency}`)
-    .then((answer) =>
-      this.setState({
+      .then((answer) =>
+        this.setState({
           managerAnswers: answer
-      }));
-    getData(`competencies/${competency}/questions`)
-    .then((ques) => this.eachCompetencyQuestion(ques, competency)
-    );
+        }));
+    _.map(ques, (question, key) => {
+      if (question.competency === competency) {
+        getData(`questions/${key}/questions`).then((questions) => this.eachCompetencyQuestion(questions, competency))
+      }
+    });
+  }
+
+  getQuestion(competencyName) {
+    Promise.all(getData('questions')
+      .then((ques) => this.findQuestionsByCompetencyName(ques, competencyName)
+      ));   
   }
 
   handle(answer) {
-    var competencies = Object.keys(answer);
-    Object.values(competencies).map((competency) => this.getQuestion(competency));
+    _.map(answer,(answer,competencyName)=>this.getQuestion(competencyName));
   }
 
   getSelectedCompetenciesDataToState = (name) => {
     getData(`answers/${name}`)
-    .then((answer) => this.handle(answer)
-    );
+      .then((answer) => this.handle(answer)
+      );
   }
 
   saveFinalAnswers(finalAnswers) {
-    update(`answers/${this.props.name}_final`,this.state.finalAnswers);
+    update(`answers/${this.props.name}_final`, this.state.finalAnswers);
+    console.log(this.state.finalAnswers)
     window.location.replace(`/#/compare/${this.props.name}/final`);
   }
 
@@ -152,24 +164,23 @@ class CompareAssessment extends Component {
     const listConflicts = Object.values(this.state.conflicts);
     const currentCompetencyName = competenciesName[this.state.current];
     return (
-      <Layout style={{height: '100%'}}>
+      <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
-          <Row type='flex' justify='space-between' style={{height: '100%'}}>
+          <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Col span={4}>
-              <img alt='logo' src={logo} style={{height: 64, padding: 10}}/>
+              <img alt='logo' src={logo} style={{ height: 64, padding: 10 }} />
             </Col>
           </Row>
         </Header>
         <Layout>
-          <Content style={{ margin: 16, background: '#fff', padding: '0 20px'}}>
-            <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+          <Content style={{ margin: 16, background: '#fff', padding: '0 20px' }}>
+            <Row type='flex' justify='center' style={{ padding: '10px 0' }}>
               <h2>Assessment comparation for {this.props.name}</h2>
             </Row>
-            <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+            <Row type='flex' justify='center' style={{ padding: '10px 0' }}>
               <h3>Please discuss and resolve conflict below </h3>
-              <getData />
             </Row>
-            <Row style={{padding: '20px 0'}} type='flex'>
+            <Row style={{ padding: '20px 0' }} type='flex'>
               <Steps current={this.state.current}>
                 {_.map(competenciesName, (name) =>
                   <Step title={name} />
@@ -181,16 +192,16 @@ class CompareAssessment extends Component {
                 {
                   _.map(listConflicts[this.state.current], (conflict, index) =>
                     <Col span={12} className='question-content'>
-                      <h3>Question {index+1}: {conflict.question} ({competenciesName[this.state.current]})</h3>
-                      <div style={{width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15}}>
+                      <h3>Question {index + 1}: {conflict.question} ({competenciesName[this.state.current]})</h3>
+                      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
                         <div>
-                          <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled/>
+                          <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled />
                         </div>
                         <div>
-                          <h4>Manager assessment: </h4> <QuestionInput type={conflict.type} value={conflict.managerAssessment} disabled/>
+                          <h4>Manager assessment: </h4> <QuestionInput type={conflict.type} value={conflict.managerAssessment} disabled />
                         </div>
                       </div>
-                      <div style={{marginTop: 10}}>
+                      <div style={{ marginTop: 10 }}>
                         <h4>Final result</h4> <QuestionInput type={conflict.type} options={conflict.options} onChange={(value) => this.setState({
                           finalAnswers: {
                             ...this.state.finalAnswers,
@@ -200,7 +211,7 @@ class CompareAssessment extends Component {
                             }
                           }
                         })}
-                        value={_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`)}
+                          value={_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`)}
                         />
                       </div>
                     </Col>

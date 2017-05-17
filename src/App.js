@@ -8,7 +8,6 @@ import SelfAssessment from './SelfAssessment';
 import CompareAssessment from './CompareAssessment';
 import FinishPage from './FinishPage';
 import ProfilePage from './ProfilePage';
-import SetWeight from './SetWeight';
 import './App.css';
 
 
@@ -28,7 +27,6 @@ class App extends Component {
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/:name' handler={ProfilePage} />
           <Location path='/profiles/:profile' handler={ProfilePage} />
-          <Location path='/competencies/:name/:title' handler={SetWeight} />
         </Locations>
       </LocaleProvider>
     );
