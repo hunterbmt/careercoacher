@@ -1,16 +1,19 @@
 import React, {Component} from 'react';
 import _ from 'lodash';
-import { Layout, Menu, Icon, Row, Col, Button } from 'antd';
+import { Layout, Menu, Icon, Row, Col, Button, Modal, Input } from 'antd';
 import ProfilePage from './ProfilePage';
 import Loading from './Loading';
 import './App.css';
 import logo from './logo.png';
 import {getData} from './firebase';
+import GroupManagement from './GroupManagement';
+import {Router, Link} from 'react-router-component';
+import AddNewProfilePopup from './AddNewProfilePopup';
 
 const { Header, Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
 
-class MainPage extends Component {
+class ClonedMainPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -20,11 +23,11 @@ class MainPage extends Component {
     };
   }
   componentDidMount() {
-    Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
+    Promise.all([getData('baseline'), getData('BU_projects')]).then(([baseline, projectList]) =>
       this.setState({
         baseline,
-        profileList,
-        selectedProfile: _.first(profileList),
+        projectList,
+        selectedProject: _.first(Object.keys(projectList)),
         loading: false
       })
     );
@@ -35,9 +38,9 @@ class MainPage extends Component {
       mode: collapsed ? 'vertical' : 'inline',
     });
   }
-  onSelectProfile = (e) => {
+  onSelectProject = (e) => {
     this.setState({
-      selectedProfile: e.key,
+      selectedProject: e.key,
     });
   }
   render() {
@@ -50,7 +53,7 @@ class MainPage extends Component {
               <img alt='logo' src={logo} style={{height: 64, padding: 10}}/>
             </Col>
             <Col style={{paddingRight: 20}}>
-              <Button type='primary' style={{height: 40, fontSize: 14}}>Add new profile</Button>
+              <AddNewProfilePopup />
             </Col>
           </Row>
         </Header>
@@ -60,32 +63,37 @@ class MainPage extends Component {
             collapsed={this.state.collapsed}
             onCollapse={this.onCollapse}
           >
-            <Menu theme="dark"
+            <Menu theme='dark'
               mode={this.state.mode}
-              onClick={this.onSelectProfile}
-              selectedKeys={[this.state.selectedProfile]}
+              onClick={this.onSelectProject}
+              selectedKeys={[this.state.selectedProject]}
             >
               <SubMenu
-                key="sub1"
-                title={<span><Icon type="user" /><span className="nav-text">Members</span></span>}
+                key='sub1'
+                title={<span><Icon type='database' /><span className='nav-text'>BU_projects</span></span>}
               >
                 {
-                  _.map(this.state.profileList, (profile) => <Menu.Item key={profile}>{profile}</Menu.Item>)
+                  _.map(Object.keys(this.state.projectList), (project) => <Menu.Item key={project}>{project}</Menu.Item>)
                 }
               </SubMenu>
               <Menu.Item key='Report'>
                 <span>
-                  <Icon type="area-chart" />
-                  <span className="nav-text">Report</span>
+                  <Icon type='area-chart' />
+                  <span className='nav-text'>Report</span>
                 </span>
+              </Menu.Item>
+              <Menu.Item>
+                <Link href='/roleProfile'>
+                <Icon type='user' />
+                <span>Role Profile</span>
+                </Link>
               </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
             <Content style={{ margin: '0 16px' }}>
-              <ProfilePage
-                baseline={this.state.baseline}
-                profile={this.state.selectedProfile}
+              <GroupManagement
+                project={this.state.selectedProject}
               />
             </Content>
           </Layout>
@@ -95,4 +103,4 @@ class MainPage extends Component {
   }
 }
 
-export default MainPage;
+export default ClonedMainPage;
