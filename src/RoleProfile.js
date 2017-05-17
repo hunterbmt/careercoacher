@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Layout, Menu, Icon, Row, Col, Button, Modal, Input, Card, Table } from 'antd';
+import { Layout, Menu, Icon, Row, Col, Button, Modal, Input, Card, Table, Select } from 'antd';
 import ProfilePage from './ProfilePage';
+import CurrentBaseline from './CurrentBaseline';
 import Loading from './Loading';
 import './App.css';
 import logo from './logo.png';
@@ -15,20 +16,47 @@ class RoleProfile extends Component {
     this.state = {
       collapsed: false,
       mode: 'inline',
-      loading: true
+      loading: true,
+
+      filterDropdownVisible: false,
+     
+      selectedBaseline : 0,
+
+      baselineListDataSource : [],
+    
+      baselineListColumns : [{
+        title: 'No',
+        dataIndex: 'no',
+        key: 'no',
+      }, {
+        title: 'Name',
+        dataIndex: 'name',
+        key: 'name',
+      }, { 
+        title: 'Action',
+        key: 'action',
+        render: (text, record) => (
+          <span>
+            <a onClick={() => this.onSelectBaseline(record.no)} key={record.name}>Edit 一 {record.name}</a>
+            <span className="ant-divider" />
+            <a>Delete</a>
+            <span className="ant-divider" />
+            <a className="ant-dropdown-link">
+              More actions <Icon type="down" />
+            </a>
+          </span>
+        ),
+      }]
     };
   }
-
+  
   componentDidMount() {
-    Promise.all([getData('baseline/0/name'), getData('baseline/0/competencies')]).then(([baseline, competencyList]) =>
+    Promise.all([getData('baseline')]).then(([baselineList]) =>
       this.setState({
-        baseline,
-        competencyList,
-        selectedProfile: _.first(competencyList),
+        baselineList,
         loading: false
       })
     );
-    console.log(Object.keys(this.state.competencyList));
   }
 
   onCollapse = (collapsed) => {
@@ -37,29 +65,27 @@ class RoleProfile extends Component {
       mode: collapsed ? 'vertical' : 'inline',
     });
   }
-  onSelectProfile = (e) => {
-    this.setState({
-      selectedProfile: e.key,
-    });
-  }
 
-  create() {
-    // A post entry.
-    var data = {
-      'competencies': {
-        '0': 'Coding',
-        '1': 'Version Control'
-      },
-      'baseline': {
-        '0': '0',
-        '1': '1'
-      }
-    }
-    insert(`roleProfile`, data);
+  onSelectBaseline = (e) => {
+    console.log(e);
+    this.setState({
+      baselineList : [],
+      selectedBaseline : e,
+      loading : false
+    })
   }
 
   render() {
     if (this.state.loading) return <Loading />;
+    
+    _.map(this.state.baselineList, (item, index) => {
+      var object = {
+        key: index,
+        no: index,
+        name: item.name
+      };
+      this.state.baselineListDataSource.push(object);
+    })
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -73,21 +99,24 @@ class RoleProfile extends Component {
           </Row>
         </Header>
         <Layout>
-
+          
+          <Row type='flex' justify='space-between' style={{ height: '100%' }}>
+          <Col span={8}>
           <Layout>
             <Content style={{ margin: '0 16px' }}>
-              <Card title='Role Profile' style={{ width: '34%' }}>
-                <h1>Baseline :</h1>
-                <p>{this.state.baseline}</p>
-                <h1>Competencies Required:</h1>
-                {_.map(this.state.competencyList, (item, index) => 
-                  <div>
-                  <a>{index}</a> : <a>{item}</a>
-                  </div>
-                )}
+              <Card title='All Role Profiles' style={{ width: '100%' }}>
+                
+                <Table dataSource={this.state.baselineListDataSource} columns={this.state.baselineListColumns} />
               </Card>
             </Content>
           </Layout>
+          </Col>
+
+          <Col span={16}>
+            <CurrentBaseline selectedBaseline={this.state.selectedBaseline} />
+          </Col>
+        </Row>
+
         </Layout>
       </Layout>
     );
@@ -98,36 +127,46 @@ class AddNewProfilePopup extends Component {
   state = {
     loading: false,
     visible: false,
-    newBaseline : '',
-    newCompetency: ''
+    newBaseline: '',
+    newCompetency: '',
+    baselineList : []
+  }
+
+  componentDidMount() {
+    Promise.all([getData('baseline')]).then(([baselineList]) =>
+      this.setState({
+        baselineList,
+        loading: false
+      })
+    );
   }
 
   handleBaselineChange = (e) => {
     this.setState({
-      newBaseline : e.target.value
+      newBaseline: e.target.value
     });
-    console.log("changed baseline to " + this.state.newBaseline);
+    //console.log("changed baseline to " + this.state.newBaseline);
   }
 
   handleCompetencyChange = (e) => {
     this.setState({
-      newCompetency : e.target.value
+      newCompetency: e.target.value
     });
-    console.log("changed competency to " + this.state.newCompetency);
+    //console.log("changed competency to " + this.state.newCompetency);
   }
 
   saveBaseline() {
     var data = {
-      '1' : this.state.newBaseline
+      '1': this.state.newBaseline
     }
-    insert('roleProfile/baseline', data);
+   
   }
 
   saveCompetency() {
     var data = {
-      '1' : this.state.newCompetency
+      '1': this.state.newCompetency
     }
-    insert('roleProfile/competencies', data);
+   
   }
 
   showModal = () => {
@@ -135,7 +174,7 @@ class AddNewProfilePopup extends Component {
       visible: true,
     });
   }
-  
+
   handleOk = () => {
     this.setState({ loading: true });
     this.saveBaseline();
@@ -149,15 +188,21 @@ class AddNewProfilePopup extends Component {
     this.setState({ visible: false });
   }
 
+  children = []
+
   render() {
+    _.map(this.state.baselineList, (item, index) =>(
+      this.children.push(<Option key={index}>{item.name}</Option>)
+    ));
+    
     return (
       <div>
         <Button type="primary" size="large" onClick={this.showModal}>
-          Add New Role Profile
+          Add New Baseline
         </Button>
         <Modal
           visible={this.state.visible}
-          title="Add New Group"
+          title="Add New Baseline"
           onOk={this.handleOk}
           onCancel={this.handleCancel}
           footer={[
@@ -167,10 +212,19 @@ class AddNewProfilePopup extends Component {
             </Button>
           ]}
         >
-          <p>Baseline: </p>
+          <p>Baseline Name: </p>
           <Input placeholder="Baseline...." value={this.state.newBaseline} onChange={this.handleBaselineChange.bind(this)} />
-          <p>Competency: </p>
+          <p>Please choose competencies: </p>
           <Input placeholder="Competency...." value={this.state.newCompetency} onChange={this.handleCompetencyChange.bind(this)} />
+          <Select
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="Please select"
+            defaultValue={['a10', 'c12']}
+            
+          >
+            {this.children}
+          </Select>
         </Modal>
       </div>
     );
