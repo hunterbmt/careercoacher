@@ -151,7 +151,6 @@ class Competencies extends Component {
 
   render() {
     this.getDataSoureKMSCore()
-    
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
