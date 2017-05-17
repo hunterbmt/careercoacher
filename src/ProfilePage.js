@@ -33,8 +33,8 @@ const compentencies = [
 ]
 
 const getSelectedCompentencies = (profile) => {
-  const configuratedCompentencies = profile.configuratedCompentencies;
-  if (!_.isEmpty(configuratedCompentencies)) return configuratedCompentencies;
+  const configuratedCompetencies = profile.configuratedCompetencies;
+  if (!_.isEmpty(configuratedCompetencies)) return configuratedCompetencies;
   const nonEmptyCompentencies = _.reduce(profile.compentencies, (result, proficiency, compentency) => {
     if (proficiency > 0) result.push(compentency);
     return result;
@@ -76,7 +76,7 @@ export default class ProfilePage extends Component {
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
-    //const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
+    
     const selectedCompentencies = getSelectedCompentencies(profile);
 
     return (
@@ -99,9 +99,6 @@ export default class ProfilePage extends Component {
               <Option value="Previous PA">Compare with previous PA</Option>
               <Option value="Next Level">Compare with next level</Option>
             </Select>
-          </Row>
-          <Row type="flex" justify="center">
-
           </Row>
         </Col>
         <Col span={9} offset={1}>
@@ -152,27 +149,27 @@ export default class ProfilePage extends Component {
 
   removeCompentency = (compentency) => {
     const targetProfile = this.state.profile;
-    const configuratedCompentencies = _.filter(getSelectedCompentencies(targetProfile), (value) => compentency !== value);
+    const configuratedCompetencies = _.filter(getSelectedCompentencies(targetProfile), (value) => compentency !== value);
     this.setState({
       profile: {
         ...targetProfile,
-        configuratedCompentencies
+        configuratedCompetencies
       }
     });
-    this.updateConfiguratedCompentencies(configuratedCompentencies);
+    this.updateconfiguratedCompetencies(configuratedCompetencies);
   }
   addCompentency = (compentency) => {
     const targetProfile = this.state.profile;
-    const configuratedCompentencies = _.concat(getSelectedCompentencies(targetProfile), compentency);
+    const configuratedCompetencies = _.concat(getSelectedCompentencies(targetProfile), compentency);
     this.setState({
       profile: {
         ...targetProfile,
-        configuratedCompentencies
+        configuratedCompetencies
       }
     });
-    this.updateConfiguratedCompentencies(configuratedCompentencies);
+    this.updateconfiguratedCompetencies(configuratedCompetencies);
   }
-  updateConfiguratedCompentencies = (configuratedCompentencies) => {
-    update(`/profiles/${this.props.profile}/configuratedCompetencies`, configuratedCompentencies)
+  updateconfiguratedCompetencies = (configuratedCompetencies) => {
+    update(`/profiles/${this.props.profile}/configuratedCompetencies`, configuratedCompetencies)
   }
 };

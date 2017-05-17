@@ -42,8 +42,8 @@ class CurrentBaseline extends Component {
         render: (text, record) => (
           <span>
             <a onClick={() => this.onSelectCompetency(record.competencies, record.level)} key={record.level}>Edit 一 {record.competencies} Level</a>
-            <span className="ant-divider" />
-            <Popconfirm title="Are you sure delete this item?" onConfirm={this.onConfirmDelete} onCancel={this.onConfirmCancelDelete} okText="Yes" cancelText="No">
+            <span className='ant-divider' />
+            <Popconfirm title='Are you sure delete this item?' onConfirm={this.onConfirmDelete} onCancel={this.onConfirmCancelDelete} okText='Yes' cancelText='No'>
             <a>Delete</a>
             </Popconfirm>
           </span>
@@ -65,7 +65,7 @@ class CurrentBaseline extends Component {
       showEditProfilePopup : true,
       selectedCompetency : c,
       selectedCompetencyLevel : l,
-    }, () => console.log("edit " + this.state.selectedCompetency + " level is " + this.state.selectedCompetencyLevel))
+    })
   }
 
   componentDidMount() {
@@ -77,7 +77,7 @@ class CurrentBaseline extends Component {
         loading: false
       })
     );
-    console.log("Did Mount " + this.props.selectedBaseline);
+   
   }
 
   
@@ -89,21 +89,20 @@ class CurrentBaseline extends Component {
         baseline
       })
     );
-    console.log("will receive props " + nextProps.selectedBaseline);
+    
   }
 
   handleBaselineChange = (e) => {
     this.setState({
       newBaseline: e.target.value
     });
-    console.log("changed number to " + e);
+   
   }
 
   handleCompetencyChange = (e) => {
     this.setState({
       newCompetency: e.target.value
     });
-    //console.log("changed competency to " + this.state.newCompetency);
   }
 
   showModal = () => {
@@ -151,19 +150,19 @@ class CurrentBaseline extends Component {
     </Layout>
     <Modal
       visible={this.state.showEditProfilePopup}
-      title="Edit Competency"
+      title='Edit Competency'
       onOk={this.handleOk}
       onCancel={this.handleCancel}
       footer={[
-        <Button key="back" size="large" onClick={this.handleCancel}>Return</Button>,
-        <Button key="submit" type="primary" size="large" loading={this.state.loading} onClick={this.handleOk}>
+        <Button key='back' size='large' onClick={this.handleCancel}>Return</Button>,
+        <Button key='submit' type='primary' size='large' loading={this.state.loading} onClick={this.handleOk}>
           Save
         </Button>
       ]}
     >
       <p>{this.props.something}</p>
       <p>Competencies: </p>
-      <Input placeholder="Coding...." value={this.state.selectedCompetency} onChange={this.handleBaselineChange.bind(this)} disabled='true'/>
+      <Input placeholder='Coding....' value={this.state.selectedCompetency} onChange={this.handleBaselineChange.bind(this)} disabled='true'/>
       <p>Proficency: </p>
       <InputNumber min={0} max={4} defaultValue={this.state.selectedCompetencyLevel} onChange={this.handleBaselineChange.bind(this)} />
     </Modal>

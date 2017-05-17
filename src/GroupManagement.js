@@ -45,27 +45,22 @@ export default class GroupManagement extends Component {
     });
   }
 
-  componentWillMount() {}
-
-  componentWillUnmount() {}
-
-  getGroupDataToState = (project) =>  {
+  getGroupDataToState = (projectName) =>  {
     this.setState({
       loading: true
     });
-    getData(`BU_projects/${project}`)
-    .then((projectData) => this.setState({
-      projectName: project,
-      members: projectData.members,
-      manager: projectData.manager,
-      loading: false
-    }));
+    getData(`BU_projects/${projectName}`)
+      .then(({ members, manager }) => this.setState({
+        projectName,
+        members,
+        manager,
+        loading: false
+      }));
   }
 
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     return (
-      <div>
         <Layout>
         <Content style={{ margin: '0 16px' }}>
         <Card title={this.state.projectName} style={{ width: '34%' }}>
@@ -85,7 +80,6 @@ export default class GroupManagement extends Component {
         </Card>
         </Content>
         </Layout>
-      </div>
     );
   }
 }
