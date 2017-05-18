@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
 import _ from 'lodash';
-//import CompentencyRadar from './CompentencyRadar';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
 
@@ -75,7 +74,6 @@ export default class ProfilePage extends Component {
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
-    //const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
     const selectedCompentencies = getSelectedCompentencies(profile);
     return (
       <Row type="flex" style={{padding: '20px 10px 10px'}}>
