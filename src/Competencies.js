@@ -20,13 +20,12 @@ class Competencies extends Component {
       competencyName: '',
       competenciesKMSCore: [],
       competenciesKmsOptional: [],
-      dataSourceKMSCore: [],
-      dataSourceKMSOptional: [],
       showEditPopup: false,
       optionActivated: false,
       keyUpdate: '',
       showEditPopupKmsOptional: false,
-      optionActivatedKmsOptional: false
+      optionActivatedKmsOptional: false,
+      loading : true
 
     };
     this.handleChange = this.handleChange.bind(this);
@@ -81,7 +80,7 @@ class Competencies extends Component {
     }
     update(`competencies1/Kms_core/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
-      showEditPopup: false
+       showEditPopup: false
     })
   }
 
@@ -102,12 +101,10 @@ class Competencies extends Component {
 
   addNewCompetency(competencyName, option) {
     const optionalCompetency = database.ref(`competencies1`).child(`${option}`);
-
     optionalCompetency.push().set({
       "activated": false,
       "name": competencyName
     });
-
   }
 
   handleChange(e) {
@@ -120,6 +117,7 @@ class Competencies extends Component {
     });
 
     this.addNewCompetency(this.state.competencyName, this.state.option);
+    
   }
 
   handleCancel = (e) => {
@@ -204,7 +202,8 @@ class Competencies extends Component {
   getCompetencyOptional() {
     getData(`competencies1/Kms_optional`)
       .then((kmsOptionalData) => this.setState({
-        competenciesKmsOptional: kmsOptionalData
+        competenciesKmsOptional: kmsOptionalData,
+        loading : false
       }));
   }
 
@@ -212,58 +211,39 @@ class Competencies extends Component {
     this.getCompetencyKMSCore();
     this.getCompetencyOptional();
 
-
   }
 
-  componentDidMount() {
-
-
-  }
-
-  getDataSoureKMSCore() {
-    _.map(this.state.competenciesKMSCore, (item, index) => {
+  render() {
+     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
+     let dataSourceKMSCore = [];
+      _.forEach(this.state.competenciesKMSCore, (item) => {
       let activate;
       if (item.activated === true) {
         activate = "On"
       } else {
         activate = "Off"
       }
-      const object = {
+      const kmsCoreDataPushTable = {
         kmscore: item.name,
         activatedKmscore: activate,
       }
-      this.state.dataSourceKMSCore.push(object);
+      dataSourceKMSCore.push(kmsCoreDataPushTable);
     })
-  }
 
-  getDataSourceKMSOptional() {
-    _.map(this.state.competenciesKmsOptional, (item, index) => {
+    let dataSourceKMSOptional = [];
+    _.forEach(this.state.competenciesKmsOptional, (item) => {
        let activate;
       if (item.activated === true) {
         activate = "On"
       } else {
         activate = "Off"
       }
-      const objectKmsOptional = {
+      const kmsOptionalDataPushTable = {
         kmsoptional: item.name,
         activatedKmsOptional: activate,
       }
-      this.state.dataSourceKMSOptional.push(objectKmsOptional);
+      dataSourceKMSOptional.push(kmsOptionalDataPushTable);
     })
-  }
-
-  componentWillUpdate() {
-    this.getDataSoureKMSCore();
-    this.getDataSourceKMSOptional();
-
-
-
-  }
-
-
-
-
-  render() {
 
     return (
       <Layout style={{ height: '100%' }}>
@@ -297,11 +277,11 @@ class Competencies extends Component {
           </Modal>
           <Row style={{ margin: 100 }}>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
-              <Table columns={this.columnsKMSCore} dataSource={this.state.dataSourceKMSCore} />
+              <Table columns={this.columnsKMSCore} dataSource={dataSourceKMSCore} />
             </Col>
             <Col xs={20} sm={16} md={12} lg={8} xl={4}></Col>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
-              <Table columns={this.columnsKMSOptional} dataSource={this.state.dataSourceKMSOptional} />
+              <Table columns={this.columnsKMSOptional} dataSource={dataSourceKMSOptional} />
             </Col>
           </Row>
         </Header>
