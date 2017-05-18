@@ -29,17 +29,17 @@ class SelfAssessment extends Component {
     isFinalPage: null
   }
 
-  setAnswers(answer) {
+  setAnswers(answers) {
     this.setState({
       isFinalPage: true,
-      answers: answer
+      answers: answers
     })
   }
 
   isFinalPage() {
      if(window.location.href.indexOf("final") > -1) {
        getData(`answers/${this.props.name}_final`)
-         .then((answer) => this.setAnswers(answer));
+         .then((answers) => this.setAnswers(answers));
      }
      this.setState({
        loading: false
