@@ -307,6 +307,9 @@ class QuestionCompetency extends Component {
             <Col span={4}>
               <img alt='logo' src={logo} style={{ height: 64, padding: 10 }} />
             </Col>
+            <Col>
+            <Button type="primary" onClick={this.showModal}>Add new question</Button>
+            </Col>
           </Row>
         </Header>
         <Row type="flex" justify="space-around" align="middle">
@@ -314,7 +317,6 @@ class QuestionCompetency extends Component {
           <Col span={8}>
           </Col>
           <Col span={8}>
-            <Button type="primary" onClick={this.showModal}>Add new question</Button>
             <Modal title="Create new question" visible={this.state.visible}
               onOk={this.handleSave} onCancel={this.handleCancel}>
               <h3>Please choose question types: </h3>
