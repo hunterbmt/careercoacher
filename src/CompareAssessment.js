@@ -11,6 +11,8 @@ const Step = Steps.Step;
 class CompareAssessment extends Component {
   constructor(props) {
     super(props);
+    getData('questions')
+      .then((questions) => this.setState({questions: questions}))
   }
   state = {
     managerAnswers: [],
@@ -18,14 +20,12 @@ class CompareAssessment extends Component {
     conflicts: {},
     loading: true,
     finalAnswers: {},
-    current: 0
+    current: 0,
+    count:0
   }
 
   componentDidMount() {
-    this.getSelectedCompetenciesDataToState(this.props.name);
-    this.setState({
-      loading: false
-    });
+    this.getConflicts(this.props.name);
   }
 
   eachCompetencyQuestion(question, competency) {
@@ -97,6 +97,9 @@ class CompareAssessment extends Component {
 
       }
     }
+    this.setState({
+      loading: false
+    });
   }
   next() {
     const current = this.state.current + 1;
@@ -118,7 +121,7 @@ class CompareAssessment extends Component {
     });
   }
 
-  findQuestionsByCompetencyName(ques, competency) {
+  findConflictsByCompetencyName(competency) {
     getData(`answers/${this.props.name}/${competency}`)
       .then((answer) =>
         this.setState({
@@ -129,24 +132,23 @@ class CompareAssessment extends Component {
         this.setState({
           managerAnswers: answer
         }));
-    _.map(ques, (question, key) => {
+    _.map(this.state.questions, (question, key) => { 
       if (question.competency === competency) {
         getData(`questions/${key}/questions`).then((questions) => this.eachCompetencyQuestion(questions, competency))
       }
     });
   }
 
-  getQuestion(competencyName) {
-    Promise.all(getData('questions')
-      .then((ques) => this.findQuestionsByCompetencyName(ques, competencyName)
-      ));   
+  getQuestion() {
+    getData('questions')
+      .then((questions) => this.setState({questions: questions}))
   }
 
   handle(answer) {
-    _.map(answer,(answer,competencyName)=>this.getQuestion(competencyName));
+    _.map(answer,(answer,competencyName)=>this.findConflictsByCompetencyName(competencyName));
   }
 
-  getSelectedCompetenciesDataToState = (name) => {
+  getConflicts = (name) => {
     getData(`answers/${name}`)
       .then((answer) => this.handle(answer)
       );
@@ -154,7 +156,6 @@ class CompareAssessment extends Component {
 
   saveFinalAnswers(finalAnswers) {
     update(`answers/${this.props.name}_final`, this.state.finalAnswers);
-    console.log(this.state.finalAnswers)
     window.location.replace(`/#/compare/${this.props.name}/final`);
   }
 
@@ -182,8 +183,8 @@ class CompareAssessment extends Component {
             </Row>
             <Row style={{ padding: '20px 0' }} type='flex'>
               <Steps current={this.state.current}>
-                {_.map(competenciesName, (name) =>
-                  <Step title={name} />
+                {_.map(this.state.conflicts, (conflict, key) =>
+                  <Step title={key} />
                 )}
               </Steps>
             </Row>
@@ -192,7 +193,7 @@ class CompareAssessment extends Component {
                 {
                   _.map(listConflicts[this.state.current], (conflict, index) =>
                     <Col span={12} className='question-content'>
-                      <h3>Question {index + 1}: {conflict.question} ({competenciesName[this.state.current]})</h3>
+                      <h3>Question {++index}: {conflict.question} ({competenciesName[this.state.current]})</h3>
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
                         <div>
                           <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled />
