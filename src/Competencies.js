@@ -40,7 +40,6 @@ class Competencies extends Component {
       "activated": this.state.optionActivatedKmsOptional,
       "name": this.state.competencyName
     }
-    console.log(dataUpdate);
     update(`competencies1/Kms_optional/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
       showEditPopupKmsOptional: false
