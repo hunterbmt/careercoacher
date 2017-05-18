@@ -93,9 +93,13 @@ class QuestionCompetency extends Component {
 
   saveOthers() {
     var newDataOthers = {
+      "competency": this.props.name,
+      "question":[{
       "desc": this.state.question,
       "hint": this.state.hint,
       "type": this.state.selectValue
+      }
+      ]
     }
 
     console.log(newDataOthers);
