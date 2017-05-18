@@ -8,6 +8,8 @@ import Loading from './Loading';
 
 const { Header, Content } = Layout;
 const Step = Steps.Step;
+let conflicts = {};
+let finalAnswers = {};
 class CompareAssessment extends Component {
   constructor(props) {
     super(props);
@@ -34,25 +36,22 @@ class CompareAssessment extends Component {
 
   eachCompetencyQuestion(question, competency) {
     for (var i = 0; i < question.length; i++) {
-      if (_.get(this.state.selfAnswers,`${competency}.${i}`) === _.get(this.state.managerAnswers,`${competency}.${i}`) ){
-        this.setState({
-          finalAnswers: {
-            ...this.state.finalAnswers,
+      if (_.get(this.state.selfAnswers,`${competency}.${i}`) === _.get(this.state.managerAnswers,`${competency}.${i}`) ){   
+          finalAnswers =  {
+            ...finalAnswers,
             [competency]: {
-              ...(this.state.finalAnswers[competency] || {}),
+              ...(finalAnswers[competency] || {}),
               [i]: _.get(this.state.selfAnswers,`${competency}.${i}`)
             }
           }
-        });
         continue;
       }
       switch (question[i].type) {
-        case 'option':       
-          this.setState({
-            conflicts: {
-              ...this.state.conflicts,
+        case 'option':
+          conflicts = {
+            ...conflicts,
               [competency]: {
-                ...this.state.conflicts[competency],
+                ...conflicts[competency],
                 [i]: {
                   isResolved: false,
                   type: 'option',
@@ -62,49 +61,48 @@ class CompareAssessment extends Component {
                   managerAssessment: _.get(this.state.managerAnswers,`${competency}.${i}`)
                 }
               }
-            }
-          });
+          }       
           break;
         case 'scale':
-          this.setState({
-            conflicts: {
-              ...this.state.conflicts,
+          conflicts = {
+            ...conflicts,
               [competency]: {
-                ...(this.state.conflicts[competency]),
+                ...conflicts[competency],
                 [i]: {
                   isResolved: false,
                   type: 'scale',
                   question: question[i].desc,
+                  options: question[i].options,
                   selfAssessment:_.get(this.state.selfAnswers,`${competency}.${i}`),
                   managerAssessment: _.get(this.state.managerAnswers,`${competency}.${i}`)
                 }
               }
-            }
-          });
+          }    
           break;
 
         case 'switch':
-          this.setState({
-            conflicts: {
-              ...this.state.conflicts,
+          conflicts = {
+            ...conflicts,
               [competency]: {
-                ...(this.state.conflicts[competency]),
+                ...conflicts[competency],
                 [i]: {
-                  isResolved: true,
+                  isResolved: false,
                   type: 'switch',
                   question: question[i].desc,
+                  options: question[i].options,
                   selfAssessment:_.get(this.state.selfAnswers,`${competency}.${i}`),
                   managerAssessment: _.get(this.state.managerAnswers,`${competency}.${i}`)
                 }
               }
-            }
-          });
+          }    
           break;
         default:
 
-      }
+      } 
     }
     this.setState({
+      conflicts: conflicts,
+      finalAnswers: finalAnswers,
       loading: false
     });
   }
@@ -142,10 +140,10 @@ class CompareAssessment extends Component {
 
   getConflicts = (name) => {
     getData(`answers/${name}`)
-      .then((answer) => this.handle(answer)
+      .then((answers) => this.handle(answers)
       );
   }
-
+ 
   isConflictsResolved(){
     _.map((this.state.conflicts),(conflicts)=>{
       _.map((conflicts),(conflicts)=>{
@@ -163,10 +161,7 @@ class CompareAssessment extends Component {
     if(this.state.numberOfConflicsNotSolve === 0) {
       update(`answers/${this.props.name}_final`, this.state.finalAnswers);
       window.location.replace(`/#/compare/${this.props.name}/final`);
-    } else {
-      
     }
-
   }
 
   render() {
@@ -228,8 +223,7 @@ class CompareAssessment extends Component {
                               [index]:{
                                 ...this.state.conflicts[currentCompetencyName][index],
                                 isResolved: true
-                              }
-                              
+                              }                             
                             }
                           }
                         })}
