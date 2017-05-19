@@ -1,14 +1,12 @@
 import React, {Component} from 'react'
 import _ from 'lodash'
-import { Layout, Row, Col, Button, Card, Tag} from 'antd'
-import QuestionInput from './QuestionInput'
+import { Layout, Row, Col, Card, Tag} from 'antd'
 import logo from './logo.png'
-import CompentencyConfig from './CompentencyConfig'
 import Loading from './Loading'
 import {getData, update} from './firebase'
 import ProfilePage from './ProfilePage'
 
-const { Header, Content } = Layout
+const { Content } = Layout
 
 export default class GroupManagement extends Component {
 
