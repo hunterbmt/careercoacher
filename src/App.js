@@ -9,7 +9,7 @@ import CompareAssessment from './CompareAssessment';
 import FinishPage from './FinishPage';
 import ProfilePage from './ProfilePage';
 import './App.css';
-
+import SetWeight from './SetWeight';
 
 const Locations = Router.Locations;
 const Location = Router.Location;
@@ -26,6 +26,7 @@ class App extends Component {
           <Location path='/:manager/assessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/:name' handler={ProfilePage} />
+          <Location path='/competencies/:option/:index/:title' handler={SetWeight} />
           <Location path='/profiles/:profile' handler={ProfilePage} />
         </Locations>
       </LocaleProvider>
