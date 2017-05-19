@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table, Card } from 'antd';
-import { getData, update, database,getLastIndex } from './firebase';
+import { getData, update, database, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
 import { Router, Link } from 'react-router-component';
@@ -25,8 +25,8 @@ class Competencies extends Component {
       keyUpdate: '',
       showEditPopupKmsOptional: false,
       optionActivatedKmsOptional: false,
-      loading : true,
-      lastId : 0,
+      loading: true,
+      lastId: 0,
 
     };
     this.handleChange = this.handleChange.bind(this);
@@ -36,8 +36,8 @@ class Competencies extends Component {
   }
 
 
-  handleSaveActivatedKmsOptional = (e) =>{
-     let dataUpdate = {
+  handleSaveActivatedKmsOptional = (e) => {
+    let dataUpdate = {
       "activated": this.state.optionActivatedKmsOptional,
       "name": this.state.competencyName
     }
@@ -45,16 +45,16 @@ class Competencies extends Component {
     this.setState({
       showEditPopupKmsOptional: false
     })
-  } 
+  }
 
-  handleCancelActivatedKmsOptional = (e) =>{
-      this.setState({
+  handleCancelActivatedKmsOptional = (e) => {
+    this.setState({
       showEditPopupKmsOptional: false
     });
   }
 
-  handleChangeOptionActivatedKmsOptional(){
-      this.setState({
+  handleChangeOptionActivatedKmsOptional() {
+    this.setState({
       optionActivatedKmsOptional: !this.state.optionActivatedKmsOptional
     })
   }
@@ -80,7 +80,7 @@ class Competencies extends Component {
     }
     update(`competencies1/Kms_core/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
-       showEditPopup: false
+      showEditPopup: false
     })
   }
 
@@ -96,7 +96,7 @@ class Competencies extends Component {
       visible: true
     });
   }
-  
+
   addNew(lastIndex, competencyName, option) {
     this.setState({ lastId: parseInt(lastIndex) + 1 })
     let newCompetency = {
@@ -128,6 +128,10 @@ class Competencies extends Component {
   }
 
   columnsKMSCore = [{
+    title: 'No',
+    dataIndex: 'no',
+    key: 'no',
+  }, {
     title: 'Competency',
     dataIndex: 'kmscore',
     key: 'kmscore',
@@ -141,6 +145,8 @@ class Competencies extends Component {
     render: (text, record) => (
       <span>
         <a onClick={() => this.onSelectCompetency(record.kmscore)}>Edit</a>
+        <span className="ant-divider" />
+        <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
       </span>
     ),
   }];
@@ -161,6 +167,10 @@ class Competencies extends Component {
   }
 
   columnsKMSOptional = [{
+    title: 'No',
+    dataIndex: 'no',
+    key: 'no',
+  }, {
     title: 'Competency',
     dataIndex: 'kmsoptional',
     key: 'kmsoptional',
@@ -174,12 +184,14 @@ class Competencies extends Component {
     render: (text, record) => (
       <span>
         <a onClick={() => this.onSelectKmsOptionalCompetency(record.kmsoptional)}>Edit</a>
+        <span className="ant-divider" />
+        <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
       </span>
     ),
   }];
 
-  onSelectKmsOptionalCompetency(name){
-     getData(`competencies1/Kms_optional`)
+  onSelectKmsOptionalCompetency(name) {
+    getData(`competencies1/Kms_optional`)
       .then((dataKmsOptional) => _.map(dataKmsOptional, (competency, key) => {
         if (competency.name === name) {
           getData(`competencies1/Kms_optional/${key}`).then((selectedCompetency) => this.setState({
@@ -203,7 +215,7 @@ class Competencies extends Component {
     getData(`competencies1/Kms_optional`)
       .then((kmsOptionalData) => this.setState({
         competenciesKmsOptional: kmsOptionalData,
-        loading : false
+        loading: false
       }));
   }
 
@@ -214,9 +226,9 @@ class Competencies extends Component {
 
 
   render() {
-     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
-     let dataSourceKMSCore = [];
-      _.forEach(this.state.competenciesKMSCore, (item) => {
+    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
+    let dataSourceKMSCore = [];
+    _.forEach(this.state.competenciesKMSCore, (item,index) => {
       let activate;
       if (item.activated === true) {
         activate = "On"
@@ -224,22 +236,24 @@ class Competencies extends Component {
         activate = "Off"
       }
       const kmsCoreDataPushTable = {
+        no: index,
         kmscore: item.name,
         activatedKmscore: activate,
       }
       dataSourceKMSCore.push(kmsCoreDataPushTable);
-     
+
     })
 
     let dataSourceKMSOptional = [];
-    _.forEach(this.state.competenciesKmsOptional, (item) => {
-       let activate;
+    _.forEach(this.state.competenciesKmsOptional, (item,index) => {
+      let activate;
       if (item.activated === true) {
         activate = "On"
       } else {
         activate = "Off"
       }
       const kmsOptionalDataPushTable = {
+        no : index,
         kmsoptional: item.name,
         activatedKmsOptional: activate,
       }
@@ -276,16 +290,16 @@ class Competencies extends Component {
             <h3>Activate compentency: </h3>
             <Switch defaultChecked={this.state.optionActivatedKmsOptional} onChange={this.handleChangeOptionActivatedKmsOptional} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
           </Modal>
-          <Row style={{margin :100}}>
+          <Row style={{ margin: 100 }}>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
-            <Card title="KMS Core" bordered={false} style={{ width: 600 }}>
-              <Table columns={this.columnsKMSCore} dataSource={dataSourceKMSCore} />
+              <Card title="KMS Core" bordered={false} style={{ width: 600 }}>
+                <Table columns={this.columnsKMSCore} dataSource={dataSourceKMSCore} />
               </Card>
             </Col>
             <Col xs={20} sm={16} md={12} lg={8} xl={4}></Col>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
-            <Card title="KMS Optional" bordered={false} style={{ width: 600 }}>
-              <Table columns={this.columnsKMSOptional} dataSource={dataSourceKMSOptional} />
+              <Card title="KMS Optional" bordered={false} style={{ width: 600 }}>
+                <Table columns={this.columnsKMSOptional} dataSource={dataSourceKMSOptional} />
               </Card>
             </Col>
           </Row>

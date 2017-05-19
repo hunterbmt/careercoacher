@@ -8,6 +8,7 @@ import SelfAssessment from './SelfAssessment';
 import CompareAssessment from './CompareAssessment';
 import FinishPage from './FinishPage';
 import Competencies from './Competencies'
+import QuestionCompetency from './QuestionCompetency'
 
 
 import './App.css';
@@ -27,6 +28,8 @@ class App extends Component {
           <Location path='/:manager/assessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/competencies' handler={Competencies} />
+          <Location path='/competencies/core/:index' handler={QuestionCompetency} />
+          <Location path='/competencies/optional/:index' handler={QuestionCompetency} />
         </Locations>
       </LocaleProvider>
     );
