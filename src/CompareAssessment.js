@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Layout, Steps, Row, Col, Button, Alert} from 'antd';
+import { Layout, Steps, Row, Col, Button, message} from 'antd';
 import QuestionInput from './QuestionInput';
 import { getData, update} from './firebase';
 import logo from './logo.png';
@@ -10,6 +10,7 @@ const { Header, Content } = Layout;
 const Step = Steps.Step;
 let conflicts = {};
 let finalAnswers = {};
+let numOfConflicsNotSolve = 0;
 class CompareAssessment extends Component {
   constructor(props) {
     super(props);
@@ -21,6 +22,10 @@ class CompareAssessment extends Component {
     current: 0,
     numberOfConflicsNotSolve: 0
   }
+
+  error = () => {
+    message.error('You need to resolve all conflicts');
+  };
 
   componentDidMount() {
     Promise.all([getData('questions'),getData(`answers/${this.props.name}`),getData(`answers/${this.props.name}_manager`)])
@@ -145,22 +150,24 @@ class CompareAssessment extends Component {
   }
  
   isConflictsResolved(){
-    _.map((this.state.conflicts),(conflicts)=>{
-      _.map((conflicts),(conflicts)=>{
-        if(conflicts.isResolved === false) {
-          this.setState(prevState => ({
-            numberOfConflicsNotSolve: prevState.numberOfConflicsNotSolve+1
-          }))
-        }
-      })
-    });
+    
   }
 
   saveFinalAnswers(finalAnswers) {
-    this.isConflictsResolved();
-    if(this.state.numberOfConflicsNotSolve === 0) {
+    _.map((this.state.conflicts),(conflicts)=>{
+      _.map((conflicts),(conflicts)=>{
+        if(conflicts.isResolved === false) {
+          numOfConflicsNotSolve = numOfConflicsNotSolve+1;
+        }
+      })
+    });
+   
+    if(numOfConflicsNotSolve === 0) {
       update(`answers/${this.props.name}_final`, this.state.finalAnswers);
       window.location.replace(`/#/compare/${this.props.name}/final`);
+    } else {
+      this.error()
+      numOfConflicsNotSolve = 0;
     }
   }
 
