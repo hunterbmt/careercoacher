@@ -127,29 +127,33 @@ class Competencies extends Component {
     });
   }
 
-  columnsKMSCore = [{
-    title: 'No',
-    dataIndex: 'no',
-    key: 'no',
-  }, {
-    title: 'Competency',
-    dataIndex: 'kmscore',
-    key: 'kmscore',
-  }, {
-    title: 'Status',
-    dataIndex: 'activatedKmscore',
-    key: 'activatedKmscore',
-  }, {
-    title: 'Action',
-    key: 'action',
-    render: (text, record) => (
-      <span>
-        <a onClick={() => this.onSelectCompetency(record.kmscore)}>Edit</a>
-        <span className="ant-divider" />
-        <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
-      </span>
-    ),
-  }];
+  getColumnKMSCore() {
+    let columnsKMSCore = [{
+      title: 'No',
+      dataIndex: 'no',
+      key: 'no',
+    }, {
+      title: 'Competency',
+      dataIndex: 'kmscore',
+      key: 'kmscore',
+    }, {
+      title: 'Status',
+      dataIndex: 'activatedKmscore',
+      key: 'activatedKmscore',
+    }, {
+      title: 'Action',
+      key: 'action',
+      render: (text, record) => (
+        <span>
+          <a onClick={() => this.onSelectCompetency(record.kmscore)}>Edit</a>
+          <span className="ant-divider" />
+          <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
+        </span>
+      ),
+    }];
+    return columnsKMSCore
+  }
+
 
   onSelectCompetency(name) {
     getData(`competencies1/Kms_core`)
@@ -163,32 +167,34 @@ class Competencies extends Component {
           }))
         }
       }))
-
   }
 
-  columnsKMSOptional = [{
-    title: 'No',
-    dataIndex: 'no',
-    key: 'no',
-  }, {
-    title: 'Competency',
-    dataIndex: 'kmsoptional',
-    key: 'kmsoptional',
-  }, {
-    title: 'Status',
-    dataIndex: 'activatedKmsOptional',
-    key: 'activatedKmsOptional',
-  }, {
-    title: 'Action',
-    key: 'action',
-    render: (text, record) => (
-      <span>
-        <a onClick={() => this.onSelectKmsOptionalCompetency(record.kmsoptional)}>Edit</a>
-        <span className="ant-divider" />
-        <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
-      </span>
-    ),
-  }];
+  getColumnKMSOptional() {
+    let columnsKMSOptional = [{
+      title: 'No',
+      dataIndex: 'no',
+      key: 'no',
+    }, {
+      title: 'Competency',
+      dataIndex: 'kmsoptional',
+      key: 'kmsoptional',
+    }, {
+      title: 'Status',
+      dataIndex: 'activatedKmsOptional',
+      key: 'activatedKmsOptional',
+    }, {
+      title: 'Action',
+      key: 'action',
+      render: (text, record) => (
+        <span>
+          <a onClick={() => this.onSelectKmsOptionalCompetency(record.kmsoptional)}>Edit</a>
+          <span className="ant-divider" />
+          <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
+        </span>
+      ),
+    }];
+    return columnsKMSOptional
+  }
 
   onSelectKmsOptionalCompetency(name) {
     getData(`competencies1/Kms_optional`)
@@ -224,11 +230,9 @@ class Competencies extends Component {
     this.getCompetencyOptional();
   }
 
-
-  render() {
-    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
+  getDataSourceKMSCore = () => {
     let dataSourceKMSCore = [];
-    _.forEach(this.state.competenciesKMSCore, (item,index) => {
+    _.forEach(this.state.competenciesKMSCore, (item, index) => {
       let activate;
       if (item.activated === true) {
         activate = "On"
@@ -243,9 +247,12 @@ class Competencies extends Component {
       dataSourceKMSCore.push(kmsCoreDataPushTable);
 
     })
+    return dataSourceKMSCore
+  }
 
+  getDataSourceKMSOptional = () => {
     let dataSourceKMSOptional = [];
-    _.forEach(this.state.competenciesKmsOptional, (item,index) => {
+    _.forEach(this.state.competenciesKmsOptional, (item, index) => {
       let activate;
       if (item.activated === true) {
         activate = "On"
@@ -253,13 +260,19 @@ class Competencies extends Component {
         activate = "Off"
       }
       const kmsOptionalDataPushTable = {
-        no : index,
+        no: index,
         kmsoptional: item.name,
         activatedKmsOptional: activate,
       }
       dataSourceKMSOptional.push(kmsOptionalDataPushTable);
     })
+    return dataSourceKMSOptional
+  }
 
+  render() {
+    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
+    this.getDataSourceKMSCore();
+    this.getDataSourceKMSOptional();
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -293,13 +306,13 @@ class Competencies extends Component {
           <Row style={{ margin: 100 }}>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
               <Card title="KMS Core" bordered={false} style={{ width: 600 }}>
-                <Table columns={this.columnsKMSCore} dataSource={dataSourceKMSCore} />
+                <Table columns={this.getColumnKMSCore()} dataSource={this.getDataSourceKMSCore()} />
               </Card>
             </Col>
             <Col xs={20} sm={16} md={12} lg={8} xl={4}></Col>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
               <Card title="KMS Optional" bordered={false} style={{ width: 600 }}>
-                <Table columns={this.columnsKMSOptional} dataSource={dataSourceKMSOptional} />
+                <Table columns={this.getColumnKMSOptional()} dataSource={this.getDataSourceKMSOptional()} />
               </Card>
             </Col>
           </Row>
@@ -308,6 +321,5 @@ class Competencies extends Component {
     );
   }
 }
-
 
 export default Competencies;
