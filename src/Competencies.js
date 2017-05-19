@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table } from 'antd';
-import { getData, update, database } from './firebase';
+import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table, Card } from 'antd';
+import { getData, update, database,getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
 import { Router, Link } from 'react-router-component';
@@ -25,7 +25,8 @@ class Competencies extends Component {
       keyUpdate: '',
       showEditPopupKmsOptional: false,
       optionActivatedKmsOptional: false,
-      loading : true
+      loading : true,
+      lastId : 0,
 
     };
     this.handleChange = this.handleChange.bind(this);
@@ -90,20 +91,23 @@ class Competencies extends Component {
     });
   }
 
-
-
   showModal = () => {
     this.setState({
-      visible: true,
+      visible: true
     });
+  }
+  
+  addNew(lastIndex, competencyName, option) {
+    this.setState({ lastId: parseInt(lastIndex) + 1 })
+    let newCompetency = {
+      "activated": false,
+      "name": competencyName
+    }
+    update(`competencies1/${option}/${this.state.lastId}`, newCompetency)
   }
 
   addNewCompetency(competencyName, option) {
-    const optionalCompetency = database.ref(`competencies1`).child(`${option}`);
-    optionalCompetency.push().set({
-      "activated": false,
-      "name": competencyName
-    });
+    getLastIndex(`competencies1/${option}`).then((lastIndex) => this.addNew(lastIndex, competencyName, option))
   }
 
   handleChange(e) {
@@ -114,24 +118,21 @@ class Competencies extends Component {
     this.setState({
       visible: false
     });
-
     this.addNewCompetency(this.state.competencyName, this.state.option);
-    
   }
 
   handleCancel = (e) => {
-
     this.setState({
       visible: false,
     });
   }
 
   columnsKMSCore = [{
-    title: 'KMS Core',
+    title: 'Competency',
     dataIndex: 'kmscore',
     key: 'kmscore',
   }, {
-    title: 'Activated',
+    title: 'Status',
     dataIndex: 'activatedKmscore',
     key: 'activatedKmscore',
   }, {
@@ -160,11 +161,11 @@ class Competencies extends Component {
   }
 
   columnsKMSOptional = [{
-    title: 'KMS Optional',
+    title: 'Competency',
     dataIndex: 'kmsoptional',
     key: 'kmsoptional',
   }, {
-    title: 'Activated',
+    title: 'Status',
     dataIndex: 'activatedKmsOptional',
     key: 'activatedKmsOptional',
   }, {
@@ -209,8 +210,8 @@ class Competencies extends Component {
   componentWillMount() {
     this.getCompetencyKMSCore();
     this.getCompetencyOptional();
-
   }
+
 
   render() {
      if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
@@ -227,6 +228,7 @@ class Competencies extends Component {
         activatedKmscore: activate,
       }
       dataSourceKMSCore.push(kmsCoreDataPushTable);
+     
     })
 
     let dataSourceKMSOptional = [];
@@ -274,13 +276,17 @@ class Competencies extends Component {
             <h3>Activate compentency: </h3>
             <Switch defaultChecked={this.state.optionActivatedKmsOptional} onChange={this.handleChangeOptionActivatedKmsOptional} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
           </Modal>
-          <Row style={{ margin: 100 }}>
+          <Row style={{margin :100}}>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
+            <Card title="KMS Core" bordered={false} style={{ width: 600 }}>
               <Table columns={this.columnsKMSCore} dataSource={dataSourceKMSCore} />
+              </Card>
             </Col>
             <Col xs={20} sm={16} md={12} lg={8} xl={4}></Col>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
+            <Card title="KMS Optional" bordered={false} style={{ width: 600 }}>
               <Table columns={this.columnsKMSOptional} dataSource={dataSourceKMSOptional} />
+              </Card>
             </Col>
           </Row>
         </Header>
