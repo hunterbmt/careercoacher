@@ -1,4 +1,5 @@
 import FireBase from 'firebase';
+import _ from 'lodash';
 
 
 const config = {
@@ -21,6 +22,10 @@ export const insert = (part, data) => {
   database.ref().update(updates);
 };
 
-export const listenData = (part) => database.ref(part).on('value',snap => snap.val());
+export const getLastIndex = (part) => {
+  return getData(part).then((data) => {
+    return _.last(Object.keys(data))
+  })
+}
 
 export default firebase;

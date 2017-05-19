@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Layout, Button, Input, Select, Row, Col, Modal, Table, Icon } from 'antd';
-import { getData, insert, update } from './firebase';
+import { getData, insert, update,database,getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
 import QuestionInput from './QuestionInput';
@@ -29,6 +29,7 @@ class QuestionCompetency extends Component {
       answer4: '',
       answer5: '',
       hint: '',
+      lastId: 0,
       selectedIndex : 0,
       dataQuestion: [],
       dataSource: [],
@@ -41,6 +42,7 @@ class QuestionCompetency extends Component {
     this.handleChangeAnswer2 = this.handleChangeAnswer2.bind(this);
     this.handleChangeAnswer3 = this.handleChangeAnswer3.bind(this);
     this.handleChangeAnswer4 = this.handleChangeAnswer4.bind(this);
+    this.handleChangeAnswer5 = this.handleChangeAnswer5.bind(this);
     this.handleChangeHint = this.handleChangeHint.bind(this);
   }
 
@@ -80,31 +82,33 @@ class QuestionCompetency extends Component {
   }
 
   saveOption() {
-    var newDataOption = {
+      getLastIndex(`question1/${this.props.index}/questions`).then(lastIndex => this.setState({
+            lastId : parseInt(lastIndex)
+       }))
+    let newData = {
+      "competency" : this.props.name,
+      "question" : [{
       "desc": this.state.question,
       "hint": this.state.hint,
       "options": [this.state.answer1, this.state.answer2, this.state.answer3, this.state.answer4, this.state.answer5],
       "type": this.state.selectValue
+      }] 
     }
-
-    update(`competencies1/${this.props.name}/questions/12`, newDataOption);
-
+      update(`question1/${this.props.index}/`, newData); 
   }
 
   saveOthers() {
+   
     var newDataOthers = {
       "competency": this.props.name,
       "question":[{
       "desc": this.state.question,
       "hint": this.state.hint,
       "type": this.state.selectValue
-      }
-      ]
+      }]
     }
 
-    console.log(newDataOthers);
-
-    update(`competencies1/${this.props.name}/questions/12`, newDataOthers);
+    update(`question1/${this.props.index}/`, newDataOthers);
 
   }
 
@@ -124,11 +128,7 @@ class QuestionCompetency extends Component {
         dataQuestion: data,
         loading: false
       }));
-
-
   }
-
-
 
   showModal = () => {
     this.setState({
@@ -302,6 +302,7 @@ class QuestionCompetency extends Component {
 
 
   render() {
+  
     if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
     this.getDataSouce();
     return (
