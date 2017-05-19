@@ -80,27 +80,27 @@ export default class ProfilePage extends Component {
     const selectedCompentencies = getSelectedCompentencies(profile);
 
     return (
-      <Row type="flex" style={{padding: '20px 10px 10px'}}>
+      <Row type='flex' style={{padding: '20px 10px 10px'}}>
         <Col span={14}>
           <Row>
             <Select
               showSearch
-              size="large"
+              size='large'
               style={{ width: 200 }}
               defaultValue={this.state.compareAgain}
-              placeholder="Select a comparation"
-              optionFilterProp="children"
+              placeholder='Select a comparation'
+              optionFilterProp='children'
               onChange={this.comparationOnChange}
               filterOption={(input, option) => option.props.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
-              <Option value="AVG SE">Compare with avg SE</Option>
-              <Option value="AVG SSE">Compare with avg SSE</Option>
-              <Option value="AVG SA">Compare with avg SA</Option>
-              <Option value="Previous PA">Compare with previous PA</Option>
-              <Option value="Next Level">Compare with next level</Option>
+              <Option value='AVG SE'>Compare with avg SE</Option>
+              <Option value='AVG SSE'>Compare with avg SSE</Option>
+              <Option value='AVG SA'>Compare with avg SA</Option>
+              <Option value='Previous PA'>Compare with previous PA</Option>
+              <Option value='Next Level'>Compare with next level</Option>
             </Select>
           </Row>
-          <Row type="flex" justify="center">
+          <Row type='flex' justify='center'>
 
           </Row>
         </Col>
@@ -131,9 +131,9 @@ export default class ProfilePage extends Component {
           </Row>
           <Row style={{paddingTop: 10}}>
             <Card title='Compentency historical'>
-              <Timeline pending={<a href="#">See more</a>}>
+              <Timeline pending={<a href='#'>See more</a>}>
               {_.map(profile.historical, (historical) =>
-                <Timeline.Item color="green">
+                <Timeline.Item color='green'>
                   <p>{historical.time}</p>
                   {_.map(historical.changelog, (change) => <p>{change}</p>)}
                 </Timeline.Item>

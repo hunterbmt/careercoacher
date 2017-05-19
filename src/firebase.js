@@ -17,11 +17,11 @@ export const getData = (part) => database.ref(part).once('value').then((snapshot
 export const update = (part, data) => database.ref().update({[part]: data});
 export const writeAnswers = (user, data) => database.ref(`answers/${user}`).set(data);
 export const insert = (part, data) => {
-  var updates = {};
+  let updates = {};
   updates[part] = data;
   database.ref().update(updates);
 };
-export const getNewIndex = (part) => {
+export const getLastIndex = (part) => {
   return getData(part).then((data) => {
     return _.last(Object.keys(data));
   });

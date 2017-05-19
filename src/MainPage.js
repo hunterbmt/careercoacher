@@ -1,47 +1,53 @@
-import React, {Component} from 'react';
-import _ from 'lodash';
-import { Layout, Menu, Icon, Row, Col, Button, Modal, Input } from 'antd';
-import ProfilePage from './ProfilePage';
-import Loading from './Loading';
-import './App.css';
-import logo from './logo.png';
-import {getData} from './firebase';
+import React, {Component} from 'react'
+import _ from 'lodash'
+import { Layout, Menu, Icon, Row, Col, Button, Modal, Input } from 'antd'
+import Loading from './Loading'
+import AddNewProfilePopup from './AddNewProfilePopup'
+import './App.css'
+import logo from './logo.png'
+import {getData} from './firebase'
+import GroupManagement from './GroupManagement'
+import {Link} from 'react-router-component'
 
-const { Header, Content, Sider } = Layout;
-const SubMenu = Menu.SubMenu;
+const { Header, Content, Sider } = Layout
+const SubMenu = Menu.SubMenu
 
 class MainPage extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       collapsed: false,
       mode: 'inline',
       loading: true
-    };
+    }
   }
+
   componentDidMount() {
-    Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
+    Promise.all([getData('baseline'), getData('BU_projects')]).then(([baseline, projectList]) =>
       this.setState({
         baseline,
-        profileList,
-        selectedProfile: _.first(profileList),
+        projectList,
+        selectedProject: _.first(Object.keys(projectList)),
         loading: false
       })
-    );
+    )
   }
+
   onCollapse = (collapsed) => {
     this.setState({
       collapsed,
       mode: collapsed ? 'vertical' : 'inline',
-    });
+    })
   }
-  onSelectProfile = (e) => {
+
+  onSelectProject = (e) => {
     this.setState({
-      selectedProfile: e.key,
-    });
+      selectedProject: e.key,
+    })
   }
+
   render() {
-    if (this.state.loading) return <Loading />;
+    if (this.state.loading) return <Loading />
     return (
       <Layout style={{height: '100%'}}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -60,85 +66,44 @@ class MainPage extends Component {
             collapsed={this.state.collapsed}
             onCollapse={this.onCollapse}
           >
-            <Menu theme="dark"
+            <Menu theme='dark'
               mode={this.state.mode}
-              onClick={this.onSelectProfile}
-              selectedKeys={[this.state.selectedProfile]}
+              onClick={this.onSelectProject}
+              selectedKeys={[this.state.selectedProject]}
             >
               <SubMenu
-                key="sub1"
-                title={<span><Icon type="user" /><span className="nav-text">Members</span></span>}
+                key='sub1'
+                title={<span><Icon type='database' /><span className='nav-text'>BU - Projects</span></span>}
               >
                 {
-                  _.map(this.state.profileList, (profile) => <Menu.Item key={profile}>{profile}</Menu.Item>)
+                  _.map(Object.keys(this.state.projectList), (project) => <Menu.Item key={project}>{project}</Menu.Item>)
                 }
-                 
               </SubMenu>
               <Menu.Item key='Report'>
                 <span>
-                  <Icon type="area-chart" />
-                  <span className="nav-text">Report</span>
+                  <Icon type='area-chart' />
+                  <span className='nav-text'>Report</span>
                 </span>
+              </Menu.Item>
+              <Menu.Item>
+                <Link href='/roleProfile'>
+                <Icon type='user' />
+                <span>Baselines</span>
+                </Link>
               </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
             <Content style={{ margin: '0 16px' }}>
-              <ProfilePage
-                baseline={this.state.baseline}
-                profile={this.state.selectedProfile}
-              />              
+              <GroupManagement
+                project={this.state.selectedProject}
+              />
             </Content>
           </Layout>
         </Layout>
       </Layout>
-    );
+    )
   }
 }
 
-class AddNewProfilePopup extends Component {
-  state = {
-    loading: false,
-    visible: false,
-  }
-  showModal = () => {
-    this.setState({
-      visible: true,
-    });
-  }
-  handleOk = () => {
-    this.setState({ loading: true });
-    setTimeout(() => {
-      this.setState({ loading: false, visible: false });
-    }, 3000);
-  }
-  handleCancel = () => {
-    this.setState({ visible: false });
-  }
-  render() {
-    return (
-      <div>
-        <Button type="primary" size="large" onClick={this.showModal}>
-          Add New Group
-        </Button>
-        <Modal
-          visible={this.state.visible}
-          title="Add New Group"
-          onOk={this.handleOk}
-          onCancel={this.handleCancel}
-          footer={[
-            <Button key="back" size="large" onClick={this.handleCancel}>Return</Button>,
-            <Button key="submit" type="primary" size="large" loading={this.state.loading} onClick={this.handleOk}>
-              Submit
-            </Button>
-          ]}
-        >
-          <p>Group Name: </p>
-          <Input placeholder="Group Name...." />
-        </Modal>
-      </div>
-    );
-  }
-}
-
-export default MainPage;
+export default MainPage
