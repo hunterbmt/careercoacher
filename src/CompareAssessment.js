@@ -203,7 +203,7 @@ class CompareAssessment extends Component {
                 {
                   _.map(listConflicts[this.state.current], (conflict, index) =>
                     <Col span={12} className='question-content'>
-                      <h3>Question {index}: {conflict.question} ({competenciesName[this.state.current]})</h3>
+                      <h3>Question {parseInt(index) + 1}: {conflict.question} ({competenciesName[this.state.current]})</h3>
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
                         <div>
                           <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled />
