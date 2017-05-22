@@ -9,20 +9,49 @@ import logo from './logo.png';
 const { Header, Content } = Layout;
 const Step = Steps.Step;
 
-
+function Welcome(props) {
+  return (
+    <Row type='flex' style={{flexDirection: 'column'}}>
+      <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+        <h2>Welcome {props.name}</h2>
+      </Row>
+      <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+        <h3>{props.content} </h3>
+      </Row>
+    </Row>
+  );
+}
 class SelfAssessment extends Component {
   state = {
     current: 0,
     loading: true,
-    answers: {}
+    answers: {},
+    isFinalPage: null
+  }
+
+  setAnswers(answers) {
+    this.setState({
+      isFinalPage: true,
+      answers: answers
+    })
+  }
+
+  isFinalPage() {
+     if(window.location.href.indexOf("final") > -1) {
+       getData(`answers/${this.props.name}_final`)
+         .then((answers) => this.setAnswers(answers));
+     }
+     this.setState({
+       loading: false
+     });
   }
 
   componentDidMount() {
     getData('questions')
       .then((questions) => this.setState({
-        questions,
-        loading: false
+        questions
       }));
+      this.isFinalPage();
   }
 
   next() {
@@ -70,23 +99,13 @@ class SelfAssessment extends Component {
         <Layout>
           <Content style={{ margin: 16, background: '#fff', padding: '0 20px'}}>
             {
-              _.isEmpty(this.props.manager) ?
-              <Row type='flex' style={{flexDirection: 'column'}}>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h2>Welcome {this.props.name}</h2>
-                </Row>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h3>Please answer questions below for your self-assement </h3>
-                </Row>
-              </Row> :
-              <Row type='flex' style={{flexDirection: 'column'}}>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h2>Welcome {this.props.manager}</h2>
-                </Row>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h3>Please answer questions below for {this.props.name}'s assement </h3>
-                </Row>
-              </Row>
+              _.isNull(this.state.isFinalPage)?
+                _.isEmpty(this.props.manager) ?
+                <Welcome name={this.props.name} content="Please answer questions below for your self-assement"/>
+                :
+                <Welcome name={this.props.manager} content={`Please answer questions below for ${this.props.name}'s assement`}/>
+                :
+                <Welcome name='' content={`This is final assessment of ${this.props.name}`}/>
             }
             <Row style={{padding: '20px 0'}} type='flex'>
               <Steps current={this.state.current}>
@@ -102,6 +121,8 @@ class SelfAssessment extends Component {
                     <Col span={12} className='question-content'>
                       <h3>Question {index + 1}: <span style={{whiteSpace: 'pre-wrap'}}>{question.desc}</span> {!_.isEmpty(question.hint) ? <Button shape="circle" icon="question" size="small" onClick={() => this.openHint(question.hint)}/> : null}</h3>
                       <div style={{width: '100%'}}>
+                        {
+                        _.isNull(this.state.isFinalPage)?
                         <QuestionInput {...question} onChange={(value) => this.setState({
                           answers: {
                             ...this.state.answers,
@@ -113,6 +134,11 @@ class SelfAssessment extends Component {
                         })}
                         value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)}
                         />
+                        :
+                        <QuestionInput {...question} disabled
+                        value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)} 
+                        />
+                        }
                       </div>
                     </Col>
                   )
@@ -143,7 +169,7 @@ class SelfAssessment extends Component {
                 </Button>
               }
               {
-                this.state.current === questions.length - 1
+                this.state.isFinalPage === null && this.state.current === questions.length - 1
                 &&
                 <Button
                   type="primary"
