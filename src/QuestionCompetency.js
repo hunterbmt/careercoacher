@@ -34,9 +34,16 @@ class QuestionCompetency extends Component {
             dataQuestion: [],
             questionDataDetail: {},
             loading: true,
-            keyUpdate : 0,
-            typeEdit : '',
-            questionEdit : ''
+            keyUpdate: 0,
+            typeEdit: '',
+            questionEdit: '',
+            hintEdit: '',
+            answer1Edit: '',
+            answer2Edit: '',
+            answer3Edit: '',
+            answer4Edit: '',
+            answer5Edit: '',
+            showDeletePopup: false
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeQuestion = this.handleChangeQuestion.bind(this);
@@ -122,7 +129,7 @@ class QuestionCompetency extends Component {
 
     saveQuestion(type) {
         if (type === 'option') {
-            this.saveOptionIdIncrement();
+            this.saveOptionIdIncrement()
         } else {
             this.saveOthersIdIncrement();
         }
@@ -133,9 +140,18 @@ class QuestionCompetency extends Component {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         getData(`competencies1/${option}/${this.props.index}/questions`)
             .then((data) => this.setState({
-                dataQuestion: data,
+                dataQuestion: _.filter(data, function (o) { return _.isObject(o) }),
                 loading: false
-            }));
+            })
+            )
+       
+    }
+
+
+    componentDidMount(){
+    //     const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+    //    console.log(getData(`competencies1/${option}/${this.props.index}/questions`).then((data) => this.getLastQuestionIndex(data)).then((last) => last))
+      
     }
 
     showModal = () => {
@@ -162,9 +178,9 @@ class QuestionCompetency extends Component {
     editOptionQuestion() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOption = {
-            "desc": this.state.question,
-            "hint": this.state.hint,
-            "options": [this.state.answer1, this.state.answer2, this.state.answer3, this.state.answer4, this.state.answer5],
+            "desc": this.state.questionEdit,
+            "hint": this.state.hintEdit,
+            "options": [this.state.answer1Edit, this.state.answer2Edit, this.state.answer3Edit, this.state.answer4Edit, this.state.answer5Edit],
             "type": this.state.typeEdit
         }
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption);
@@ -174,18 +190,24 @@ class QuestionCompetency extends Component {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOthers = {
             "desc": this.state.questionEdit,
-            "hint": this.state.hint,
+            "hint": this.state.hintEdit,
             "type": this.state.typeEdit
         }
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers);
     }
 
-    editQuestion(type){
-        if(type === 'option'){
+    editQuestion(type) {
+        if (type === 'option') {
             this.editOptionQuestion();
-        }else{
+        } else {
             this.editOthersQuestion();
         }
+    }
+
+
+    deleteQuestion() {
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null);
     }
 
 
@@ -202,9 +224,47 @@ class QuestionCompetency extends Component {
         });
     }
 
-      handleEditQuestion(e) {
+    handleDeleteSave = (e) => {
+        this.deleteQuestion();
+        this.setState({
+            showDeletePopup: false
+        });
+
+    }
+
+    handleDeleteCancel = (e) => {
+        this.setState({
+            showEditPopup: false,
+        });
+    }
+
+    handleEditQuestion = (e) => {
         this.setState({ questionEdit: e.target.value });
 
+    }
+
+    handleEditAnswer1 = (e) => {
+        this.setState({ answer1Edit: e.target.value })
+    }
+
+    handleEditAnswer2 = (e) => {
+        this.setState({ answer2Edit: e.target.value })
+    }
+
+    handleEditAnswer3 = (e) => {
+        this.setState({ answer3Edit: e.target.value })
+    }
+
+    handleEditAnswer4 = (e) => {
+        this.setState({ answer4Edit: e.target.value })
+    }
+
+    handleEditAnswer5 = (e) => {
+        this.setState({ answer5Edit: e.target.value })
+    }
+
+    handleEditHint = (e) => {
+        this.setState({ hintEdit: e.target.value })
     }
 
     optionQuestionType(type) {
@@ -255,13 +315,20 @@ class QuestionCompetency extends Component {
                 <span>
                     <a onClick={() => this.onSelectQuestion(record.no)}>Edit</a>
                     <span className="ant-divider" />
-                    <a onClick={this.showModalDelete}>Delete</a>
+                    <a onClick={() => this.onSelectedDeleteQuestion(record.no)}>Delete</a>
                 </span>
             ),
         }];
         return columns
     }
 
+    onSelectedDeleteQuestion(index) {
+        let realIndex = index - 1;
+        this.setState({
+            keyDelete: realIndex,
+            showDeletePopup: true
+        });
+    }
 
     onSelectQuestion(index) {
         let realIndex = index - 1;
@@ -269,14 +336,11 @@ class QuestionCompetency extends Component {
         getData(`competencies1/${option}/${this.props.index}/questions/${realIndex}`)
             .then((detailQuestionData) => this.setState({
                 questionDataDetail: detailQuestionData,
-                keyUpdate : realIndex,
-                typeEdit : detailQuestionData.type,
+                keyUpdate: realIndex,
+                typeEdit: detailQuestionData.type,
                 showEditPopup: true
             }));
     }
-
-
-
 
     renderOptionQuestionType(detailQuestion) {
         if (detailQuestion.type === "option") {
@@ -285,7 +349,7 @@ class QuestionCompetency extends Component {
                     <h3>Question</h3>
                     <Input type="textarea" defaultValue={detailQuestion.desc} onChange={this.handleEditQuestion} />
                     <h3>Hint</h3>
-                    <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleChangeHint} />
+                    <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleEditHint} />
                     <h3>First answer :</h3>
                     <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 0)} onChange={this.handleEditAnswer1} />
                     <h3>Second answer :</h3>
@@ -302,14 +366,13 @@ class QuestionCompetency extends Component {
             return (
                 <div>
                     <h3>Question</h3>
-                    <Input type="textarea" defaultValue={detailQuestion.desc} onChange={this.handleEditQuestion}/>
+                    <Input type="textarea" defaultValue={detailQuestion.desc} onChange={this.handleEditQuestion} />
                     <h3>Hint</h3>
-                    <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleChangeHint}/>
+                    <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleEditHint} />
                 </div>
             );
         }
     }
-
 
     getDataSouce() {
         let dataSource = [];
@@ -322,7 +385,6 @@ class QuestionCompetency extends Component {
         })
         return dataSource;
     }
-
 
     render() {
 
@@ -361,6 +423,10 @@ class QuestionCompetency extends Component {
                             {
                                 this.renderOptionQuestionType(this.state.questionDataDetail)
                             }
+                        </Modal>
+                        <Modal title="Delete question" visible={this.state.showDeletePopup}
+                            onOk={this.handleDeleteSave} onCancel={this.handleDeleteCancel}>
+                            <h3>Do you sure to delete this question</h3>
                         </Modal>
                     </Col>
                 </Row>
