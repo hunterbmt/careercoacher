@@ -271,28 +271,28 @@ class QuestionCompetency extends Component {
         if (type === "option") {
             return (
                 <div>
-                    <h3>Please input the question</h3>
+                    <h3>Question</h3>
                     <Input type="textarea" value={this.state.question} onChange={this.handleChangeQuestion} />
-                    <h3>Please input hint for this question</h3>
+                    <h3>Hint question</h3>
                     <Input type="textarea" value={this.state.hint} onChange={this.handleChangeHint} />
-                    <h3>Please input the first answer :</h3>
+                    <h3>First answer :</h3>
                     <Input type="textarea" value={this.state.answer1} onChange={this.handleChangeAnswer1} />
-                    <h3>Please input the second answer :</h3>
+                    <h3>Second answer :</h3>
                     <Input type="textarea" value={this.state.answer2} onChange={this.handleChangeAnswer2} />
-                    <h3>Please input the third answer :</h3>
+                    <h3>Third answer :</h3>
                     <Input type="textarea" value={this.state.answer3} onChange={this.handleChangeAnswer3} />
-                    <h3>Please input the fourth answer :</h3>
+                    <h3>Fourth answer :</h3>
                     <Input type="textarea" value={this.state.answer4} onChange={this.handleChangeAnswer4} />
-                    <h3>Please input the fifth answer :</h3>
+                    <h3>Other answer :</h3>
                     <Input type="textarea" value={this.state.answer5} onChange={this.handleChangeAnswer5} />
                 </div>
             );
         } else {
             return (
                 <div>
-                    <h3>Please input the question</h3>
+                    <h3>Question</h3>
                     <Input type="textarea" value={this.state.question} onChange={this.handleChangeQuestion} />
-                    <h3>Please input hint for this question</h3>
+                    <h3>Hint question</h3>
                     <Input type="textarea" value={this.state.hint} onChange={this.handleChangeHint} />
                 </div>
             );
@@ -348,7 +348,7 @@ class QuestionCompetency extends Component {
                 <div>
                     <h3>Question</h3>
                     <Input type="textarea" defaultValue={detailQuestion.desc} onChange={this.handleEditQuestion} />
-                    <h3>Hint</h3>
+                    <h3>Hint question</h3>
                     <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleEditHint} />
                     <h3>First answer :</h3>
                     <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 0)} onChange={this.handleEditAnswer1} />
@@ -358,7 +358,7 @@ class QuestionCompetency extends Component {
                     <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 2)} onChange={this.handleEditAnswer3} />
                     <h3>Fourth answer :</h3>
                     <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 3)} onChange={this.handleEditAnswer4} />
-                    <h3>Fifth answer :</h3>
+                    <h3>Other answer :</h3>
                     <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 4)} onChange={this.handleEditAnswer5} />
                 </div>
             );
@@ -367,7 +367,7 @@ class QuestionCompetency extends Component {
                 <div>
                     <h3>Question</h3>
                     <Input type="textarea" defaultValue={detailQuestion.desc} onChange={this.handleEditQuestion} />
-                    <h3>Hint</h3>
+                    <h3>Hint question</h3>
                     <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleEditHint} />
                 </div>
             );

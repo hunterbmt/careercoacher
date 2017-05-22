@@ -10,6 +10,7 @@ import FinishPage from './FinishPage';
 import Competencies from './Competencies'
 import QuestionCompetency from './QuestionCompetency'
 
+
 import './App.css';
 
 
