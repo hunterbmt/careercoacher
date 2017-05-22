@@ -11,9 +11,6 @@ const Step = Steps.Step;
 
 
 class CompareAssessment extends Component {
-  constructor(props) {
-    super(props);
-  }
   state = {
     conflicts: {},
     loading: true,
@@ -58,7 +55,7 @@ class CompareAssessment extends Component {
     } else {
       this.eachCompetencyQuestion(core_competency.questions, competencyName)
     }
-    
+
   }
 
   eachCompetencyQuestion(question, competency) {
