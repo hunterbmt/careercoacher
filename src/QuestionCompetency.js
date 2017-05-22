@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Button, Input, Select, Row, Col, Modal, Table, Icon } from 'antd';
+import { Form, Layout, Button, Input, Select, Row, Col, Modal, Table, Icon } from 'antd';
 import { getData, insert, update, database, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
@@ -7,6 +7,7 @@ import QuestionInput from './QuestionInput';
 import Scale from './Scale';
 import ReactDOM from 'react-dom';
 import logo from './logo.png';
+const FormItem = Form.Item;
 
 const { Header, Content } = Layout;
 
@@ -43,7 +44,9 @@ class QuestionCompetency extends Component {
             answer3Edit: '',
             answer4Edit: '',
             answer5Edit: '',
-            showDeletePopup: false
+            showDeletePopup: false,
+            indexSource: []
+
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeQuestion = this.handleChangeQuestion.bind(this);
@@ -144,14 +147,15 @@ class QuestionCompetency extends Component {
                 loading: false
             })
             )
-       
+
     }
 
 
-    componentDidMount(){
-    //     const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-    //    console.log(getData(`competencies1/${option}/${this.props.index}/questions`).then((data) => this.getLastQuestionIndex(data)).then((last) => last))
-      
+    componentDidMount() {
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+            getData(`competencies1/${option}/${this.props.index}/questions`)
+            .then((data) => console.log(Object.keys(data)))
+
     }
 
     showModal = () => {
@@ -161,14 +165,14 @@ class QuestionCompetency extends Component {
     }
 
     handleSave = (e) => {
-        this.setState({
-            visible: false
-        });
         this.saveQuestion(this.state.selectValue);
+        this.setState({
+            visible: false,
+
+        });
     }
 
     handleCancel = (e) => {
-
         this.setState({
             visible: false,
         });
@@ -214,7 +218,7 @@ class QuestionCompetency extends Component {
     handleEdit = (e) => {
         this.editQuestion(this.state.typeEdit);
         this.setState({
-            showEditPopup: false
+            showEditPopup: false,
         });
     }
 
@@ -376,18 +380,17 @@ class QuestionCompetency extends Component {
 
     getDataSouce() {
         let dataSource = [];
-        _.forEach(this.state.dataQuestion, (item, index) => {
-            var object = {
-                no: index + 1,
-                question: item.desc
-            }
-            dataSource.push(object);
+        _.forEach(this.state.dataQuestion, (item,key) => {
+            const object = {
+            no: key +1,
+            question : item.desc
+        }
+        dataSource.push(object);
         })
         return dataSource;
     }
 
     render() {
-
         if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
         this.getDataSouce();
         return (

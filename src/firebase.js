@@ -34,4 +34,5 @@ export const getLastIndexDefault = (data) =>{
         }
 }
 
+
 export default firebase;
