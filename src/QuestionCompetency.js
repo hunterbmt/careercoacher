@@ -45,8 +45,6 @@ class QuestionCompetency extends Component {
             answer4Edit: '',
             answer5Edit: '',
             showDeletePopup: false,
-            indexSource: []
-
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleChangeQuestion = this.handleChangeQuestion.bind(this);
@@ -138,7 +136,6 @@ class QuestionCompetency extends Component {
         }
     }
 
-
     componentWillMount() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         getData(`competencies1/${option}/${this.props.index}/questions`)
@@ -147,9 +144,7 @@ class QuestionCompetency extends Component {
                 loading: false
             })
             )
-
     }
-
 
     componentDidMount() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
