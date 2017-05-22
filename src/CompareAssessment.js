@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import { Layout, Steps, Row, Col, Button, message } from 'antd';
 import QuestionInput from './QuestionInput';
-import { getData, update } from './firebase';
+import { getData, writeAnswers } from './firebase';
 import logo from './logo.png';
 import Loading from './Loading';
 
@@ -18,109 +18,35 @@ class CompareAssessment extends Component {
     current: 0
   }
 
-  conflicts = {};
-  finalAnswers = {};
-
   error = () => {
     message.error('You need to resolve all conflicts');
   };
 
   componentDidMount() {
-    Promise.all([getData('competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`)])
+    this.setState({
+      loading: true
+    });
+    Promise.all([getData('/competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`)])
       .then(([competencies, selfAnswers, managerAnswers]) => {
         this.setState({
+          loading: false,
           competencies,
-          selfAnswers,
-          managerAnswers
-        })
-        this.getConflicts(this.props.name);
+          conflicts: this.getConflictsView(selfAnswers, managerAnswers),
+          finalAnswers: managerAnswers
+        });
       })
   }
-
-  getConflicts = (name) => {
-    getData(`answers/${name}`)
-      .then((answers) => this.handle(answers)
-      );
+  getConflictsView = (selfAnswers, managerAnswers) => {
+    const conflicts = _.mergeWith(selfAnswers, managerAnswers, (selfAnswer, managerAnswer) =>
+      _.map(selfAnswer, (answer, index) => [answer, managerAnswer[index]])
+    );
+    debugger;
+    return _.omitBy(
+      _.mapValues(conflicts, (answers) => _.omitBy(answers, (answer) => answer[0] === answer[1]))
+    , _.isEmpty);
   }
 
-  handle(answers) {
-    _.map(Object.keys(answers), (competencyName) => this.findConflictsByCompetencyName(competencyName));
-  }
 
-  findConflictsByCompetencyName(competencyName) {
-    let core_competency = _.find(this.state.competencies.Kms_core, { name: competencyName })
-    let optinal_competency = _.find(this.state.competencies.Kms_optional, { name: competencyName })
-    if(core_competency == null) {
-      this.eachCompetencyQuestion(optinal_competency.questions, competencyName)
-    } else {
-      this.eachCompetencyQuestion(core_competency.questions, competencyName)
-    }
-
-  }
-
-  eachCompetencyQuestion(question, competency) {
-    for (let i = 0; i < question.length; i++) {
-      if (_.get(this.state.selfAnswers, `${competency}.${i}`) === _.get(this.state.managerAnswers, `${competency}.${i}`)) {
-        this.finalAnswers = {
-          ...this.finalAnswers,
-          [competency]: {
-            ...(this.finalAnswers[competency] || {}),
-            [i]: _.get(this.state.selfAnswers, `${competency}.${i}`)
-          }
-        }
-        continue;
-      }
-      switch (question[i].type) {
-        case 'option':
-          this.conflicts = {
-            ...this.conflicts,
-            [competency]: {
-              ...this.conflicts[competency],
-              [i]: {
-                isResolved: false,
-                selfAssessment: _.get(this.state.selfAnswers, `${competency}.${i}`),
-                managerAssessment: _.get(this.state.managerAnswers, `${competency}.${i}`)
-              }
-            }
-          }
-          break;
-        case 'scale':
-          this.conflicts = {
-            ...this.conflicts,
-            [competency]: {
-              ...this.conflicts[competency],
-              [i]: {
-                isResolved: false,
-                selfAssessment: _.get(this.state.selfAnswers, `${competency}.${i}`),
-                managerAssessment: _.get(this.state.managerAnswers, `${competency}.${i}`)
-              }
-            }
-          }
-          break;
-
-        case 'switch':
-          this.conflicts = {
-            ...this.conflicts,
-            [competency]: {
-              ...this.conflicts[competency],
-              [i]: {
-                isResolved: false,
-                selfAssessment: _.get(this.state.selfAnswers, `${competency}.${i}`),
-                managerAssessment: _.get(this.state.managerAnswers, `${competency}.${i}`)
-              }
-            }
-          }
-          break;
-        default:
-
-      }
-    }
-    this.setState({
-      conflicts: this.conflicts,
-      finalAnswers: this.finalAnswers,
-      loading: false
-    });
-  }
   next() {
     const current = this.state.current + 1;
     this.setState({ current });
@@ -142,21 +68,8 @@ class CompareAssessment extends Component {
   }
 
   saveFinalAnswers(finalAnswers) {
-    let numOfConflicsNotSolve = 0;
-    _.map((this.state.conflicts), (conflicts) => {
-      _.map((conflicts), (conflicts) => {
-        if (conflicts.isResolved === false) {
-          numOfConflicsNotSolve = numOfConflicsNotSolve + 1;
-        }
-      })
-    });
-
-    if (numOfConflicsNotSolve === 0) {
-      update(`answers/${this.props.name}_final`, this.state.finalAnswers);
-      window.location.replace(`/#/compare/${this.props.name}/final`);
-    } else {
-      this.error()
-    }
+    writeAnswers(`${this.props.name}_final`, this.state.finalAnswers);
+    window.location.replace(`/#/compare/${this.props.name}/final`);
   }
 
   onChangeAnswer = (value, index, currentCompetencyName) => {
@@ -167,20 +80,12 @@ class CompareAssessment extends Component {
           ...(this.state.finalAnswers[currentCompetencyName] || {}),
           [index]: value
         }
-      },
-      conflicts: {
-        ...this.state.conflicts,
-        [currentCompetencyName]: {
-          ...(this.state.conflicts[currentCompetencyName] || {}),
-          [index]: {
-            ...this.state.conflicts[currentCompetencyName][index],
-            isResolved: true
-          }
-        }
       }
-    })
+    });
   }
 
+  getValueByQuestion = (question, value) =>
+    question.options ? question.options[value - 1] : value
 
   render() {
     if (this.state.loading) return <Loading />;
@@ -223,13 +128,19 @@ class CompareAssessment extends Component {
                 {
                   _.map(listConflicts[this.state.current], (conflict, index) =>
                     <Col span={12} className='question-content'>
-                      <h3>Question {index}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
+                      <h3>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
                         <div>
-                          <h4>Seft-assessment: </h4> <QuestionInput type={currentQuestion[index].type} value={conflict.selfAssessment} disabled />
+                          <h4>Seft-assessment: </h4> <QuestionInput
+                            type={currentQuestion[index].type}
+                            value={this.getValueByQuestion(currentQuestion[index], conflict[0])}
+                            disabled />
                         </div>
                         <div>
-                          <h4>Manager assessment: </h4> <QuestionInput type={currentQuestion[index].type} value={conflict.managerAssessment} disabled />
+                          <h4>Manager assessment: </h4> <QuestionInput
+                            type={currentQuestion[index].type}
+                            value={this.getValueByQuestion(currentQuestion[index], conflict[1])}
+                            disabled />
                         </div>
                       </div>
                       <div style={{ marginTop: 10 }}>

@@ -6,6 +6,7 @@ import QuestionInput from './QuestionInput';
 import Loading from './Loading';
 
 import {getData, writeAnswers} from './firebase';
+import {convertValueFromOption} from './utils';
 import logo from './logo.png';
 const { Header, Content } = Layout;
 const Step = Steps.Step;
@@ -50,7 +51,6 @@ class SelfAssessment extends Component {
         });
       }
     );
-    console.log(this.isFinalPage());
     this.autoSaveInterval = setInterval(() => {
       if (this.state.answers !== this.lastAnswers) {
         this.lastAnswers = this.state.answers;
