@@ -23,9 +23,15 @@ export const insert = (part, data) => {
 };
 
 export const getLastIndex = (part) => {
-  return getData(part).then((data) => {
-    return _.last(Object.keys(data))
-  })
+  return getData(part).then((data) => getLastIndexDefault(data))
+}
+
+export const getLastIndexDefault = (data) =>{
+     if(_.isNull(data)){
+            return -1
+        }else{
+            return _.last(Object.keys(data))
+        }
 }
 
 

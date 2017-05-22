@@ -147,7 +147,7 @@ class Competencies extends Component {
         <span>
           <a onClick={() => this.onSelectCompetency(record.kmscore)}>Edit</a>
           <span className="ant-divider" />
-          <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
+          <Link href={`#competencies/core/${record.no}`}>Add question</Link>
         </span>
       ),
     }];
