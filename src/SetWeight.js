@@ -12,7 +12,16 @@ class SetWeight extends Component {
     loading: true,
     defaultWeight: 0,
     constraints: { minRange: 0, maxRange: 0, title: '', weight: {} },
-    disabledSetWeight: []
+    disabledSetWeight: [],
+    defaultOption: 'none'
+  }
+
+  componentDidMount() {
+    this.getTitle();
+    this.getDefaultWeight();
+    const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+    getData(`competencies/${option}/${this.props.index}/questions`)
+      .then((questions) => this.setStateForQuestion(questions))
   }
 
   getTitle() {
@@ -34,7 +43,7 @@ class SetWeight extends Component {
     }
   }
 
-  findOneByTitle(baseline) {
+  findDefaultWeightByTitle(baseline) {
     const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
     _.map(baseline, (baseline, key) => {
       if (baseline.name === this.state.constraints.title) {
@@ -45,9 +54,10 @@ class SetWeight extends Component {
     });
   }
 
+
   getDefaultWeight() {
     getData('baseline')
-      .then((baseline) => this.findOneByTitle(baseline));
+      .then((baseline) => this.findDefaultWeightByTitle(baseline));
   }
 
   setStateForQuestion = (questions) => {
@@ -59,13 +69,7 @@ class SetWeight extends Component {
       loading: false
     })
   }
-  componentDidMount() {
-    this.getTitle();
-    this.getDefaultWeight();
-    const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-    getData(`competencies/${option}/${this.props.index}/questions`)
-      .then((questions) => this.setStateForQuestion(questions))
-  }
+
   openHint(hint) {
     this.setState({
       visible: true,
@@ -76,6 +80,15 @@ class SetWeight extends Component {
     this.setState({
       visible: false
     });
+  }
+
+  OnCheckUseDefaultForAll = (e) => {
+    if (e.target.checked) {
+      this.setState({
+        defaultOption: 'default'
+      })
+    }
+
   }
 
   setValueForMinRange(value) {
@@ -114,7 +127,7 @@ class SetWeight extends Component {
   }
 
   changeWeight(value, index) {
-    _.isNumber(value)?
+    _.isNumber(value) ?
       this.setState({
         constraints: {
           ...this.state.constraints,
@@ -157,7 +170,6 @@ class SetWeight extends Component {
         disabledSetWeight: this.state.disabledSetWeight
       })
     }
-
   }
 
   saveConstraints() {
@@ -204,7 +216,7 @@ class SetWeight extends Component {
                   <h3>{`Default weight: ${this.state.defaultWeight}`}</h3>
                 </Row>
                 <Row type='flex' justify='left' style={{ padding: '10px 0' }}>
-                  <Checkbox>Use default weight for all questions</Checkbox>
+                  <Checkbox onChange={this.OnCheckUseDefaultForAll}>Use default weight for all questions</Checkbox>
                 </Row>
                 <Row type='flex' justify='left' style={{ padding: '10px 0' }}>
                   <div>
@@ -226,16 +238,16 @@ class SetWeight extends Component {
                           null
                           :
                           <div>
-                            <Collapse accordion style = {{marginBottom: 10}}>
+                            <Collapse accordion style={{ marginBottom: 10 }}>
                               <Panel header={`Question ${index + 1}`} key={index}>
                                 <p>{question.desc} {!_.isEmpty(question.hint) ? <Button shape="circle" icon="question" size="small" onClick={() => this.openHint(question.hint)} /> : null}</p>
                               </Panel>
                             </Collapse>
-                            <RadioGroup onChange={(e) => this.onRadioSetWeightChange(index, e)} defaultValue='none'>
+                            <RadioGroup onChange={(e) => this.onRadioSetWeightChange(index, e)} defaultValue={this.state.defaultOption}>
                               <Radio value='none'>No constraint</Radio>
                               <Radio value='default'>Use default weight for this question</Radio>
                               <Radio value='customize'>Set another weight</Radio>
-                              <InputNumber min={0} max={4} disabled={this.state.disabledSetWeight[index]} defaultValue={this.state.defaultWeight} onChange={(value) => this.changeWeight(value,index)}/>
+                              <InputNumber min={0} max={4} disabled={this.state.disabledSetWeight[index]} defaultValue={this.state.defaultWeight} onChange={(value) => this.changeWeight(value, index)} />
                             </RadioGroup>
                           </div>
                       }
