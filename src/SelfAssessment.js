@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import _ from 'lodash';
 import { Layout, Steps, Row, Col, Button, Modal } from 'antd';
 import QuestionInput from './QuestionInput';
 import Loading from './Loading';
 
 import {getData, writeAnswers} from './firebase';
+import {convertValueFromOption} from './utils';
 import logo from './logo.png';
 const { Header, Content } = Layout;
 const Step = Steps.Step;
+const interval = 60000;
 
 function Welcome(props) {
   return (
@@ -25,42 +28,52 @@ class SelfAssessment extends Component {
   state = {
     current: 0,
     loading: true,
-    answers: {},
-    isFinalPage: null
-  }
-
-  setAnswers(answers) {
-    this.setState({
-      isFinalPage: true,
-      answers: answers
-    })
+    answers: {}
   }
 
   isFinalPage() {
-     if(window.location.href.indexOf("final") > -1) {
-       getData(`answers/${this.props.name}_final`)
-         .then((answers) => this.setAnswers(answers));
-     }
-     this.setState({
-       loading: false
-     });
+    return window.location.href.indexOf('final') > -1;
+  }
+
+  getAnswerPath(props) {
+    if (this.isFinalPage()) return `${props.name}_final`;
+    return _.isEmpty(props.manager) ? props.name : `${props.name}_manager`;
   }
 
   componentDidMount() {
-    getData('questions')
-      .then((questions) => this.setState({
-        questions
-      }));
-      this.isFinalPage();
+      const part = this.getAnswerPath(this.props);
+      Promise.all([getData('questions'), getData(`answers/${part}`)])
+      .then(([questions, answers]) => {
+        this.setState({
+          questions,
+          answers: answers || {},
+          loading: false
+        });
+      }
+    );
+    this.autoSaveInterval = setInterval(() => {
+      if (this.state.answers !== this.lastAnswers) {
+        this.lastAnswers = this.state.answers;
+        writeAnswers(part, this.state.answers);
+      }
+    }, interval);
   }
+
+  componentWillUnmount() {
+    clearInterval(this.autoSaveInterval);
+  }
+
 
   next() {
     const current = this.state.current + 1;
     this.setState({ current });
+    this.layout.scrollTop = 0;
+    console.log(this.state.answers);
   }
   prev() {
     const current = this.state.current - 1;
     this.setState({ current });
+    this.layout.scrollTop = 0;
   }
   openHint(hint) {
     this.setState({
@@ -96,10 +109,10 @@ class SelfAssessment extends Component {
             </Col>
           </Row>
         </Header>
-        <Layout>
+        <Layout ref={(ref) => this.layout = ReactDOM.findDOMNode(ref)}>
           <Content style={{ margin: 16, background: '#fff', padding: '0 20px'}}>
             {
-              _.isNull(this.state.isFinalPage)?
+              !this.isFinalPage()?
                 _.isEmpty(this.props.manager) ?
                 <Welcome name={this.props.name} content="Please answer questions below for your self-assement"/>
                 :
@@ -122,7 +135,7 @@ class SelfAssessment extends Component {
                       <h3>Question {index + 1}: <span style={{whiteSpace: 'pre-wrap'}}>{question.desc}</span> {!_.isEmpty(question.hint) ? <Button shape="circle" icon="question" size="small" onClick={() => this.openHint(question.hint)}/> : null}</h3>
                       <div style={{width: '100%'}}>
                         {
-                        _.isNull(this.state.isFinalPage)?
+                        !this.isFinalPage() ?
                         <QuestionInput {...question} onChange={(value) => this.setState({
                           answers: {
                             ...this.state.answers,
@@ -136,7 +149,7 @@ class SelfAssessment extends Component {
                         />
                         :
                         <QuestionInput {...question} disabled
-                        value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)} 
+                        value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)}
                         />
                         }
                       </div>
@@ -169,7 +182,7 @@ class SelfAssessment extends Component {
                 </Button>
               }
               {
-                this.state.isFinalPage === null && this.state.current === questions.length - 1
+                !this.isFinalPage() && this.state.current === questions.length - 1
                 &&
                 <Button
                   type="primary"
