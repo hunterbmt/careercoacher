@@ -127,6 +127,9 @@ class CompareAssessment extends Component {
               <Row type='flex'>
                 {
                   _.map(listConflicts[this.state.current], (conflict, index) =>
+                  _.isEqual(currentQuestion[index].type,'freetext')?
+                    null
+                    :
                     <Col span={12} className='question-content'>
                       <h3>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
