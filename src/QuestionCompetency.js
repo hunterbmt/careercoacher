@@ -8,9 +8,7 @@ import Scale from './Scale';
 import ReactDOM from 'react-dom';
 import logo from './logo.png';
 const FormItem = Form.Item;
-
 const { Header, Content } = Layout;
-
 
 const Option = Select.Option;
 
@@ -23,27 +21,9 @@ class QuestionCompetency extends Component {
             showEditPopup: false,
             visible: false,
             selectValue: 'scale',
-            question: '',
-            answer1: '',
-            answer2: '',
-            answer3: '',
-            answer4: '',
-            answer5: '',
-            hint: '',
-            lastId: 0,
-            selectedIndex: 0,
             dataQuestion: [],
             questionDataDetail: {},
             loading: true,
-            keyUpdate: 0,
-            typeEdit: '',
-            questionEdit: '',
-            hintEdit: '',
-            answer1Edit: '',
-            answer2Edit: '',
-            answer3Edit: '',
-            answer4Edit: '',
-            answer5Edit: '',
             showDeletePopup: false,
         };
         this.handleChange = this.handleChange.bind(this);
@@ -93,17 +73,23 @@ class QuestionCompetency extends Component {
         })
     }
 
-
     saveOptionQuestion(lastIndex) {
-        this.setState({ lastId: parseInt(lastIndex) + 1 })
+        let lastId = parseInt(lastIndex) + 1
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newData = {
+            "id": lastId,
             "desc": this.state.question,
             "hint": this.state.hint,
             "options": [this.state.answer1, this.state.answer2, this.state.answer3, this.state.answer4, this.state.answer5],
             "type": this.state.selectValue
         }
-        update(`competencies1/${option}/${this.props.index}/questions/${this.state.lastId}`, newData);
+
+        this.state.dataQuestion.push(newData) 
+        this.setState({
+           dataQuestion : this.state.dataQuestion
+        })
+
+        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newData);
     }
 
     saveOptionIdIncrement() {
@@ -112,14 +98,21 @@ class QuestionCompetency extends Component {
     }
 
     saveOthersQuestion(lastIndex) {
-        this.setState({ lastId: parseInt(lastIndex) + 1 })
+        let lastId = parseInt(lastIndex) + 1
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOthers = {
+            "id": lastId,
             "desc": this.state.question,
             "hint": this.state.hint,
             "type": this.state.selectValue
         }
-        update(`competencies1/${option}/${this.props.index}/questions/${this.state.lastId}`, newDataOthers);
+
+        this.state.dataQuestion.push(newDataOthers) 
+        this.setState({
+           dataQuestion : this.state.dataQuestion
+        })
+
+        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newDataOthers);
     }
 
     saveOthersIdIncrement() {
@@ -132,7 +125,7 @@ class QuestionCompetency extends Component {
         if (type === 'option') {
             this.saveOptionIdIncrement()
         } else {
-            this.saveOthersIdIncrement();
+            this.saveOthersIdIncrement()
         }
     }
 
@@ -140,17 +133,9 @@ class QuestionCompetency extends Component {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         getData(`competencies1/${option}/${this.props.index}/questions`)
             .then((data) => this.setState({
-                dataQuestion: _.filter(data, function (o) { return _.isObject(o) }),
+                dataQuestion: _.filter(data, (o) => _.isObject(o)),
                 loading: false
-            })
-            )
-    }
-
-    componentDidMount() {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-            getData(`competencies1/${option}/${this.props.index}/questions`)
-            .then((data) => console.log(Object.keys(data)))
-
+            }))
     }
 
     showModal = () => {
@@ -177,21 +162,35 @@ class QuestionCompetency extends Component {
     editOptionQuestion() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOption = {
+            "id": this.state.keyUpdate,
             "desc": this.state.questionEdit,
             "hint": this.state.hintEdit,
             "options": [this.state.answer1Edit, this.state.answer2Edit, this.state.answer3Edit, this.state.answer4Edit, this.state.answer5Edit],
             "type": this.state.typeEdit
         }
+        
+        this.state.dataQuestion[this.state.keyUpdate] = newDataOption
+        this.setState({
+            dataQuestion : this.state.dataQuestion
+        })
+
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption);
     }
 
     editOthersQuestion() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOthers = {
+            "id": this.state.keyUpdate,
             "desc": this.state.questionEdit,
             "hint": this.state.hintEdit,
             "type": this.state.typeEdit
         }
+
+        this.state.dataQuestion[this.state.keyUpdate] = newDataOthers
+        this.setState({
+            dataQuestion : this.state.dataQuestion
+        })
+
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers);
     }
 
@@ -206,6 +205,12 @@ class QuestionCompetency extends Component {
 
     deleteQuestion() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+
+        _.remove(this.state.dataQuestion,this.state.dataQuestion[this.state.keyDelete])
+        this.setState({
+            dataQuestion : this.state.dataQuestion
+        })
+
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null);
     }
 
@@ -233,7 +238,7 @@ class QuestionCompetency extends Component {
 
     handleDeleteCancel = (e) => {
         this.setState({
-            showEditPopup: false,
+            showDeletePopup: false,
         });
     }
 
@@ -271,28 +276,28 @@ class QuestionCompetency extends Component {
             return (
                 <div>
                     <h3>Question</h3>
-                    <Input type="textarea" value={this.state.question} onChange={this.handleChangeQuestion} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeQuestion} />
                     <h3>Hint question</h3>
-                    <Input type="textarea" value={this.state.hint} onChange={this.handleChangeHint} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeHint} />
                     <h3>First answer :</h3>
-                    <Input type="textarea" value={this.state.answer1} onChange={this.handleChangeAnswer1} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer1} />
                     <h3>Second answer :</h3>
-                    <Input type="textarea" value={this.state.answer2} onChange={this.handleChangeAnswer2} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer2} />
                     <h3>Third answer :</h3>
-                    <Input type="textarea" value={this.state.answer3} onChange={this.handleChangeAnswer3} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer3} />
                     <h3>Fourth answer :</h3>
-                    <Input type="textarea" value={this.state.answer4} onChange={this.handleChangeAnswer4} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer4} />
                     <h3>Other answer :</h3>
-                    <Input type="textarea" value={this.state.answer5} onChange={this.handleChangeAnswer5} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer5} />
                 </div>
             );
         } else {
             return (
                 <div>
                     <h3>Question</h3>
-                    <Input type="textarea" value={this.state.question} onChange={this.handleChangeQuestion} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeQuestion} />
                     <h3>Hint question</h3>
-                    <Input type="textarea" value={this.state.hint} onChange={this.handleChangeHint} />
+                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeHint} />
                 </div>
             );
         }
@@ -373,21 +378,21 @@ class QuestionCompetency extends Component {
         }
     }
 
-    getDataSouce() {
+    getDataSouce(indexData) {
+        let arrayIndex = indexData
         let dataSource = [];
-        _.forEach(this.state.dataQuestion, (item,key) => {
-            const object = {
-            no: key +1,
-            question : item.desc
-        }
-        dataSource.push(object);
+        _.forEach(this.state.dataQuestion, (item) => {
+            const dataPushTable = {
+                no: item.id + 1,
+                question: item.desc
+            }
+            dataSource.push(dataPushTable);
         })
         return dataSource;
     }
 
     render() {
         if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
-        this.getDataSouce();
         return (
             <Layout style={{ height: '100%' }}>
                 <Header style={{ background: '#fff', padding: 0 }}>

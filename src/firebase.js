@@ -13,15 +13,16 @@ const config = {
 const firebase = FireBase.initializeApp(config);
 
 export const database = firebase.database();
-export const getData = (part) => database.ref(part).once('value').then((snapshot) => snapshot.val());
+export const getData = (part) => database.ref(part).once('value').then((snapshot) => snapshot.val())
 export const update = (part, data) => database.ref().update({[part]: data});
 export const writeAnswers = (user, data) => database.ref(`answers/${user}`).set(data);
+
 export const getLastIndex = (part) => {
   return getData(part).then((data) => getLastIndexDefault(data))
 }
 
 export const getLastIndexDefault = (data) =>{
-     if(_.isNull(data)){
+     if(_.isEmpty(data)){
             return -1
         }else{
             return _.last(Object.keys(data))
