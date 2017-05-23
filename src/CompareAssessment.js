@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
-import _ from 'lodash';
-import { Layout, Steps, Row, Col, Button, message } from 'antd';
-import QuestionInput from './QuestionInput';
-import { getData, writeAnswers } from './firebase';
-import logo from './logo.png';
-import Loading from './Loading';
-
-const { Header, Content } = Layout;
-const Step = Steps.Step;
+import React, { Component } from 'react'
+import _ from 'lodash'
+import { Layout, Steps, Row, Col, Button, message } from 'antd'
+import QuestionInput from './QuestionInput'
+import { getData, writeAnswers } from './firebase'
+import logo from './logo.png'
+import Loading from './Loading'
+const { Header, Content } = Layout
+const Step = Steps.Step
 
 
 class CompareAssessment extends Component {
@@ -19,13 +18,13 @@ class CompareAssessment extends Component {
   }
 
   error = () => {
-    message.error('You need to resolve all conflicts');
-  };
+    message.error('You need to resolve all conflicts')
+  }
 
   componentDidMount() {
     this.setState({
       loading: true
-    });
+    })
     Promise.all([getData('/competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`)])
       .then(([competencies, selfAnswers, managerAnswers]) => {
         this.setState({
@@ -33,67 +32,69 @@ class CompareAssessment extends Component {
           competencies,
           conflicts: this.getConflictsView(selfAnswers, managerAnswers),
           finalAnswers: managerAnswers
-        });
+        })
       })
   }
   getConflictsView = (selfAnswers, managerAnswers) => {
     const conflicts = _.mergeWith(selfAnswers, managerAnswers, (selfAnswer, managerAnswer) =>
       _.map(selfAnswer, (answer, index) => [answer, managerAnswer[index]])
-    );
-    debugger;
+    )
     return _.omitBy(
       _.mapValues(conflicts, (answers) => _.omitBy(answers, (answer) => answer[0] === answer[1]))
-    , _.isEmpty);
+    , _.isEmpty)
   }
 
 
   next() {
-    const current = this.state.current + 1;
-    this.setState({ current });
+    const current = this.state.current + 1
+    this.setState({ current })
   }
   prev() {
-    const current = this.state.current - 1;
-    this.setState({ current });
+    const current = this.state.current - 1
+    this.setState({ current })
   }
   openHint(hint) {
     this.setState({
       visible: true,
       hint
-    });
+    })
   }
   closeHint = () => {
     this.setState({
       visible: false
-    });
+    })
   }
 
   saveFinalAnswers(finalAnswers) {
-    writeAnswers(`${this.props.name}_final`, this.state.finalAnswers);
-    window.location.replace(`/#/compare/${this.props.name}/final`);
+    writeAnswers(`${this.props.name}_final`, this.state.finalAnswers)
+    window.location.replace(`/#/compare/${this.props.name}/final`)
   }
 
   onChangeAnswer = (value, index, currentCompetencyName) => {
-    this.setState({
-      finalAnswers: {
-        ...this.state.finalAnswers,
-        [currentCompetencyName]: {
-          ...(this.state.finalAnswers[currentCompetencyName] || {}),
-          [index]: value
-        }
-      }
-    });
+    this.state.finalAnswers[currentCompetencyName][index] = value
+    this.setState({finalAnswers:this.state.finalAnswers})
   }
 
   getValueByQuestion = (question, value) =>
     question.options ? question.options[value - 1] : value
 
+  getCurrentConstraintByRange = (range, competenciesName,isCore) =>
+      isCore?
+      _.filter(_.find(this.state.competencies.Kms_core, { name: competenciesName }).constraints, (constraint) => { return _.inRange(range, constraint.minRange, constraint.maxRange)})
+      :
+      _.filter(_.find(this.state.competencies.Kms_optional, { name: competenciesName }).constraints, (constraint) =>{ return _.inRange(range, constraint.minRange, constraint.maxRange)})
+  
+
   render() {
-    if (this.state.loading) return <Loading />;
-    const competenciesName = Object.keys(this.state.conflicts);
-    const listConflicts = Object.values(this.state.conflicts);
-    const currentCompetencyName = competenciesName[this.state.current];
-    const this_is_core_questions = (_.find(this.state.competencies.Kms_core, { name: currentCompetencyName }) == null)? false: true;
-    let currentQuestion;
+    if (this.state.loading) return <Loading />
+    const competenciesName = Object.keys(this.state.conflicts)
+    const listConflicts = Object.values(this.state.conflicts)
+    const currentCompetencyName = competenciesName[this.state.current]
+    const this_is_core_questions = (_.find(this.state.competencies.Kms_core, { name: currentCompetencyName }) == null)? false: true
+    let currentQuestion
+    let currentRange = _.sum(_.get(this.state.finalAnswers,[currentCompetencyName]))
+    let currentConstrain = this.getCurrentConstraintByRange(currentRange, currentCompetencyName, this_is_core_questions)
+    console.log(currentConstrain)
     if(this_is_core_questions) {
       currentQuestion = _.find(this.state.competencies.Kms_core, { name: currentCompetencyName }).questions
     } else{
@@ -123,6 +124,9 @@ class CompareAssessment extends Component {
                 )}
               </Steps>
             </Row>
+            <Row style={{ padding: '20px 0' }} type='flex'>
+              <h3>Your {currentCompetencyName} is in range {currentRange}</h3>
+            </Row>
             <div className='steps-content'>
               <Row type='flex'>
                 {
@@ -146,7 +150,7 @@ class CompareAssessment extends Component {
                             disabled />
                         </div>
                       </div>
-                      <div style={{ marginTop: 10 }}>
+                      <div style={{ marginTop: 10}}>
                         <h4>Final result</h4> <QuestionInput type={currentQuestion[index].type} options={currentQuestion[index].options} onChange={(value) => this.onChangeAnswer(value, index, currentCompetencyName)}
                           value={_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`)}
                         />
@@ -197,8 +201,8 @@ class CompareAssessment extends Component {
           </Content>
         </Layout>
       </Layout>
-    );
+    )
   }
 }
 
-export default CompareAssessment;
+export default CompareAssessment
