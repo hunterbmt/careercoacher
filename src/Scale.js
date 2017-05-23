@@ -22,11 +22,11 @@ export default class Scale extends Component {
   getText = (value) => {
     switch (value) {
       case 1:
-        return 'Very bad';
+        return 'No knowledge';
       case 2:
-        return 'Bad';
+        return 'Basic';
       case 3:
-        return 'Neutral';
+        return 'Normal';
       case 4:
         return 'Good';
       case 5:

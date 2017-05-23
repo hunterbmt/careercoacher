@@ -1,113 +1,52 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Layout, Steps, Row, Col, Button, Alert} from 'antd';
+import { Layout, Steps, Row, Col, Button, message } from 'antd';
 import QuestionInput from './QuestionInput';
-import { getData, update} from './firebase';
+import { getData, writeAnswers } from './firebase';
 import logo from './logo.png';
 import Loading from './Loading';
 
 const { Header, Content } = Layout;
 const Step = Steps.Step;
+
+
 class CompareAssessment extends Component {
-  constructor(props) {
-    super(props);
-  }
   state = {
     conflicts: {},
     loading: true,
     finalAnswers: {},
-    current: 0,
-    numberOfConflicsNotSolve: 0
+    current: 0
   }
+
+  error = () => {
+    message.error('You need to resolve all conflicts');
+  };
 
   componentDidMount() {
-    Promise.all([getData('questions'),getData(`answers/${this.props.name}`),getData(`answers/${this.props.name}_manager`)])
-      .then(([questions,selfAnswers,managerAnswers])=>{
-        this.setState({
-          questions: questions,
-          selfAnswers : selfAnswers,
-          managerAnswers : managerAnswers
-        })
-        this.getConflicts(this.props.name);
-      })  
-  }
-
-  eachCompetencyQuestion(question, competency) {
-    for (var i = 0; i < question.length; i++) {
-      if (_.get(this.state.selfAnswers,`${competency}.${i}`) === _.get(this.state.managerAnswers,`${competency}.${i}`) ){
-        this.setState({
-          finalAnswers: {
-            ...this.state.finalAnswers,
-            [competency]: {
-              ...(this.state.finalAnswers[competency] || {}),
-              [i]: _.get(this.state.selfAnswers,`${competency}.${i}`)
-            }
-          }
-        });
-        continue;
-      }
-      switch (question[i].type) {
-        case 'option':       
-          this.setState({
-            conflicts: {
-              ...this.state.conflicts,
-              [competency]: {
-                ...this.state.conflicts[competency],
-                [i]: {
-                  isResolved: false,
-                  type: 'option',
-                  question: question[i].desc,
-                  options: question[i].options,
-                  selfAssessment:_.get(this.state.selfAnswers,`${competency}.${i}`),
-                  managerAssessment: _.get(this.state.managerAnswers,`${competency}.${i}`)
-                }
-              }
-            }
-          });
-          break;
-        case 'scale':
-          this.setState({
-            conflicts: {
-              ...this.state.conflicts,
-              [competency]: {
-                ...(this.state.conflicts[competency]),
-                [i]: {
-                  isResolved: false,
-                  type: 'scale',
-                  question: question[i].desc,
-                  selfAssessment:_.get(this.state.selfAnswers,`${competency}.${i}`),
-                  managerAssessment: _.get(this.state.managerAnswers,`${competency}.${i}`)
-                }
-              }
-            }
-          });
-          break;
-
-        case 'switch':
-          this.setState({
-            conflicts: {
-              ...this.state.conflicts,
-              [competency]: {
-                ...(this.state.conflicts[competency]),
-                [i]: {
-                  isResolved: true,
-                  type: 'switch',
-                  question: question[i].desc,
-                  selfAssessment:_.get(this.state.selfAnswers,`${competency}.${i}`),
-                  managerAssessment: _.get(this.state.managerAnswers,`${competency}.${i}`)
-                }
-              }
-            }
-          });
-          break;
-        default:
-
-      }
-    }
     this.setState({
-      loading: false
+      loading: true
     });
+    Promise.all([getData('/competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`)])
+      .then(([competencies, selfAnswers, managerAnswers]) => {
+        this.setState({
+          loading: false,
+          competencies,
+          conflicts: this.getConflictsView(selfAnswers, managerAnswers),
+          finalAnswers: managerAnswers
+        });
+      })
   }
+  getConflictsView = (selfAnswers, managerAnswers) => {
+    const conflicts = _.mergeWith(selfAnswers, managerAnswers, (selfAnswer, managerAnswer) =>
+      _.map(selfAnswer, (answer, index) => [answer, managerAnswer[index]])
+    );
+    debugger;
+    return _.omitBy(
+      _.mapValues(conflicts, (answers) => _.omitBy(answers, (answer) => answer[0] === answer[1]))
+    , _.isEmpty);
+  }
+
+
   next() {
     const current = this.state.current + 1;
     this.setState({ current });
@@ -128,52 +67,38 @@ class CompareAssessment extends Component {
     });
   }
 
-  findConflictsByCompetencyName(competency) {
-    _.map(this.state.questions, (questions) => { 
-      if (questions.competency === competency) {
-        this.eachCompetencyQuestion(questions.questions,competency)
+  saveFinalAnswers(finalAnswers) {
+    writeAnswers(`${this.props.name}_final`, this.state.finalAnswers);
+    window.location.replace(`/#/compare/${this.props.name}/final`);
+  }
+
+  onChangeAnswer = (value, index, currentCompetencyName) => {
+    this.setState({
+      finalAnswers: {
+        ...this.state.finalAnswers,
+        [currentCompetencyName]: {
+          ...(this.state.finalAnswers[currentCompetencyName] || {}),
+          [index]: value
+        }
       }
     });
   }
 
-  handle(answers) {
-    _.map(Object.keys(answers),(competencyName)=>this.findConflictsByCompetencyName(competencyName));
-  }
-
-  getConflicts = (name) => {
-    getData(`answers/${name}`)
-      .then((answer) => this.handle(answer)
-      );
-  }
-
-  isConflictsResolved(){
-    _.map((this.state.conflicts),(conflicts)=>{
-      _.map((conflicts),(conflicts)=>{
-        if(conflicts.isResolved === false) {
-          this.setState(prevState => ({
-            numberOfConflicsNotSolve: prevState.numberOfConflicsNotSolve+1
-          }))
-        }
-      })
-    });
-  }
-
-  saveFinalAnswers(finalAnswers) {
-    this.isConflictsResolved();
-    if(this.state.numberOfConflicsNotSolve === 0) {
-      update(`answers/${this.props.name}_final`, this.state.finalAnswers);
-      window.location.replace(`/#/compare/${this.props.name}/final`);
-    } else {
-      
-    }
-
-  }
+  getValueByQuestion = (question, value) =>
+    question.options ? question.options[value - 1] : value
 
   render() {
     if (this.state.loading) return <Loading />;
     const competenciesName = Object.keys(this.state.conflicts);
     const listConflicts = Object.values(this.state.conflicts);
     const currentCompetencyName = competenciesName[this.state.current];
+    const this_is_core_questions = (_.find(this.state.competencies.Kms_core, { name: currentCompetencyName }) == null)? false: true;
+    let currentQuestion;
+    if(this_is_core_questions) {
+      currentQuestion = _.find(this.state.competencies.Kms_core, { name: currentCompetencyName }).questions
+    } else{
+      currentQuestion = _.find(this.state.competencies.Kms_optional, { name: currentCompetencyName }).questions
+    }
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -202,37 +127,27 @@ class CompareAssessment extends Component {
               <Row type='flex'>
                 {
                   _.map(listConflicts[this.state.current], (conflict, index) =>
+                  _.isEqual(currentQuestion[index].type,'freetext')?
+                    null
+                    :
                     <Col span={12} className='question-content'>
-                      <h3>Question {parseInt(index) + 1}: {conflict.question} ({competenciesName[this.state.current]})</h3>
+                      <h3>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
                         <div>
-                          <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled />
+                          <h4>Seft-assessment: </h4> <QuestionInput
+                            type={currentQuestion[index].type}
+                            value={this.getValueByQuestion(currentQuestion[index], conflict[0])}
+                            disabled />
                         </div>
                         <div>
-                          <h4>Manager assessment: </h4> <QuestionInput type={conflict.type} value={conflict.managerAssessment} disabled />
+                          <h4>Manager assessment: </h4> <QuestionInput
+                            type={currentQuestion[index].type}
+                            value={this.getValueByQuestion(currentQuestion[index], conflict[1])}
+                            disabled />
                         </div>
                       </div>
                       <div style={{ marginTop: 10 }}>
-                        <h4>Final result</h4> <QuestionInput type={conflict.type} options={conflict.options} onChange={(value) => this.setState({
-                          finalAnswers: {
-                            ...this.state.finalAnswers,
-                            [currentCompetencyName]: {
-                              ...(this.state.finalAnswers[currentCompetencyName] || {}),
-                              [index]: value
-                            }
-                          },
-                          conflicts: {
-                            ...this.state.conflicts,
-                            [currentCompetencyName]: {
-                              ...(this.state.conflicts[currentCompetencyName] || {}),
-                              [index]:{
-                                ...this.state.conflicts[currentCompetencyName][index],
-                                isResolved: true
-                              }
-                              
-                            }
-                          }
-                        })}
+                        <h4>Final result</h4> <QuestionInput type={currentQuestion[index].type} options={currentQuestion[index].options} onChange={(value) => this.onChangeAnswer(value, index, currentCompetencyName)}
                           value={_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`)}
                         />
                       </div>
