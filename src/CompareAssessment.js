@@ -90,16 +90,16 @@ class CompareAssessment extends Component {
     const competenciesName = Object.keys(this.state.conflicts)
     const listConflicts = Object.values(this.state.conflicts)
     const currentCompetencyName = competenciesName[this.state.current]
-    const this_is_core_questions = (_.find(this.state.competencies.Kms_core, { name: currentCompetencyName }) == null)? false: true
+    const isCore = _.some(this.state.competencies.Kms_core,['name',currentCompetencyName])
     let currentQuestion
     let currentRange = _.sum(_.get(this.state.finalAnswers,[currentCompetencyName]))
-    let currentConstrain = this.getCurrentConstraintByRange(currentRange, currentCompetencyName, this_is_core_questions)
+    let currentConstrain = this.getCurrentConstraintByRange(currentRange, currentCompetencyName, isCore)
     //console.log(currentConstrain)
-    if(this_is_core_questions) {
-      currentQuestion = _.find(this.state.competencies.Kms_core, { name: currentCompetencyName }).questions
-    } else{
-      currentQuestion = _.find(this.state.competencies.Kms_optional, { name: currentCompetencyName }).questions
-    }
+    isCore?
+    currentQuestion = _.find(this.state.competencies.Kms_core, { name: currentCompetencyName }).questions
+    :
+    currentQuestion = _.find(this.state.competencies.Kms_optional, { name: currentCompetencyName }).questions
+
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
