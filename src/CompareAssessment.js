@@ -135,7 +135,7 @@ class CompareAssessment extends Component {
                     null
                     :
                     <Col span={12} className='question-content'>
-                      {_.inRange(_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`),currentConstrain.weight[index])?
+                      {_.lt(_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`),currentConstrain.weight[index])?
                         <h3 style={{background:'#fffaad'}}>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
                         :
                         <h3>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
