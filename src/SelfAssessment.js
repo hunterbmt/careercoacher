@@ -1,15 +1,29 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import _ from 'lodash';
 import { Layout, Steps, Row, Col, Button, Modal } from 'antd';
 import QuestionInput from './QuestionInput';
 import Loading from './Loading';
 
 import {getData, writeAnswers} from './firebase';
+import {convertValueFromOption} from './utils';
 import logo from './logo.png';
 const { Header, Content } = Layout;
 const Step = Steps.Step;
+const interval = 60000;
 
-
+function Welcome(props) {
+  return (
+    <Row type='flex' style={{flexDirection: 'column'}}>
+      <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+        <h2>Welcome {props.name}</h2>
+      </Row>
+      <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+        <h3>{props.content} </h3>
+      </Row>
+    </Row>
+  );
+}
 class SelfAssessment extends Component {
   state = {
     current: 0,
@@ -17,21 +31,49 @@ class SelfAssessment extends Component {
     answers: {}
   }
 
-  componentDidMount() {
-    getData('questions')
-      .then((questions) => this.setState({
-        questions,
-        loading: false
-      }));
+  isFinalPage() {
+    return window.location.href.indexOf('final') > -1;
   }
+
+  getAnswerPath(props) {
+    if (this.isFinalPage()) return `${props.name}_final`;
+    return _.isEmpty(props.manager) ? props.name : `${props.name}_manager`;
+  }
+
+  componentDidMount() {
+      const part = this.getAnswerPath(this.props);
+      Promise.all([getData('questions'), getData(`answers/${part}`)])
+      .then(([questions, answers]) => {
+        this.setState({
+          questions,
+          answers: answers || {},
+          loading: false
+        });
+      }
+    );
+    this.autoSaveInterval = setInterval(() => {
+      if (this.state.answers !== this.lastAnswers) {
+        this.lastAnswers = this.state.answers;
+        writeAnswers(part, this.state.answers);
+      }
+    }, interval);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.autoSaveInterval);
+  }
+
 
   next() {
     const current = this.state.current + 1;
     this.setState({ current });
+    this.layout.scrollTop = 0;
+    console.log(this.state.answers);
   }
   prev() {
     const current = this.state.current - 1;
     this.setState({ current });
+    this.layout.scrollTop = 0;
   }
   openHint(hint) {
     this.setState({
@@ -67,26 +109,16 @@ class SelfAssessment extends Component {
             </Col>
           </Row>
         </Header>
-        <Layout>
+        <Layout ref={(ref) => this.layout = ReactDOM.findDOMNode(ref)}>
           <Content style={{ margin: 16, background: '#fff', padding: '0 20px'}}>
             {
-              _.isEmpty(this.props.manager) ?
-              <Row type='flex' style={{flexDirection: 'column'}}>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h2>Welcome {this.props.name}</h2>
-                </Row>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h3>Please answer questions below for your self-assement </h3>
-                </Row>
-              </Row> :
-              <Row type='flex' style={{flexDirection: 'column'}}>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h2>Welcome {this.props.manager}</h2>
-                </Row>
-                <Row type='flex' justify='center' style={{padding: '10px 0'}}>
-                  <h3>Please answer questions below for {this.props.name}'s assement </h3>
-                </Row>
-              </Row>
+              !this.isFinalPage()?
+                _.isEmpty(this.props.manager) ?
+                <Welcome name={this.props.name} content="Please answer questions below for your self-assement"/>
+                :
+                <Welcome name={this.props.manager} content={`Please answer questions below for ${this.props.name}'s assement`}/>
+                :
+                <Welcome name='' content={`This is final assessment of ${this.props.name}`}/>
             }
             <Row style={{padding: '20px 0'}} type='flex'>
               <Steps current={this.state.current}>
@@ -102,6 +134,8 @@ class SelfAssessment extends Component {
                     <Col span={12} className='question-content'>
                       <h3>Question {index + 1}: <span style={{whiteSpace: 'pre-wrap'}}>{question.desc}</span> {!_.isEmpty(question.hint) ? <Button shape="circle" icon="question" size="small" onClick={() => this.openHint(question.hint)}/> : null}</h3>
                       <div style={{width: '100%'}}>
+                        {
+                        !this.isFinalPage() ?
                         <QuestionInput {...question} onChange={(value) => this.setState({
                           answers: {
                             ...this.state.answers,
@@ -113,6 +147,11 @@ class SelfAssessment extends Component {
                         })}
                         value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)}
                         />
+                        :
+                        <QuestionInput {...question} disabled
+                        value={_.get(this.state.answers, `${currentCompentency.competency}.${index}`)}
+                        />
+                        }
                       </div>
                     </Col>
                   )
@@ -143,7 +182,7 @@ class SelfAssessment extends Component {
                 </Button>
               }
               {
-                this.state.current === questions.length - 1
+                !this.isFinalPage() && this.state.current === questions.length - 1
                 &&
                 <Button
                   type="primary"

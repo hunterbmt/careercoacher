@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
 import { Button, Modal, Input, Table, Select, Popconfirm } from 'antd'
+import Loading from './Loading'
 import './App.css'
-import { getData, update } from './firebase'
+import { getData, update, getLastIndex } from './firebase'
 
 
 class ProjectBaseline extends Component {
@@ -66,17 +67,20 @@ class ProjectBaseline extends Component {
         )
     }
 
-    saveNewProjectBaselineCompetencies = (baselineKey, projectBaselineCompetencies) => {
-        update(`project_baseline/3/Kms_optional/competencies`, projectBaselineCompetencies)
-            .then(() => this.setState({
-                loading : false, showEditProfilePopup : false
-            }))
+    saveNewProjectBaseline = (newProjectBaselineName, projectBaselineCompetencies) => {
+        getLastIndex(`project_baseline`).then((lastIndex) => 
+            this.saveNewProjectBaselineData(lastIndex, newProjectBaselineName, projectBaselineCompetencies)) 
     }
 
-    saveNewProjectBaselineName = (baselineKey, newProjectBaselineName) => {
-        update(`project_baseline/${baselineKey}/name`, newProjectBaselineName)
+    saveNewProjectBaselineData = (lastIndex, newProjectBaselineName, projectBaselineCompetencies) => {
+        lastIndex = parseInt(lastIndex) + 1
+        update(`project_baseline/${lastIndex}/Kms_optional/competencies`, projectBaselineCompetencies)
             .then(() => this.setState({
-                loading : false, showEditProfilePopup : false
+                showEditProfilePopup: false
+            }))
+        update(`project_baseline/${lastIndex}/name`, newProjectBaselineName)
+            .then(() => this.setState({
+                showEditProfilePopup: false
             }))
     }
 
@@ -90,13 +94,29 @@ class ProjectBaseline extends Component {
 
     handleBaselineChange = (e) => {
         this.setState({
-            newBaseline: e.target.value
+            newBaseline: e
         })
     }
 
-    handleCreateOk = (e) => {
-        this.saveNewProjectBaselineCompetencies(0, this.state.competenciesToBeSaved)
-        //this.saveNewProjectBaselineName(this.state.newProjectBaselineName)
+    handleCreateOk = () => {
+        this.saveNewProjectBaseline(this.state.newProjectBaselineName, this.state.projectBaselineCompetencies)
+        this.updateDataSource()
+        this.setState({
+            showCreateNewPopup : false
+        })
+    }
+
+    updateDataSource = () => {
+        this.setState({
+            loading : true
+        })
+         Promise.all([getData(`project_baseline`)]).then(([projectBaselines]) =>
+            this.setState({
+                projectBaselines,
+                
+        }), () => this.setState({
+            loading: false
+        }))
     }
 
     handleAddNewProfile = () => {
@@ -108,7 +128,7 @@ class ProjectBaseline extends Component {
     handleChangeRequiredBaselineOnCreate = (no) => {
         this.setState({
             selectedbaselineKey : no
-        }, () => Promise.all([getData(`project_baseline`), getData(`project_baseline/${no}/Kms_optional/competencies`), getData(`project_baseline/${no}/Kms_optional/competencies`)]).then(([projectBaselines, projectBaselineCompetencies, optionalBaselines]) =>
+        }, () => Promise.all([getData(`project_baseline`), getData(`baseline/${no}/Kms_optional/competencies`), getData(`baseline/${no}/Kms_optional/competencies`)]).then(([projectBaselines, projectBaselineCompetencies, optionalBaselines]) =>
             this.setState({
                 projectBaselines,
                 projectBaselineCompetencies,
@@ -128,10 +148,18 @@ class ProjectBaseline extends Component {
         }) 
        this.setState({
            competenciesToBeSaved : data
-       }, () => console.log(this.state.competenciesToBeSaved))
+       })
+    }
+
+    handleProjectBaselineNameChange = (e) => {
+        this.setState({
+            newProjectBaselineName : e.target.value
+        })        
     }
 
     render() {
+        if (this.state.loading) return <Loading />
+
         let baselines = []
         _.forEach(this.state.baselines, (item, index) => (
             baselines.push(<Option key={index}>{item.name}</Option>)
@@ -205,6 +233,8 @@ class ProjectBaseline extends Component {
                     </Button>
                 ]}
                 >
+                <p>Baseline Name: </p>
+                <Input value={this.state.newProjectBaselineName} onChange={this.handleProjectBaselineNameChange} />
                 <p>Requiried Baselines: </p>
                 <Select
                     mode='combobox'
