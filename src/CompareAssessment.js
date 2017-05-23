@@ -80,9 +80,9 @@ class CompareAssessment extends Component {
 
   getCurrentConstraintByRange = (range, competenciesName,isCore) =>
       isCore?
-      _.filter(_.find(this.state.competencies.Kms_core, { name: competenciesName }).constraints, (constraint) => { return _.inRange(range, constraint.minRange, constraint.maxRange)})
+      _.filter(_.find(this.state.competencies.Kms_core, { name: competenciesName }).constraints, (constraint) => { return _.inRange(range, constraint.minRange, constraint.maxRange)})[0]
       :
-      _.filter(_.find(this.state.competencies.Kms_optional, { name: competenciesName }).constraints, (constraint) =>{ return _.inRange(range, constraint.minRange, constraint.maxRange)})
+      _.filter(_.find(this.state.competencies.Kms_optional, { name: competenciesName }).constraints, (constraint) =>{ return _.inRange(range, constraint.minRange, constraint.maxRange)})[0]
   
 
   render() {
@@ -94,7 +94,7 @@ class CompareAssessment extends Component {
     let currentQuestion
     let currentRange = _.sum(_.get(this.state.finalAnswers,[currentCompetencyName]))
     let currentConstrain = this.getCurrentConstraintByRange(currentRange, currentCompetencyName, this_is_core_questions)
-    console.log(currentConstrain)
+    //console.log(currentConstrain)
     if(this_is_core_questions) {
       currentQuestion = _.find(this.state.competencies.Kms_core, { name: currentCompetencyName }).questions
     } else{
@@ -125,7 +125,7 @@ class CompareAssessment extends Component {
               </Steps>
             </Row>
             <Row style={{ padding: '20px 0' }} type='flex'>
-              <h3>Your {currentCompetencyName} is in range {currentRange}</h3>
+              <h3>Your {currentCompetencyName} is in range {currentRange}, this range is in {currentConstrain.title}</h3>
             </Row>
             <div className='steps-content'>
               <Row type='flex'>
@@ -135,7 +135,12 @@ class CompareAssessment extends Component {
                     null
                     :
                     <Col span={12} className='question-content'>
-                      <h3>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
+                      {_.inRange(_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`),currentConstrain.weight[index])?
+                        <h3 style={{background:'#fffaad'}}>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
+                        :
+                        <h3>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
+                      }
+                      
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
                         <div>
                           <h4>Seft-assessment: </h4> <QuestionInput
