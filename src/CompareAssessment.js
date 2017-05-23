@@ -1,97 +1,152 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import _ from 'lodash';
-import { Layout, Row, Col, Button} from 'antd';
+import { Layout, Steps, Row, Col, Button, message } from 'antd';
 import QuestionInput from './QuestionInput';
-
+import { getData, writeAnswers } from './firebase';
 import logo from './logo.png';
-const { Header, Content } = Layout;
+import Loading from './Loading';
 
-const conflicts = [
-  {
-    compentency: 'Programming Language',
-    question: 'How confident you are with your ability in task performing without helps or instructions',
-    type: 'scale',
-    selfAssessment: 4,
-    managerAssessment: 3
-  },
-  {
-    compentency: 'Programming Language',
-    question: 'How you evaluate your awareness about common performance issues in JS',
-    type: 'scale',
-    selfAssessment: 2,
-    managerAssessment: 3
-  },
-  {
-    compentency: 'Programming Language',
-    question: 'How confident you are with code designing tasks',
-    type: 'scale',
-    selfAssessment: 3,
-    managerAssessment: 4
-  },
-  {
-    compentency: 'Programming Language',
-    type: 'option',
-    desc: 'How about another/ advances programming paradigms',
-    options: [
-      "I don't know any other programming paradigms",
-      "I hear about some others paradigms such as OOP or functional programming",
-      "I have good knowledge about others paradigms but not yet apply them into projects",
-      "I apply others paradigms in projects and can see clearly benefit of applying those"
-    ],
-    selfAssessment: 'I have good knowledge about others paradigms but not yet apply them into projects',
-    managerAssessment: 'I hear about some others paradigms such as OOP or functional programming'
-  },
-  {
-    compentency: 'Source Control',
-    question: 'Conflict example question 5',
-    type: 'scale',
-    selfAssessment: 3,
-    managerAssessment: 1
-  },
-  {
-    compentency: 'Web backend',
-    question: 'Conflict example question 6',
-    type: 'scale',
-    selfAssessment: 2,
-    managerAssessment: 1
-  }
-]
+const { Header, Content } = Layout;
+const Step = Steps.Step;
+
 
 class CompareAssessment extends Component {
+  state = {
+    conflicts: {},
+    loading: true,
+    finalAnswers: {},
+    current: 0
+  }
+
+  error = () => {
+    message.error('You need to resolve all conflicts');
+  };
+
+  componentDidMount() {
+    this.setState({
+      loading: true
+    });
+    Promise.all([getData('/competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`)])
+      .then(([competencies, selfAnswers, managerAnswers]) => {
+        this.setState({
+          loading: false,
+          competencies,
+          conflicts: this.getConflictsView(selfAnswers, managerAnswers),
+          finalAnswers: managerAnswers
+        });
+      })
+  }
+  getConflictsView = (selfAnswers, managerAnswers) => {
+    const conflicts = _.mergeWith(selfAnswers, managerAnswers, (selfAnswer, managerAnswer) =>
+      _.map(selfAnswer, (answer, index) => [answer, managerAnswer[index]])
+    );
+    debugger;
+    return _.omitBy(
+      _.mapValues(conflicts, (answers) => _.omitBy(answers, (answer) => answer[0] === answer[1]))
+    , _.isEmpty);
+  }
+
+
+  next() {
+    const current = this.state.current + 1;
+    this.setState({ current });
+  }
+  prev() {
+    const current = this.state.current - 1;
+    this.setState({ current });
+  }
+  openHint(hint) {
+    this.setState({
+      visible: true,
+      hint
+    });
+  }
+  closeHint = () => {
+    this.setState({
+      visible: false
+    });
+  }
+
+  saveFinalAnswers(finalAnswers) {
+    writeAnswers(`${this.props.name}_final`, this.state.finalAnswers);
+    window.location.replace(`/#/compare/${this.props.name}/final`);
+  }
+
+  onChangeAnswer = (value, index, currentCompetencyName) => {
+    this.setState({
+      finalAnswers: {
+        ...this.state.finalAnswers,
+        [currentCompetencyName]: {
+          ...(this.state.finalAnswers[currentCompetencyName] || {}),
+          [index]: value
+        }
+      }
+    });
+  }
+
+  getValueByQuestion = (question, value) =>
+    question.options ? question.options[value - 1] : value
+
   render() {
+    if (this.state.loading) return <Loading />;
+    const competenciesName = Object.keys(this.state.conflicts);
+    const listConflicts = Object.values(this.state.conflicts);
+    const currentCompetencyName = competenciesName[this.state.current];
+    const this_is_core_questions = (_.find(this.state.competencies.Kms_core, { name: currentCompetencyName }) == null)? false: true;
+    let currentQuestion;
+    if(this_is_core_questions) {
+      currentQuestion = _.find(this.state.competencies.Kms_core, { name: currentCompetencyName }).questions
+    } else{
+      currentQuestion = _.find(this.state.competencies.Kms_optional, { name: currentCompetencyName }).questions
+    }
     return (
-      <Layout style={{height: '100%'}}>
+      <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
-          <Row type='flex' justify='space-between' style={{height: '100%'}}>
+          <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Col span={4}>
-              <img alt='logo' src={logo} style={{height: 64, padding: 10}}/>
+              <img alt='logo' src={logo} style={{ height: 64, padding: 10 }} />
             </Col>
           </Row>
         </Header>
         <Layout>
-          <Content style={{ margin: 16, background: '#fff', padding: '0 20px'}}>
-            <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+          <Content style={{ margin: 16, background: '#fff', padding: '0 20px' }}>
+            <Row type='flex' justify='center' style={{ padding: '10px 0' }}>
               <h2>Assessment comparation for {this.props.name}</h2>
             </Row>
-            <Row type='flex' justify='center' style={{padding: '10px 0'}}>
+            <Row type='flex' justify='center' style={{ padding: '10px 0' }}>
               <h3>Please discuss and resolve conflict below </h3>
+            </Row>
+            <Row style={{ padding: '20px 0' }} type='flex'>
+              <Steps current={this.state.current}>
+                {_.map(this.state.conflicts, (conflict, key) =>
+                  <Step title={key} />
+                )}
+              </Steps>
             </Row>
             <div className='steps-content'>
               <Row type='flex'>
                 {
-                  _.map(conflicts, (conflict, index) =>
+                  _.map(listConflicts[this.state.current], (conflict, index) =>
                     <Col span={12} className='question-content'>
-                      <h3>Question {index + 1}: {conflict.question} ({conflict.compentency})</h3>
-                      <div style={{width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15}}>
+                      <h3>Question {_.toNumber(index) + 1}: {currentQuestion[index].desc} ({competenciesName[this.state.current]})</h3>
+                      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: 5, marginLeft: 15 }}>
                         <div>
-                          <h4>Seft-assessment: </h4> <QuestionInput type={conflict.type} value={conflict.selfAssessment} disabled/>
+                          <h4>Seft-assessment: </h4> <QuestionInput
+                            type={currentQuestion[index].type}
+                            value={this.getValueByQuestion(currentQuestion[index], conflict[0])}
+                            disabled />
                         </div>
                         <div>
-                          <h4>Manager assessment: </h4> <QuestionInput type={conflict.type} value={conflict.managerAssessment} disabled/>
+                          <h4>Manager assessment: </h4> <QuestionInput
+                            type={currentQuestion[index].type}
+                            value={this.getValueByQuestion(currentQuestion[index], conflict[1])}
+                            disabled />
                         </div>
                       </div>
-                      <div style={{marginTop: 10}}>
-                        <h4>Final result</h4> <QuestionInput type={conflict.type} options={conflict.options}/>
+                      <div style={{ marginTop: 10 }}>
+                        <h4>Final result</h4> <QuestionInput type={currentQuestion[index].type} options={currentQuestion[index].options} onChange={(value) => this.onChangeAnswer(value, index, currentCompetencyName)}
+                          value={_.get(this.state.finalAnswers, `${currentCompetencyName}.${index}`)}
+                        />
                       </div>
                     </Col>
                   )
@@ -99,24 +154,42 @@ class CompareAssessment extends Component {
               </Row>
             </div>
             <div className='steps-action'>
-              <Button
-                type='primary'
-                size='large'
-                style={{
-                  width: 80
-                }}
-              >
-                Resolve
-              </Button>
-              <Button
-                size='large'
-                style={{
-                  marginLeft: 20,
-                  width: 80
-                }}
-              >
-                Close
-              </Button>
+              {
+                this.state.current > 0
+                &&
+                <Button
+                  style={{ marginRight: 8 }}
+                  size='large'
+                  onClick={() => this.prev()}
+                >
+                  Previous
+                </Button>
+              }
+              {
+                this.state.current < competenciesName.length - 1
+                &&
+                <Button
+                  type='primary'
+                  size='large'
+                  onClick={() => this.next()}
+                >
+                  Next
+                </Button>
+              }
+              {
+                this.state.current === competenciesName.length - 1
+                &&
+                <Button
+                  type="primary"
+                  size='large'
+                  style={{
+                    width: 80
+                  }}
+                  onClick={() => this.saveFinalAnswers(this.state.finalAnswers)}
+                >
+                  Resolve
+                </Button>
+              }
             </div>
           </Content>
         </Layout>

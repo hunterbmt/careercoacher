@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
 import _ from 'lodash';
-import CompentencyRadar from './CompentencyRadar';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
 
@@ -10,7 +9,7 @@ import {getData, update} from './firebase';
 const Option = Select.Option;
 
 const compentencies = [
-  'Programming Language',
+  'Coding',
   'Source Control',
   'Web back-end',
   'Web front-end',
@@ -46,7 +45,7 @@ export default class ProfilePage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      compareAgain: 'Previous PA',
+      compareAgain: 'Previous Assessment',
       loading: true
     }
   }
@@ -75,7 +74,6 @@ export default class ProfilePage extends Component {
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
-    const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
     const selectedCompentencies = getSelectedCompentencies(profile);
     return (
       <Row type="flex" style={{padding: '20px 10px 10px'}}>
@@ -94,15 +92,12 @@ export default class ProfilePage extends Component {
               <Option value="AVG SE">Compare with avg SE</Option>
               <Option value="AVG SSE">Compare with avg SSE</Option>
               <Option value="AVG SA">Compare with avg SA</Option>
-              <Option value="Previous PA">Compare with previous PA</Option>
+              <Option value="Previous Assessment">Compare with previous assessment</Option>
               <Option value="Next Level">Compare with next level</Option>
             </Select>
           </Row>
           <Row type="flex" justify="center">
-            <CompentencyRadar
-              data={radarData}
-              compentencies={selectedCompentencies}
-            />
+
           </Row>
         </Col>
         <Col span={9} offset={1}>
@@ -132,7 +127,7 @@ export default class ProfilePage extends Component {
           </Row>
           <Row style={{paddingTop: 10}}>
             <Card title='Compentency historical'>
-              <Timeline pending={<a href="#">See more</a>}>
+              <Timeline pending={<a href="#">See more...</a>}>
               {_.map(profile.historical, (historical) =>
                 <Timeline.Item color="green">
                   <p>{historical.time}</p>

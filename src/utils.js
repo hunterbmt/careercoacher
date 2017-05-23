@@ -20,3 +20,9 @@ export const rainbow = (_, step) => {
 };
 
 export const getRandomColor = (numberOfColor) => _.map(_.range(1, numberOfColor), rainbow);
+
+export const convertValueFromOption = (options, value) => {
+  debugger;
+  if (_.isEmpty(options) || _.toNumber(value)) return value;
+  return _.findIndex(options, (option) => option === value) + 1;
+}
