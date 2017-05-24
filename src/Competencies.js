@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table, Card } from 'antd';
+import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table, Card, message } from 'antd';
 import { getData, update, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
@@ -107,7 +107,11 @@ class Competencies extends Component {
       "name": competencyName
     }
 
-    if (`${option}` === 'Kms_core') {
+    if(_.isUndefined(competencyName)){
+      message.error('Please input competency name', 3);
+    }else{
+      message.success('create successfully',3);
+         if (`${option}` === 'Kms_core') {
       let newDataCompeteciesKMSCore = this.state.competenciesKMSCore
       newDataCompeteciesKMSCore.push(newCompetency)
       this.setState({
@@ -122,6 +126,7 @@ class Competencies extends Component {
     }
 
     update(`competencies1/${option}/${lastId}`, newCompetency)
+    }
   }
 
   addNewCompetency(competencyName, option) {
