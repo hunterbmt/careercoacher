@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { Button, Modal, Input, Table, Select, Popconfirm, message } from 'antd'
 import Loading from './Loading'
+import WrappedTestForm from './TestForm'
 import './App.css'
 import { getData, update, getLastIndex } from './firebase'
-
 
 class ProjectBaseline extends Component {
 
@@ -213,7 +213,7 @@ class ProjectBaseline extends Component {
             <div>
                 <Button icon='user-add' onClick={this.handleAddNewProfile}>Add New Profile</Button>
                 <Table dataSource={dataSource} columns={this.state.columns} />
-
+                
                 <Modal
                 visible={this.state.showEditPopup}
                 title={'Edit ' + this.state.selectedBaseline}
@@ -239,42 +239,9 @@ class ProjectBaseline extends Component {
                     {projectBaselineCompetencies}
                 </Select>
                 </Modal>
-
-                <Modal
-                visible={this.state.showCreateNewPopup}
-                title='Create New Project Baseline'
-                onOk={this.handleCreateOk}
-                onCancel={this.handleCreateCancel}
-                footer={[
-                    <Button key='back' size='large' onClick={this.handleCreateCancel}>Return</Button>,
-                    <Button key='submit' type='primary' size='large' loading={this.state.loading} onClick={this.handleCreateOk}>
-                    Save
-                    </Button>
-                ]}
-                >
-                <p>Baseline Name: </p>
-                <Input value={this.state.newProjectBaselineName} onChange={this.handleProjectBaselineNameChange} />
-                <p>Requiried Baselines: </p>
-                <Select
-                    mode='combobox'
-                    style={{ width: '100%' }}
-                    placeholder='Please select'
-                    allowClear='true'
-                    onChange={this.handleChangeRequiredBaselineOnCreate}
-                >
-                    {baselines}
-                </Select>
-                <p>Additional Baselines: </p>
-                <Select
-                    mode='multiple'
-                    style={{ width: '100%' }}
-                    placeholder='Please select'
-                    allowClear='true'
-                    onChange={this.handleChangeAdditionalBaselineOnCreate}
-                >
-                    {optionalBaselines}
-                </Select>
-                </Modal>
+                
+                <WrappedTestForm showCreateNewPopup={this.state.showCreateNewPopup}/>
+                
             </div>
         )
     }
