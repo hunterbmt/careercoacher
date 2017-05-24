@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table, Card } from 'antd';
-import { getData, update, database, getLastIndex } from './firebase';
+import { getData, update, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
-import { Router, Link } from 'react-router-component';
-const { Header, Content } = Layout;
+import { Link } from 'react-router-component';
+const { Header } = Layout;
 import logo from './logo.png';
 
 const Option = Select.Option;
@@ -17,22 +17,13 @@ class Competencies extends Component {
     this.state = {
       visible: false,
       option: 'Kms_core',
-      competencyName: '',
-      competenciesKMSCore: [],
-      competenciesKmsOptional: [],
       showEditPopup: false,
       optionActivated: false,
-      keyUpdate: '',
       showEditPopupKmsOptional: false,
       optionActivatedKmsOptional: false,
       loading: true,
-      lastId: 0,
-
+      loadingActivated: true
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleChangeOption = this.handleChangeOption.bind(this);
-    this.handleChangeOptionActivated = this.handleChangeOptionActivated.bind(this);
-    this.handleChangeOptionActivatedKmsOptional = this.handleChangeOptionActivatedKmsOptional.bind(this);
   }
 
 
@@ -41,53 +32,65 @@ class Competencies extends Component {
       "activated": this.state.optionActivatedKmsOptional,
       "name": this.state.competencyName
     }
+
+    _.update(this.state.competenciesKmsOptional[this.state.keyUpdate] ,'activated',()=> {return this.state.optionActivatedKmsOptional})
+
     update(`competencies1/Kms_optional/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
-      showEditPopupKmsOptional: false
+      competenciesKmsOptional :this.state.competenciesKmsOptional,
+      showEditPopupKmsOptional: false,
+      loadingActivated: true
     })
   }
 
   handleCancelActivatedKmsOptional = (e) => {
     this.setState({
-      showEditPopupKmsOptional: false
+      showEditPopupKmsOptional: false,
+      loadingActivated: true
     });
   }
 
-  handleChangeOptionActivatedKmsOptional() {
+  handleChangeOptionActivatedKmsOptional = () => {
+    let activatedChangeKmsOptional = !this.state.optionActivatedKmsOptional
     this.setState({
-      optionActivatedKmsOptional: !this.state.optionActivatedKmsOptional
+      optionActivatedKmsOptional: activatedChangeKmsOptional
     })
   }
 
-  handleChangeOptionActivated() {
+  handleChangeOptionActivated = () => {
+    let activatedChangeKmsCore = !this.state.optionActivated
     this.setState({
-      optionActivated: !this.state.optionActivated
+      optionActivated: activatedChangeKmsCore
     })
   }
 
-
-  handleChangeOption(value) {
+  handleChangeOption = (value) => {
     this.setState({
       option: `${value}`
     })
   }
-
 
   handleSaveActivated = (e) => {
     let dataUpdate = {
       "activated": this.state.optionActivated,
       "name": this.state.competencyName
     }
+
+    _.update(this.state.competenciesKMSCore[this.state.keyUpdate] ,'activated',()=> {return this.state.optionActivated})
+ 
     update(`competencies1/Kms_core/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
-      showEditPopup: false
+      competenciesKMSCore : this.state.competenciesKMSCore,
+      showEditPopup: false,
+      loadingActivated: true
     })
   }
 
   handleCancelActivated = (e) => {
 
     this.setState({
-      showEditPopup: false
+      showEditPopup: false,
+      loadingActivated: true
     });
   }
 
@@ -98,19 +101,34 @@ class Competencies extends Component {
   }
 
   addNew(lastIndex, competencyName, option) {
-    this.setState({ lastId: parseInt(lastIndex) + 1 })
+    let lastId = parseInt(lastIndex, 10) + 1
     let newCompetency = {
       "activated": false,
       "name": competencyName
     }
-    update(`competencies1/${option}/${this.state.lastId}`, newCompetency)
+
+    if (`${option}` === 'Kms_core') {
+      let newDataCompeteciesKMSCore = this.state.competenciesKMSCore
+      newDataCompeteciesKMSCore.push(newCompetency)
+      this.setState({
+        competenciesKMSCore: newDataCompeteciesKMSCore
+      })
+    } else {
+      let newDataCompeteciesKMSOptional = this.state.competenciesKmsOptional
+      newDataCompeteciesKMSOptional.push(newCompetency)
+      this.setState({
+        competenciesKmsOptional: newDataCompeteciesKMSOptional
+      })
+    }
+
+    update(`competencies1/${option}/${lastId}`, newCompetency)
   }
 
   addNewCompetency(competencyName, option) {
     getLastIndex(`competencies1/${option}`).then((lastIndex) => this.addNew(lastIndex, competencyName, option))
   }
 
-  handleChange(e) {
+  handleChange = (e) => {
     this.setState({ competencyName: e.target.value });
   }
 
@@ -163,7 +181,8 @@ class Competencies extends Component {
             optionActivated: selectedCompetency.activated,
             keyUpdate: key,
             competencyName: selectedCompetency.name,
-            showEditPopup: true
+            showEditPopup: true,
+            loadingActivated: false
           }))
         }
       }))
@@ -204,7 +223,8 @@ class Competencies extends Component {
             optionActivatedKmsOptional: selectedCompetency.activated,
             keyUpdate: key,
             competencyName: selectedCompetency.name,
-            showEditPopupKmsOptional: true
+            showEditPopupKmsOptional: true,
+            loadingActivated: false,
           }))
         }
       }))
@@ -271,8 +291,6 @@ class Competencies extends Component {
 
   render() {
     if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
-    this.getDataSourceKMSCore();
-    this.getDataSourceKMSOptional();
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -296,12 +314,22 @@ class Competencies extends Component {
           <Modal title="Edit activate KMS Core compentency" visible={this.state.showEditPopup}
             onOk={this.handleSaveActivated} onCancel={this.handleCancelActivated}>
             <h3>Activate compentency: </h3>
-            <Switch defaultChecked={this.state.optionActivated} onChange={this.handleChangeOptionActivated} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
+            {
+              this.state.loadingActivated ?
+              <Loading/>
+              :
+              <Switch defaultChecked={this.state.optionActivated} onChange={this.handleChangeOptionActivated} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
+            }                    
           </Modal>
           <Modal title="Edit activate KMS Optional compentency" visible={this.state.showEditPopupKmsOptional}
             onOk={this.handleSaveActivatedKmsOptional} onCancel={this.handleCancelActivatedKmsOptional}>
             <h3>Activate compentency: </h3>
-            <Switch defaultChecked={this.state.optionActivatedKmsOptional} onChange={this.handleChangeOptionActivatedKmsOptional} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
+              {
+              this.state.loadingActivated ?
+              <Loading/>
+              :
+               <Switch defaultChecked={this.state.optionActivatedKmsOptional} onChange={this.handleChangeOptionActivatedKmsOptional} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
+            }         
           </Modal>
           <Row style={{ margin: 100 }}>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>

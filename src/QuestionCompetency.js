@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { Form, Layout, Button, Input, Select, Row, Col, Modal, Table, Icon } from 'antd';
-import { getData, insert, update, database, getLastIndex } from './firebase';
+import {Layout, Button, Input, Select, Row, Col, Modal, Table } from 'antd';
+import { getData, update, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
-import QuestionInput from './QuestionInput';
-import Scale from './Scale';
-import ReactDOM from 'react-dom';
+
+
+
 import logo from './logo.png';
-const FormItem = Form.Item;
-const { Header, Content } = Layout;
+
+const { Header } = Layout;
 
 const Option = Select.Option;
 
@@ -74,7 +74,7 @@ class QuestionCompetency extends Component {
     }
 
     saveOptionQuestion(lastIndex) {
-        let lastId = parseInt(lastIndex) + 1
+        let lastId = parseInt(lastIndex,10) + 1
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newData = {
             "id": lastId,
@@ -98,7 +98,7 @@ class QuestionCompetency extends Component {
     }
 
     saveOthersQuestion(lastIndex) {
-        let lastId = parseInt(lastIndex) + 1
+        let lastId = parseInt(lastIndex,10) + 1
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOthers = {
             "id": lastId,
@@ -379,7 +379,6 @@ class QuestionCompetency extends Component {
     }
 
     getDataSouce(indexData) {
-        let arrayIndex = indexData
         let dataSource = [];
         _.forEach(this.state.dataQuestion, (item) => {
             const dataPushTable = {
