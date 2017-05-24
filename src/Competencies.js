@@ -102,16 +102,17 @@ class Competencies extends Component {
   }
 
   checkCompetencyNameInput = (competencyName) => {
+    const isExistKmsCore = _.some(this.state.competenciesKMSCore,['name',competencyName])
+    const isExistKmsOptional =  _.some(this.state.competenciesKmsOptional,['name',competencyName])
     if(_.isNull(competencyName) || _.isUndefined(competencyName) || _.isEmpty(competencyName)){
       message.error("Please input competency name",3)
       this.setState({error : true})
-    }else if(getData(`competencies1/Kms_core`).then((data) => _.some(data,['name',competencyName])) || getData(`competencies1/Kms_optional`).then((data) => _.some(data,['name',competencyName])) ){
+    }else if(isExistKmsCore || isExistKmsOptional ){
        message.error("Competency has already existed ",3)
       this.setState({error : true})
     }else{
       this.setState({error : false})
-    }
-
+    }    
   }
 
   addNew(lastIndex, competencyName, option) {
@@ -148,6 +149,7 @@ class Competencies extends Component {
 
   handleSave = (e) => {
     this.checkCompetencyNameInput(this.state.competencyName)
+    console.log(this.state.error)
     if(this.state.error === false){
       this.addNewCompetency(this.state.competencyName, this.state.option);
       this.setState({
