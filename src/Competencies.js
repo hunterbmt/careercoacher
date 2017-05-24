@@ -3,11 +3,14 @@ import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table, Ca
 import { getData, update, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
+import CompetenciesCreateForm from './CompetenciesCreateForm'
 import { Link } from 'react-router-component';
 const { Header } = Layout;
 import logo from './logo.png';
 
-const Option = Select.Option;
+
+
+
 
 
 class Competencies extends Component {
@@ -22,7 +25,7 @@ class Competencies extends Component {
       showEditPopupKmsOptional: false,
       optionActivatedKmsOptional: false,
       loading: true,
-      loadingActivated: true
+      loadingActivated: true,
     };
   }
 
@@ -304,16 +307,8 @@ class Competencies extends Component {
               <img alt='logo' src={logo} style={{ height: 64, padding: 10 }} />
             </Col>
             <Col>
-              <Button type="primary" onClick={this.showModal}>Add new compentency</Button>
-              <Modal title="Create new compentency" visible={this.state.visible}
-                onOk={this.handleSave} onCancel={this.handleCancel}>
-                <Input type='text' value={this.state.competencyName} onChange={this.handleChange} />
-                <h3>Please choose option: </h3>
-                <Select defaultValue={this.state.option} style={{ width: 120 }} onChange={this.handleChangeOption}>
-                  <Option value="Kms_core">KMS Core</Option>
-                  <Option value="Kms_optional">KMS Optional</Option>
-                </Select>
-              </Modal>
+            <Button type="primary" onClick={this.showModal}>Add new compentency</Button>
+             <CompetenciesCreateForm visible={this.state.visible}/>
             </Col>
           </Row>
           <Modal title="Edit activate KMS Core compentency" visible={this.state.showEditPopup}
