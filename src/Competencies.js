@@ -16,13 +16,14 @@ class Competencies extends Component {
     super(props);
     this.state = {
       visible: false,
-      option: 'Kms_core',
+      option: 'Kms_optional',
       showEditPopup: false,
       optionActivated: false,
       showEditPopupKmsOptional: false,
       optionActivatedKmsOptional: false,
       loading: true,
-      loadingActivated: true
+      loadingActivated: true,
+      loadingMessage: true,
     };
   }
 
@@ -33,11 +34,11 @@ class Competencies extends Component {
       "name": this.state.competencyName
     }
 
-    _.update(this.state.competenciesKmsOptional[this.state.keyUpdate] ,'activated',()=> {return this.state.optionActivatedKmsOptional})
+    _.update(this.state.competenciesKmsOptional[this.state.keyUpdate], 'activated', () => { return this.state.optionActivatedKmsOptional })
 
     update(`competencies1/Kms_optional/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
-      competenciesKmsOptional :this.state.competenciesKmsOptional,
+      competenciesKmsOptional: this.state.competenciesKmsOptional,
       showEditPopupKmsOptional: false,
       loadingActivated: true
     })
@@ -76,11 +77,11 @@ class Competencies extends Component {
       "name": this.state.competencyName
     }
 
-    _.update(this.state.competenciesKMSCore[this.state.keyUpdate] ,'activated',()=> {return this.state.optionActivated})
- 
+    _.update(this.state.competenciesKMSCore[this.state.keyUpdate], 'activated', () => { return this.state.optionActivated })
+
     update(`competencies1/Kms_core/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
-      competenciesKMSCore : this.state.competenciesKMSCore,
+      competenciesKMSCore: this.state.competenciesKMSCore,
       showEditPopup: false,
       loadingActivated: true
     })
@@ -100,18 +101,26 @@ class Competencies extends Component {
     });
   }
 
+  checkCompetencyNameInput = (competencyName) => {
+    if(_.isNull(competencyName) || _.isUndefined(competencyName) || _.isEmpty(competencyName)){
+      message.error("Please input competency name",3)
+      this.setState({error : true})
+    }else if(getData(`competencies1/Kms_core`).then((data) => _.some(data,['name',competencyName])) || getData(`competencies1/Kms_optional`).then((data) => _.some(data,['name',competencyName])) ){
+       message.error("Competency has already existed ",3)
+      this.setState({error : true})
+    }else{
+      this.setState({error : false})
+    }
+
+  }
+
   addNew(lastIndex, competencyName, option) {
     let lastId = parseInt(lastIndex, 10) + 1
     let newCompetency = {
       "activated": false,
       "name": competencyName
     }
-
-    if(_.isUndefined(competencyName)){
-      message.error('Please input competency name', 3);
-    }else{
-      message.success('create successfully',3);
-         if (`${option}` === 'Kms_core') {
+    if (`${option}` === 'Kms_core') {
       let newDataCompeteciesKMSCore = this.state.competenciesKMSCore
       newDataCompeteciesKMSCore.push(newCompetency)
       this.setState({
@@ -124,9 +133,8 @@ class Competencies extends Component {
         competenciesKmsOptional: newDataCompeteciesKMSOptional
       })
     }
-
+    message.success('Create competency successfully',3)
     update(`competencies1/${option}/${lastId}`, newCompetency)
-    }
   }
 
   addNewCompetency(competencyName, option) {
@@ -134,14 +142,22 @@ class Competencies extends Component {
   }
 
   handleChange = (e) => {
-    this.setState({ competencyName: e.target.value });
+    this.setState({ competencyName: e.target.value })
+   
   }
 
   handleSave = (e) => {
-    this.setState({
-      visible: false
-    });
-    this.addNewCompetency(this.state.competencyName, this.state.option);
+    this.checkCompetencyNameInput(this.state.competencyName)
+    if(this.state.error === false){
+      this.addNewCompetency(this.state.competencyName, this.state.option);
+      this.setState({
+        visible: false
+      });
+    }else{
+       this.setState({
+        visible: true
+      }); 
+    }
   }
 
   handleCancel = (e) => {
@@ -321,20 +337,20 @@ class Competencies extends Component {
             <h3>Activate compentency: </h3>
             {
               this.state.loadingActivated ?
-              <Loading/>
-              :
-              <Switch defaultChecked={this.state.optionActivated} onChange={this.handleChangeOptionActivated} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
-            }                    
+                <Loading />
+                :
+                <Switch defaultChecked={this.state.optionActivated} onChange={this.handleChangeOptionActivated} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
+            }
           </Modal>
           <Modal title="Edit activate KMS Optional compentency" visible={this.state.showEditPopupKmsOptional}
             onOk={this.handleSaveActivatedKmsOptional} onCancel={this.handleCancelActivatedKmsOptional}>
             <h3>Activate compentency: </h3>
-              {
+            {
               this.state.loadingActivated ?
-              <Loading/>
-              :
-               <Switch defaultChecked={this.state.optionActivatedKmsOptional} onChange={this.handleChangeOptionActivatedKmsOptional} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
-            }         
+                <Loading />
+                :
+                <Switch defaultChecked={this.state.optionActivatedKmsOptional} onChange={this.handleChangeOptionActivatedKmsOptional} checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="cross" />} />
+            }
           </Modal>
           <Row style={{ margin: 100 }}>
             <Col xs={2} sm={4} md={6} lg={8} xl={10}>
