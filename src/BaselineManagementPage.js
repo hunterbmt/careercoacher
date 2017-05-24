@@ -21,42 +21,8 @@ class BaselineManagementPage extends Component {
 
       filterDropdownVisible: false,
      
-      selectedBaseline : 0,
-    
-      coreBaselineListColumns : this.prepareColumns()
+      selectedBaseline : 0
     }
-  }
-
-  prepareColumns = () => {
-    return [{
-        title: 'No',
-        dataIndex: 'no',
-        key: 'no',
-      }, {
-        title: 'Competency',
-        dataIndex: 'competency',
-        key: 'competency',
-      }, {
-        title: 'Proficiency',
-        dataIndex: 'proficiency',
-        key: 'proficiency',
-      }, { 
-        title: 'Action',
-        key: 'action',
-        render: (text, record) => (
-          <span>
-            <a onClick={() => this.onSelectBaseline(record.no)} key={record.name}>Edit 一 {record.name}</a>
-            <span className="ant-divider" />
-            <Popconfirm title="Are you sure delete this item?" onConfirm={this.onConfirmDelete} onCancel={this.onConfirmCancelDelete} okText="Yes" cancelText="No">
-            <a>Delete</a>
-            </Popconfirm>
-            <span className="ant-divider" />
-            <a className="ant-dropdown-link">
-              More actions <Icon type="down" />
-            </a>
-          </span>
-        ),
-      }]
   }
   
   componentDidMount() {
@@ -77,7 +43,6 @@ class BaselineManagementPage extends Component {
 
   onSelectBaseline = (e) => {
     this.setState({
-      baselineList : [],
       selectedBaseline : e,
       loading : false
     })
@@ -100,7 +65,7 @@ class BaselineManagementPage extends Component {
           <Layout>
             <Content style={{ margin: '0 16px' }}>
               <Card title='KMS Core Baselines' style={{ width: '100%' }}>
-                <CoreBaseline selectedBaseline={this.state.selectedBaseline}/>
+                <CoreBaseline selectedBaseline={index}/>
               </Card>
             </Content>
           </Layout>
@@ -109,7 +74,7 @@ class BaselineManagementPage extends Component {
           <Layout>
             <Content style={{ margin: '0 16px' }}>
               <Card title='KMS Optional Baselines' style={{ width: '100%' }}>
-                <OptionalBaseline selectedBaseline={this.state.selectedBaseline}/>
+                <OptionalBaseline selectedBaseline={index}/>
               </Card>
             </Content>
           </Layout>

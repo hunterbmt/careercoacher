@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { Button, Modal, Input, Table, Select, Popconfirm } from 'antd'
+import { Button, Modal, Input, Table, Select, Popconfirm, message } from 'antd'
 import Loading from './Loading'
 import './App.css'
 import { getData, update, getLastIndex } from './firebase'
@@ -33,7 +33,7 @@ class ProjectBaseline extends Component {
                     <span>
                         <a onClick={() => this.onSelectBaseline(record.no, record.baseline)} key={record.no}>Edit 一 {record.baseline}</a>
                         <span className='ant-divider' />
-                        <Popconfirm title='Are you sure delete this item?' onConfirm={this.onConfirmDelete} onCancel={this.onConfirmCancelDelete} okText='Yes' cancelText='No'>
+                        <Popconfirm title='Are you sure delete this item?' onConfirm={() => this.onConfirmDelete(record.no)} onCancel={this.onConfirmCancelDelete} okText='Yes' cancelText='No'>
                             <a>Delete</a>
                         </Popconfirm>
                     </span>
@@ -73,15 +73,27 @@ class ProjectBaseline extends Component {
     }
 
     saveNewProjectBaselineData = (lastIndex, newProjectBaselineName, projectBaselineCompetencies) => {
-        lastIndex = parseInt(lastIndex) + 1
-        update(`project_baseline/${lastIndex}/Kms_optional/competencies`, projectBaselineCompetencies)
-            .then(() => this.setState({
-                showEditProfilePopup: false
-            }))
-        update(`project_baseline/${lastIndex}/name`, newProjectBaselineName)
-            .then(() => this.setState({
-                showEditProfilePopup: false
-            }))
+        lastIndex = _.toNumber(lastIndex) + 1
+        console.log('prepare to save ' + lastIndex)
+
+        this.setState({
+            projectBaselineToBeSaved: {
+                competencies: projectBaselineCompetencies,
+                name: newProjectBaselineName,
+                id: lastIndex
+            },
+            loading: true
+        })
+
+        update(`project_baseline/${lastIndex}`, this.state.projectBaselineToBeSaved)
+            .then(() => {
+                getData(`project_baseline`).then((projectBaselines) =>
+                    this.setState({
+                        projectBaselines,
+                        loading: false,
+                        showEditProfilePopup: false
+                    }))
+            })
     }
 
     handleEditCancel = () => {
@@ -110,13 +122,11 @@ class ProjectBaseline extends Component {
         this.setState({
             loading : true
         })
-         Promise.all([getData(`project_baseline`)]).then(([projectBaselines]) =>
+        getData(`project_baseline`).then((projectBaselines) =>
             this.setState({
                 projectBaselines,
-                
-        }), () => this.setState({
-            loading: false
-        }))
+                loading: false
+            }))
     }
 
     handleAddNewProfile = () => {
@@ -157,6 +167,20 @@ class ProjectBaseline extends Component {
         })        
     }
 
+    onConfirmDelete = (no) => {
+        this.deleteProjectBaseline(no)
+        this.updateDataSource()
+        message.success('Successfully Deleted')
+    }
+
+    onConfirmCancelDelete = () => {
+        message.error('Delete Canceled')
+    }
+
+    deleteProjectBaseline = (baselineKey) => {
+        update(`project_baseline/${baselineKey}`, null)
+    }
+
     render() {
         if (this.state.loading) return <Loading />
 
@@ -175,16 +199,11 @@ class ProjectBaseline extends Component {
             projectBaselineCompetencies.push(<Option key={item.name}>{item.name} : {item.proficiency}</Option>)
         ))
 
-        let a = []
-        _.forEach(this.state.projectBaselineCompetencies, (item) => (
-            a.push(item.name + ' : ' + item.proficiency)
-        ))
-
         let dataSource = []
-        _.forEach(this.state.projectBaselines, (item, index) => {    
+        _.forEach(_.filter(this.state.projectBaselines, (baseline) => !_.isNil(baseline)), (item, index) => {    
             let row = {
                 key : index,
-                no: index,
+                no: item.id,
                 baseline : item.name
             }
             dataSource.push(row)

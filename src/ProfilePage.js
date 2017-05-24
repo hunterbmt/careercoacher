@@ -3,7 +3,7 @@ import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
 import _ from 'lodash';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
-
+import CompetencyRadar from './CompetencyRadar'
 import {getData, update} from './firebase';
 
 const Option = Select.Option;
@@ -62,6 +62,7 @@ export default class ProfilePage extends Component {
   }
 
   getProfileDataToState = (profile) =>  {
+    //console.log('profile is ' + profile)
     this.setState({
       loading: true
     });
@@ -99,7 +100,13 @@ export default class ProfilePage extends Component {
             </Select>
           </Row>
           <Row type="flex" justify="center">
-
+              <Col span={24}>
+              
+              {!_.isObject(profile)?
+              <h1>Is NULL</h1>:
+              <CompetencyRadar data={profile} compentencies={compentencies} />
+              }              
+              </Col>
           </Row>
         </Col>
         <Col span={9} offset={1}>

@@ -34,17 +34,16 @@ const colorList = _([
 const getBackgroundColorString = (index) => colorList[index].setAlpha(0.2).toRgbString();
 const getBorderColor = (index) => colorList[index].setAlpha(1).toRgbString();
 
-
 const CompentencyRadar = ({width = 600, height = 'auto', data, compentencies}) => {
-  const radarData = _.map(data, (profile, index) => ({
-    label: profile.name,
-    data: _.map(compentencies, (compentency) => profile.compentencies[compentency]),
-    backgroundColor: getBackgroundColorString(index),
-    borderColor: getBorderColor(index),
-    pointBackgroundColor: getBackgroundColorString(index),
+  const radarData = _.map(data, () => ({
+    label: data.name,
+    data: _.map(compentencies, (compentency) => data.competencies[compentency]),
+    backgroundColor: getBackgroundColorString(0),
+    borderColor: getBorderColor(1),
+    pointBackgroundColor: getBackgroundColorString(2),
     pointBorderColor: '#fff',
     pointHoverBackgroundColor: '#fff',
-    pointHoverBorderColor: getBackgroundColorString(index)
+    pointHoverBorderColor: getBackgroundColorString(3)
   }));
   return (
     <div style={{width, height}}>
