@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { Layout, Steps, Row, Col, Button, message } from 'antd'
 import QuestionInput from './QuestionInput'
-import { getData, writeAnswers } from './firebase'
+import { getData, writeAnswers, update, getLastIndex} from './firebase'
 import logo from './logo.png'
 import Loading from './Loading'
 const { Header, Content } = Layout
@@ -65,14 +65,41 @@ class CompareAssessment extends Component {
     })
   }
 
-  saveFinalAnswers(finalAnswers) {
+  saveSummary = (lastIndex) =>{
+    let newIndex = _.toNumber(lastIndex) +1
+    update(`summary/${this.props.name}/${newIndex}`, this.state.underWeightsState)
+  }
+  saveFinalAnswers() {
     writeAnswers(`${this.props.name}_final`, this.state.finalAnswers)
+    getLastIndex(`summary/${this.props.name}`).then((lastIndex)=>this.saveSummary(lastIndex))  
     window.location.replace(`/#/compare/${this.props.name}/final`)
   }
 
+  getUnderWeight = (weights,answers,competenciesName) => {
+    let underWeights
+    _.map(answers,(answer,index) => 
+      {
+        _.lt(answer,weights[index])?
+        underWeights ={
+          ...underWeights,
+          [index]:{
+            weight: weights[index],
+            under: answer
+          }
+        }
+        :
+        null
+      })
+    this.state.underWeightsState = {
+      ...this.state.underWeightsState,
+      [competenciesName]:underWeights
+    }
+  }
+
   onChangeAnswer = (value, index, currentCompetencyName) => {
-    this.state.finalAnswers[currentCompetencyName][index] = value
-    this.setState({finalAnswers:this.state.finalAnswers})
+    let newFinalAnswers = this.state.finalAnswers
+    newFinalAnswers[currentCompetencyName][index] = value
+    this.setState({finalAnswers:newFinalAnswers})
   }
 
   getValueByQuestion = (question, value) =>
@@ -84,7 +111,6 @@ class CompareAssessment extends Component {
       :
       _.filter(_.find(this.state.competencies.Kms_optional, { name: competenciesName }).constraints, (constraint) =>{ return _.inRange(range, constraint.minRange, constraint.maxRange)})[0]
   
-
   render() {
     if (this.state.loading) return <Loading />
     const competenciesName = Object.keys(this.state.conflicts)
@@ -94,7 +120,7 @@ class CompareAssessment extends Component {
     let currentQuestion
     let currentRange = _.sum(_.get(this.state.finalAnswers,[currentCompetencyName]))
     let currentConstrain = this.getCurrentConstraintByRange(currentRange, currentCompetencyName, isCore)
-    //console.log(currentConstrain)
+    this.getUnderWeight(currentConstrain.weight,this.state.finalAnswers[currentCompetencyName],currentCompetencyName)
     isCore?
     currentQuestion = _.find(this.state.competencies.Kms_core, { name: currentCompetencyName }).questions
     :
@@ -197,7 +223,7 @@ class CompareAssessment extends Component {
                   style={{
                     width: 80
                   }}
-                  onClick={() => this.saveFinalAnswers(this.state.finalAnswers)}
+                  onClick={() => this.saveFinalAnswers()}
                 >
                   Resolve
                 </Button>

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Layout, Steps, Row, Col, Button, Modal } from 'antd';
 import QuestionInput from './QuestionInput';
 import Loading from './Loading';
-
+import Summary from './Summary'
 import {getData, writeAnswers} from './firebase';
 import {convertValueFromOption} from './utils';
 import logo from './logo.png';
@@ -42,12 +42,13 @@ class SelfAssessment extends Component {
 
   componentDidMount() {
       const part = this.getAnswerPath(this.props);
-      Promise.all([getData('questions'), getData(`answers/${part}`)])
-      .then(([questions, answers]) => {
+      Promise.all([getData('questions'), getData(`answers/${part}`), getData(`summary/${this.props.name}`)])
+      .then(([questions, answers, summary]) => {
         this.setState({
           questions,
           answers: answers || {},
-          loading: false
+          loading: false,
+          summary: _.last(summary)
         });
       }
     );
@@ -68,7 +69,6 @@ class SelfAssessment extends Component {
     const current = this.state.current + 1;
     this.setState({ current });
     this.layout.scrollTop = 0;
-    console.log(this.state.answers);
   }
   prev() {
     const current = this.state.current - 1;
@@ -127,6 +127,7 @@ class SelfAssessment extends Component {
                 )}
               </Steps>
             </Row>
+            <Summary data={this.state.summary}/>
             <div className='steps-content'>
               <Row type='flex'>
                 {
