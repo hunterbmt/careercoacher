@@ -1,14 +1,16 @@
 import React from 'react';
+import { Card } from 'antd';
 import _ from 'lodash';
-import { getData} from './firebase'
 const Summary = (props) => {
-    return <div>{
-        
+    return <Card title='Summary' extra={<a href="#">More</a>} style={{ width: 500 }}>
+        {       
         _.map(props.data,(data,key)=>
-            <h3>{key}</h3>
-        )
-
-    }</div>
+            _.isObject(data)?
+            <div>At question {_.toNumber(key)+1}, you are {data.under} but we require {data.weight}</div>
+            :
+            null
+        )}
+        </Card>
     
 }
 

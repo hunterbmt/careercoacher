@@ -6,7 +6,6 @@ import QuestionInput from './QuestionInput';
 import Loading from './Loading';
 import Summary from './Summary'
 import {getData, writeAnswers} from './firebase';
-import {convertValueFromOption} from './utils';
 import logo from './logo.png';
 const { Header, Content } = Layout;
 const Step = Steps.Step;
@@ -127,7 +126,13 @@ class SelfAssessment extends Component {
                 )}
               </Steps>
             </Row>
-            <Summary data={this.state.summary}/>
+            {
+              this.isFinalPage() ?
+              <Summary data={this.state.summary[currentCompentency.competency]}/>
+              :
+              null
+            }
+            
             <div className='steps-content'>
               <Row type='flex'>
                 {

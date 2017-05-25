@@ -66,8 +66,9 @@ class CompareAssessment extends Component {
   }
 
   saveSummary = (lastIndex) =>{
+    console.log(this.underWeightsState)
     let newIndex = _.toNumber(lastIndex) +1
-    update(`summary/${this.props.name}/${newIndex}`, this.state.underWeightsState)
+    update(`summary/${this.props.name}/${newIndex}`, this.underWeightsState)
   }
   saveFinalAnswers() {
     writeAnswers(`${this.props.name}_final`, this.state.finalAnswers)
@@ -78,7 +79,6 @@ class CompareAssessment extends Component {
   getUnderWeight = (weights,answers,competenciesName) => {
     let underWeights
     _.map(answers,(answer,index) => 
-      {
         _.lt(answer,weights[index])?
         underWeights ={
           ...underWeights,
@@ -89,9 +89,9 @@ class CompareAssessment extends Component {
         }
         :
         null
-      })
-    this.state.underWeightsState = {
-      ...this.state.underWeightsState,
+      )
+    this.underWeightsState = {
+      ...this.underWeightsState,
       [competenciesName]:underWeights
     }
   }
