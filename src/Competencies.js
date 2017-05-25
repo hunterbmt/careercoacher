@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Modal, Switch, Icon, Button, Input, Row, Col, Select, Table, Card, message } from 'antd';
+import { Layout, Modal, Switch, Icon, Button, Row, Col, Table, Card, message } from 'antd';
 import { getData, update, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
@@ -239,16 +239,6 @@ class Competencies extends Component {
     });
   }
 
-  handleCheckExist = (rule, value, callback) => {
-    const { getFieldValue } = this.props.form
-    const isExistKMSCore = _.some(this.state.competenciesKMSCore, ['name', getFieldValue('competencyName')])
-    const isExistKMSOptional = _.some(this.state.competenciesKmsOptional, ['name', getFieldValue('competencyName')])
-    if (isExistKMSCore || isExistKMSOptional) {
-      callback("Competency has already existed!")
-    }
-    callback()
-  }
-
   getCompetencyKMSCore() {
     getData(`competencies1/Kms_core`)
       .then((kmsCoreData) => this.setState({
@@ -285,7 +275,6 @@ class Competencies extends Component {
                 visible={this.state.visible}
                 onCancel={this.handleCancel}
                 onCreate={this.handleCreate}
-                handleCheckExist={this.handleCheckExit}
               />
             </Col>
           </Row>

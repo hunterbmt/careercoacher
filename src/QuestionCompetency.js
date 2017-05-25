@@ -1,16 +1,12 @@
 import React, { Component } from 'react';
-import {Layout, Button, Input, Select, Row, Col, Modal, Table } from 'antd';
+import { Layout, Button, Row, Col, Modal, Table, Card } from 'antd';
 import { getData, update, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
-
-
-
+import CreateQuestionCompetencyForm from './CreateQuestionCompetencyForm'
+import EditQuestionCompetencyForm from './EditQuestionCompetencyForm'
 import logo from './logo.png';
-
 const { Header } = Layout;
-
-const Option = Select.Option;
 
 class QuestionCompetency extends Component {
 
@@ -21,113 +17,15 @@ class QuestionCompetency extends Component {
             showEditPopup: false,
             visible: false,
             selectValue: 'scale',
-            dataQuestion: [],
-            questionDataDetail: {},
             loading: true,
-            showDeletePopup: false,
+            showDeletePopup: false
         };
-        this.handleChange = this.handleChange.bind(this);
-        this.handleChangeQuestion = this.handleChangeQuestion.bind(this);
-        this.handleChangeAnswer1 = this.handleChangeAnswer1.bind(this);
-        this.handleChangeAnswer2 = this.handleChangeAnswer2.bind(this);
-        this.handleChangeAnswer3 = this.handleChangeAnswer3.bind(this);
-        this.handleChangeAnswer4 = this.handleChangeAnswer4.bind(this);
-        this.handleChangeAnswer5 = this.handleChangeAnswer5.bind(this);
-        this.handleChangeHint = this.handleChangeHint.bind(this);
-
-        this.handleEditQuestion = this.handleEditQuestion.bind(this);
     }
 
-    handleChangeQuestion(e) {
-        this.setState({ question: e.target.value });
-
+    onChangeOption = (value) => {
+        this.setState({ option: value })
     }
 
-    handleChangeAnswer1(e) {
-        this.setState({ answer1: e.target.value });
-    }
-
-    handleChangeAnswer2(e) {
-        this.setState({ answer2: e.target.value });
-    }
-
-    handleChangeAnswer3(e) {
-        this.setState({ answer3: e.target.value });
-    }
-
-    handleChangeAnswer4(e) {
-        this.setState({ answer4: e.target.value });
-    }
-
-    handleChangeAnswer5(e) {
-        this.setState({ answer5: e.target.value });
-    }
-
-    handleChangeHint(e) {
-        this.setState({ hint: e.target.value });
-    }
-
-    handleChange(value) {
-        this.setState({
-            selectValue: `${value}`
-        })
-    }
-
-    saveOptionQuestion(lastIndex) {
-        let lastId = parseInt(lastIndex,10) + 1
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        let newData = {
-            "id": lastId,
-            "desc": this.state.question,
-            "hint": this.state.hint,
-            "options": [this.state.answer1, this.state.answer2, this.state.answer3, this.state.answer4, this.state.answer5],
-            "type": this.state.selectValue
-        }
-
-        this.state.dataQuestion.push(newData) 
-        this.setState({
-           dataQuestion : this.state.dataQuestion
-        })
-
-        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newData);
-    }
-
-    saveOptionIdIncrement() {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOptionQuestion(lastIndex))
-    }
-
-    saveOthersQuestion(lastIndex) {
-        let lastId = parseInt(lastIndex,10) + 1
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        let newDataOthers = {
-            "id": lastId,
-            "desc": this.state.question,
-            "hint": this.state.hint,
-            "type": this.state.selectValue
-        }
-
-        this.state.dataQuestion.push(newDataOthers) 
-        this.setState({
-           dataQuestion : this.state.dataQuestion
-        })
-
-        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newDataOthers);
-    }
-
-    saveOthersIdIncrement() {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOthersQuestion(lastIndex))
-    }
-
-
-    saveQuestion(type) {
-        if (type === 'option') {
-            this.saveOptionIdIncrement()
-        } else {
-            this.saveOthersIdIncrement()
-        }
-    }
 
     componentWillMount() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
@@ -158,67 +56,108 @@ class QuestionCompetency extends Component {
         });
     }
 
+    saveOptionQuestion(lastIndex, question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5) {
+        let lastId = parseInt(lastIndex, 10) + 1
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        let newData = {
+            "id": lastId,
+            "desc": question,
+            "hint": hint,
+            "options": [answer1, answer2, answer3, answer4, answer5],
+            "type": selectedoption
+        }
 
-    editOptionQuestion() {
+        let newDataQuestion = this.state.dataQuestion
+        newDataQuestion.push(newData)
+        this.setState({
+            dataQuestion: newDataQuestion
+        })
+
+        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newData);
+    }
+
+    saveOptionIdIncrement(question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5) {
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) =>
+            this.saveOptionQuestion(lastIndex, question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5))
+    }
+
+    saveOthersQuestion(lastIndex, question, hint, selectedoption) {
+        let lastId = parseInt(lastIndex, 10) + 1
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        let newDataOthers = {
+            "id": lastId,
+            "desc": question,
+            "hint": hint,
+            "type": selectedoption
+        }
+
+        let newDataQuestion = this.state.dataQuestion
+        newDataQuestion.push(newDataOthers)
+        this.setState({
+            dataQuestion: newDataQuestion
+        })
+
+        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newDataOthers);
+    }
+
+    saveOthersIdIncrement(question, hint, selectedoption) {
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOthersQuestion(lastIndex, question, hint, selectedoption))
+    }
+
+    editOptionQuestion(question, hint, answer1, answer2, answer3, answer4, answer5) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOption = {
             "id": this.state.keyUpdate,
-            "desc": this.state.questionEdit,
-            "hint": this.state.hintEdit,
-            "options": [this.state.answer1Edit, this.state.answer2Edit, this.state.answer3Edit, this.state.answer4Edit, this.state.answer5Edit],
+            "desc": question,
+            "hint": hint,
+            "options": [answer1, answer2, answer3, answer4, answer5],
             "type": this.state.typeEdit
         }
-        
-        this.state.dataQuestion[this.state.keyUpdate] = newDataOption
+        _.merge((_.find(this.state.dataQuestion, this.state.dataQuestion[this.state.keyUpdate])), newDataOption)
         this.setState({
-            dataQuestion : this.state.dataQuestion
+            dataQuestion: this.state.dataQuestion
         })
 
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption);
     }
 
-    editOthersQuestion() {
+    editOthersQuestion(question, hint) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
         let newDataOthers = {
             "id": this.state.keyUpdate,
-            "desc": this.state.questionEdit,
-            "hint": this.state.hintEdit,
+            "desc": question,
+            "hint": hint,
             "type": this.state.typeEdit
         }
-
-        this.state.dataQuestion[this.state.keyUpdate] = newDataOthers
+        _.merge((_.find(this.state.dataQuestion, this.state.dataQuestion[this.state.keyUpdate])), newDataOthers)
         this.setState({
-            dataQuestion : this.state.dataQuestion
+            dataQuestion: this.state.dataQuestion
         })
 
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers);
     }
 
-    editQuestion(type) {
-        if (type === 'option') {
-            this.editOptionQuestion();
-        } else {
-            this.editOthersQuestion();
+    editQuestionFormRef = (form) => {
+           this.setState({ 
+               editQuestionFormRef : form
+           })
         }
-    }
 
-
-    deleteQuestion() {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-
-        _.remove(this.state.dataQuestion,this.state.dataQuestion[this.state.keyDelete])
-        this.setState({
-            dataQuestion : this.state.dataQuestion
-        })
-
-        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null);
-    }
-
-
-    handleEdit = (e) => {
-        this.editQuestion(this.state.typeEdit);
-        this.setState({
-            showEditPopup: false,
+    handleEdit = () => {
+        const form = this.state.editQuestionFormRef;
+        form.validateFields((err, values) => {
+            if (err) {
+                return;
+            }
+            if (_.isEqual(this.state.typeEdit, 'option')) {
+                this.editOptionQuestion(values.questionEdit, values.hintQuestionEdit, values.answer1Edit, values.answer2Edit, values.answer3Edit, values.answer4Edit, values.answer5Edit);
+            } else {
+                this.editOthersQuestion(values.questionEdit, values.hintQuestionEdit);
+            }
+            form.resetFields();
+            this.setState({ showEditPopup: false });
         });
     }
 
@@ -227,6 +166,18 @@ class QuestionCompetency extends Component {
             showEditPopup: false,
         });
     }
+
+    deleteQuestion() {
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+
+        _.remove(this.state.dataQuestion, this.state.dataQuestion[this.state.keyDelete])
+        this.setState({
+            dataQuestion: this.state.dataQuestion
+        })
+
+        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null);
+    }
+
 
     handleDeleteSave = (e) => {
         this.deleteQuestion();
@@ -240,67 +191,6 @@ class QuestionCompetency extends Component {
         this.setState({
             showDeletePopup: false,
         });
-    }
-
-    handleEditQuestion = (e) => {
-        this.setState({ questionEdit: e.target.value });
-
-    }
-
-    handleEditAnswer1 = (e) => {
-        this.setState({ answer1Edit: e.target.value })
-    }
-
-    handleEditAnswer2 = (e) => {
-        this.setState({ answer2Edit: e.target.value })
-    }
-
-    handleEditAnswer3 = (e) => {
-        this.setState({ answer3Edit: e.target.value })
-    }
-
-    handleEditAnswer4 = (e) => {
-        this.setState({ answer4Edit: e.target.value })
-    }
-
-    handleEditAnswer5 = (e) => {
-        this.setState({ answer5Edit: e.target.value })
-    }
-
-    handleEditHint = (e) => {
-        this.setState({ hintEdit: e.target.value })
-    }
-
-    optionQuestionType(type) {
-        if (type === "option") {
-            return (
-                <div>
-                    <h3>Question</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeQuestion} />
-                    <h3>Hint question</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeHint} />
-                    <h3>First answer :</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer1} />
-                    <h3>Second answer :</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer2} />
-                    <h3>Third answer :</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer3} />
-                    <h3>Fourth answer :</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer4} />
-                    <h3>Other answer :</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeAnswer5} />
-                </div>
-            );
-        } else {
-            return (
-                <div>
-                    <h3>Question</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeQuestion} />
-                    <h3>Hint question</h3>
-                    <Input type="textarea" defaultValue={''} onChange={this.handleChangeHint} />
-                </div>
-            );
-        }
     }
 
     getColumns() {
@@ -326,6 +216,18 @@ class QuestionCompetency extends Component {
         return columns
     }
 
+    getDataSouce(indexData) {
+        let dataSource = [];
+        _.forEach(this.state.dataQuestion, (item) => {
+            const dataPushTable = {
+                no: item.id + 1,
+                question: item.desc
+            }
+            dataSource.push(dataPushTable);
+        })
+        return dataSource;
+    }
+
     onSelectedDeleteQuestion(index) {
         let realIndex = index - 1;
         this.setState({
@@ -342,52 +244,37 @@ class QuestionCompetency extends Component {
                 questionDataDetail: detailQuestionData,
                 keyUpdate: realIndex,
                 typeEdit: detailQuestionData.type,
-                showEditPopup: true
+                questionEdit: detailQuestionData.desc,
+                questionHintEdit: detailQuestionData.hint,
+                answer1Edit: _.nth(detailQuestionData.options, 0),
+                answer2Edit: _.nth(detailQuestionData.options, 1),
+                answer3Edit: _.nth(detailQuestionData.options, 2),
+                answer4Edit: _.nth(detailQuestionData.options, 3),
+                answer5Edit: _.nth(detailQuestionData.options, 4),
+                showEditPopup: true,
             }));
     }
 
-    renderOptionQuestionType(detailQuestion) {
-        if (detailQuestion.type === "option") {
-            return (
-                <div>
-                    <h3>Question</h3>
-                    <Input type="textarea" defaultValue={detailQuestion.desc} onChange={this.handleEditQuestion} />
-                    <h3>Hint question</h3>
-                    <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleEditHint} />
-                    <h3>First answer :</h3>
-                    <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 0)} onChange={this.handleEditAnswer1} />
-                    <h3>Second answer :</h3>
-                    <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 1)} onChange={this.handleEditAnswer2} />
-                    <h3>Third answer :</h3>
-                    <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 2)} onChange={this.handleEditAnswer3} />
-                    <h3>Fourth answer :</h3>
-                    <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 3)} onChange={this.handleEditAnswer4} />
-                    <h3>Other answer :</h3>
-                    <Input type="textarea" defaultValue={_.nth(detailQuestion.options, 4)} onChange={this.handleEditAnswer5} />
-                </div>
-            );
-        } else {
-            return (
-                <div>
-                    <h3>Question</h3>
-                    <Input type="textarea" defaultValue={detailQuestion.desc} onChange={this.handleEditQuestion} />
-                    <h3>Hint question</h3>
-                    <Input type="textarea" defaultValue={detailQuestion.hint} onChange={this.handleEditHint} />
-                </div>
-            );
-        }
+    createQuestionFormRef = (form) => {
+        this.setState({
+            createQuestionFormRef : form
+        })
     }
 
-    getDataSouce(indexData) {
-        let dataSource = [];
-        _.forEach(this.state.dataQuestion, (item) => {
-            const dataPushTable = {
-                no: item.id + 1,
-                question: item.desc
+    handleCreate = () => {
+        const form = this.state.createQuestionFormRef;
+        form.validateFields((err, values) => {
+            if (err) {
+                return;
             }
-            dataSource.push(dataPushTable);
-        })
-        return dataSource;
+            if (_.isEqual(values.questionOption, 'option')) {
+                this.saveOptionIdIncrement(values.question, values.hintQuestion, values.questionOption, values.answer1, values.answer2, values.answer3, values.answer4, values.answer5)
+            } else {
+                this.saveOthersIdIncrement(values.question, values.hintQuestion, values.questionOption)
+            }
+            form.resetFields();
+            this.setState({ visible: false });
+        });
     }
 
     render() {
@@ -401,31 +288,36 @@ class QuestionCompetency extends Component {
                         </Col>
                         <Col>
                             <Button type="primary" onClick={this.showModal}>Add new question</Button>
+                            <CreateQuestionCompetencyForm
+                                ref={this.createQuestionFormRef}
+                                visible={this.state.visible}
+                                onCancel={this.handleCancel}
+                                onCreate={this.handleCreate}
+                                onChangeOption={this.onChangeOption}
+                                option={this.state.option}
+                            />
                         </Col>
                     </Row>
                 </Header>
                 <Row type="flex" justify="space-around" align="middle">
                     <Col span={8}></Col>
                     <Col span={8}>
+                        <EditQuestionCompetencyForm
+                            ref={this.editQuestionFormRef}
+                            visible={this.state.showEditPopup}
+                            onCancel={this.handleEditCancel}
+                            onCreate={this.handleEdit}
+                            option={this.state.typeEdit}
+                            questionEdit={this.state.questionEdit}
+                            hintEdit={this.state.questionHintEdit}
+                            answer1Edit={this.state.answer1Edit}
+                            answer2Edit={this.state.answer2Edit}
+                            answer3Edit={this.state.answer3Edit}
+                            answer4Edit={this.state.answer4Edit}
+                            answer5Edit={this.state.answer5Edit}
+                        />
                     </Col>
                     <Col span={8}>
-                        <Modal title="Create new question" visible={this.state.visible}
-                            onOk={this.handleSave} onCancel={this.handleCancel}>
-                            <h3>Please choose question types: </h3>
-                            <Select defaultValue={this.state.selectValue} style={{ width: 120 }} onChange={this.handleChange}>
-                                <Option value="scale">Scale</Option>
-                                <Option value="option">Option</Option>
-                                <Option value="freetext">freetext</Option>
-                                <Option value="switch">Switch</Option>
-                            </Select>
-                            {this.optionQuestionType(this.state.selectValue)}
-                        </Modal>
-                        <Modal title="Edit question" visible={this.state.showEditPopup}
-                            onOk={this.handleEdit} onCancel={this.handleEditCancel}>
-                            {
-                                this.renderOptionQuestionType(this.state.questionDataDetail)
-                            }
-                        </Modal>
                         <Modal title="Delete question" visible={this.state.showDeletePopup}
                             onOk={this.handleDeleteSave} onCancel={this.handleDeleteCancel}>
                             <h3>Do you sure to delete this question</h3>
@@ -433,7 +325,11 @@ class QuestionCompetency extends Component {
                     </Col>
                 </Row>
                 <Row style={{ margin: 100 }}>
-                    <Col><Table columns={this.getColumns()} dataSource={this.getDataSouce()} /></Col>
+                    <Col>
+                     <Card>
+                    <Table columns={this.getColumns()} dataSource={this.getDataSouce()} />
+                    </Card>
+                    </Col>
                 </Row>
             </Layout>
 
