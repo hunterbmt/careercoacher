@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Layout, Row, Col, Button, Modal, InputNumber, Checkbox, Collapse, Icon, Radio } from 'antd';
+import { Layout, Row, Col, Button, Modal, InputNumber, Checkbox, Collapse, Icon, Radio, message,BackTop } from 'antd';
 import Loading from './Loading';
 import { getData, update } from './firebase';
 import logo from './logo.png';
@@ -10,61 +10,23 @@ const RadioGroup = Radio.Group;
 class SetWeight extends Component {
   state = {
     loading: true,
-    defaultWeight: 0,
-    constraints: { minRange: 0, maxRange: 0, title: '', weight: {} },
+    constraints: { minRange: 0, maxRange: 0, weight: {} },
     disabledSetWeight: [],
     defaultOption: 'none'
   }
 
   componentDidMount() {
-    this.getTitle();
-    this.getDefaultWeight();
     const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-    getData(`competencies/${option}/${this.props.index}/questions`)
-      .then((questions) => this.setStateForQuestion(questions))
+    getData(`competencies/${option}/${this.props.index}`)
+      .then((competency) => this.setStateForQuestion(competency))
   }
 
-  getTitle() {
-    switch (this.props.title) {
-      case 'SE':
-      case 'SA':
-      case 'SSE':
-        this.setState({
-          constraints: {
-            ...this.state.constraints,
-            title: 'AVG ' + this.props.title
-          }
-        });
-        break;
-      default:
-        this.setState({
-          title: ''
-        });
-    }
-  }
-
-  findDefaultWeightByTitle(baseline) {
-    const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-    _.map(baseline, (baseline, key) => {
-      if (baseline.name === this.state.constraints.title) {
-        getData(`baseline/${key}/${option}/competencies/${this.props.index}/proficiency`)
-          .then((value) => this.setState({ defaultWeight: value })
-          );
-      }
-    });
-  }
-
-
-  getDefaultWeight() {
-    getData('baseline')
-      .then((baseline) => this.findDefaultWeightByTitle(baseline));
-  }
-
-  setStateForQuestion = (questions) => {
+  setStateForQuestion = (competency) => {
     let disabledSetWeight = []
-    _.map(questions, () => disabledSetWeight.push(true))
+    _.map(competency.questions, () => disabledSetWeight.push(true))
     this.setState({
-      questions,
+      questions: competency.questions,
+      competencyName: competency.name,
       disabledSetWeight,
       loading: false
     })
@@ -160,7 +122,7 @@ class SetWeight extends Component {
           ...this.state.constraints,
           weight: {
             ...this.state.constraints.weight,
-            [index]: this.state.defaultWeight
+            [index]: _.toNumber(this.props.level)
           }
         }
       })
@@ -172,29 +134,25 @@ class SetWeight extends Component {
     }
   }
 
-  saveConstraints() {
-    let indexTitle;
-    switch (this.props.title) {
-      case 'SE':
-        indexTitle = 0;
-        break;
-      case 'SSE':
-        indexTitle = 1;
-        break;
-      case 'SA':
-        indexTitle = 2;
-        break;
-    }
+  success = () => {
+  message.success('Saved successfully!')
+  }
 
+
+  saveConstraints() {
     const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-    update(`competencies/${option}/${this.props.index}/constraints/${indexTitle}`, this.state.constraints);
+    update(`competencies/${option}/${this.props.index}/constraints/${this.props.level}`, this.state.constraints);
+    this.success()
   }
 
   render() {
     if (this.state.loading) return <Loading />
     const questions = this.state.questions
     return (
+      <div>
+      <BackTop/>
       <Layout style={{ height: '100%' }}>
+        
         <Header style={{ background: '#fff', padding: 0 }}>
           <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Col span={4}>
@@ -210,10 +168,10 @@ class SetWeight extends Component {
                   <h2>{this.props.name}</h2>
                 </Row>
                 <Row type='flex' justify='left' style={{ padding: '10px 0' }}>
-                  <h3>{`Set weight/constraints for ${this.state.constraints.title}`}</h3>
+                  <h3>{`Set range & constraints for ${this.state.competencyName} level ${this.props.level}`}</h3>
                 </Row>
                 <Row type='flex' justify='left' style={{ padding: '10px 0' }}>
-                  <h3>{`Default weight: ${this.state.defaultWeight}`}</h3>
+                  <h3>{`Default weight: ${this.props.level}`}</h3>
                 </Row>
                 <Row type='flex' justify='left' style={{ padding: '10px 0' }}>
                   <Checkbox onChange={this.OnCheckUseDefaultForAll}>Use default weight for all questions</Checkbox>
@@ -247,7 +205,7 @@ class SetWeight extends Component {
                               <Radio value='none'>No constraint</Radio>
                               <Radio value='default'>Use default weight for this question</Radio>
                               <Radio value='customize'>Set another weight</Radio>
-                              <InputNumber min={0} max={4} disabled={this.state.disabledSetWeight[index]} defaultValue={this.state.defaultWeight} onChange={(value) => this.changeWeight(value, index)} />
+                              <InputNumber min={0} max={4} disabled={this.state.disabledSetWeight[index]} defaultValue={_.toNumber(this.props.level)} onChange={(value) => this.changeWeight(value, index)} />
                             </RadioGroup>
                           </div>
                       }
@@ -279,6 +237,7 @@ class SetWeight extends Component {
 
         </Modal>
       </Layout>
+      </div>
     );
   }
 }
