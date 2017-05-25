@@ -101,19 +101,19 @@ class Competencies extends Component {
     });
   }
 
-  checkCompetencyNameInput = (competencyName) => {
-    const isExistKmsCore = _.some(this.state.competenciesKMSCore,['name',competencyName])
-    const isExistKmsOptional =  _.some(this.state.competenciesKmsOptional,['name',competencyName])
-    if(_.isNull(competencyName) || _.isUndefined(competencyName) || _.isEmpty(competencyName)){
-      message.error("Please input competency name",3)
-      this.setState({error : true})
-    }else if(isExistKmsCore || isExistKmsOptional ){
-       message.error("Competency has already existed ",3)
-      this.setState({error : true})
-    }else{
-      this.setState({error : false})
-    }    
-  }
+  // checkCompetencyNameInput = (competencyName) => {
+  //   const isExistKmsCore = _.some(this.state.competenciesKMSCore,['name',competencyName])
+  //   const isExistKmsOptional =  _.some(this.state.competenciesKmsOptional,['name',competencyName])
+  //   if(_.isNull(competencyName) || _.isUndefined(competencyName) || _.isEmpty(competencyName)){
+  //     message.error("Please input competency name",3)
+  //     this.setState({error : true})
+  //   }else if(isExistKmsCore || isExistKmsOptional ){
+  //      message.error("Competency has already existed ",3)
+  //     this.setState({error : true})
+  //   }else{
+  //     this.setState({error : false})
+  //   }    
+  // }
 
   addNew(lastIndex, competencyName, option) {
     let lastId = parseInt(lastIndex, 10) + 1
@@ -134,7 +134,7 @@ class Competencies extends Component {
         competenciesKmsOptional: newDataCompeteciesKMSOptional
       })
     }
-    message.success('Create competency successfully',3)
+    // message.success('Create competency successfully',3)
     update(`competencies1/${option}/${lastId}`, newCompetency)
   }
 
@@ -148,18 +148,18 @@ class Competencies extends Component {
   }
 
   handleSave = (e) => {
-    this.checkCompetencyNameInput(this.state.competencyName)
-    console.log(this.state.error)
-    if(this.state.error === false){
-      this.addNewCompetency(this.state.competencyName, this.state.option);
+    // this.checkCompetencyNameInput(this.state.competencyName)
+    // console.log(this.state.error)
+    // if(this.state.error === false){
       this.setState({
         visible: false
       });
-    }else{
-       this.setState({
-        visible: true
-      }); 
-    }
+      this.addNewCompetency(this.state.competencyName, this.state.option);
+    // }else{
+    //    this.setState({
+    //     visible: true
+    //   }); 
+    // }
   }
 
   handleCancel = (e) => {
