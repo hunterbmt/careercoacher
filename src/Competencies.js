@@ -34,6 +34,7 @@ class Competencies extends Component {
     } else {
       _.update(this.state.competenciesKmsOptional[this.state.keyUpdate], 'activated', () => { return this.state.optionActivated })
     }
+    message.success("Update Competency successfully", 3)
 
     update(`competencies1/${this.state.selectOption}/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
@@ -44,7 +45,6 @@ class Competencies extends Component {
   }
 
   handleCancelActivated = (e) => {
-
     this.setState({
       showEditPopup: false,
       loadingActivated: true
@@ -83,6 +83,8 @@ class Competencies extends Component {
         competenciesKmsOptional: newDataCompeteciesKMSOptional
       })
     }
+    message.success("Create Competency successfully", 3)
+
     update(`competencies1/${option}/${lastId}`, newCompetency)
   }
 

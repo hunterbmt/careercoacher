@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Button, Row, Col, Modal, Table, Card } from 'antd';
+import { Layout, Button, Row, Col, Modal, Table, Card, message } from 'antd';
 import { getData, update, getLastIndex } from './firebase';
 import _ from 'lodash';
 import Loading from './Loading';
@@ -72,7 +72,7 @@ class QuestionCompetency extends Component {
         this.setState({
             dataQuestion: newDataQuestion
         })
-
+        message.success("Create question successfully", 3)
         update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newData);
     }
 
@@ -98,6 +98,7 @@ class QuestionCompetency extends Component {
             dataQuestion: newDataQuestion
         })
 
+        message.success("Create question successfully", 3)
         update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newDataOthers);
     }
 
@@ -119,7 +120,7 @@ class QuestionCompetency extends Component {
         this.setState({
             dataQuestion: this.state.dataQuestion
         })
-
+        message.success("update question successfully", 3)
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption);
     }
 
@@ -135,15 +136,15 @@ class QuestionCompetency extends Component {
         this.setState({
             dataQuestion: this.state.dataQuestion
         })
-
+        message.success("update question successfully", 3)
         update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers);
     }
 
     editQuestionFormRef = (form) => {
-           this.setState({ 
-               editQuestionFormRef : form
-           })
-        }
+        this.setState({
+            editQuestionFormRef: form
+        })
+    }
 
     handleEdit = () => {
         const form = this.state.editQuestionFormRef;
@@ -257,7 +258,7 @@ class QuestionCompetency extends Component {
 
     createQuestionFormRef = (form) => {
         this.setState({
-            createQuestionFormRef : form
+            createQuestionFormRef: form
         })
     }
 
@@ -326,9 +327,9 @@ class QuestionCompetency extends Component {
                 </Row>
                 <Row style={{ margin: 100 }}>
                     <Col>
-                     <Card>
-                    <Table columns={this.getColumns()} dataSource={this.getDataSouce()} />
-                    </Card>
+                        <Card>
+                            <Table columns={this.getColumns()} dataSource={this.getDataSouce()} />
+                        </Card>
                     </Col>
                 </Row>
             </Layout>
