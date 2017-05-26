@@ -10,6 +10,7 @@ import FinishPage from './FinishPage';
 import ProfilePage from './ProfilePage';
 import SetWeight from './SetWeight';
 import './App.css';
+import './ant-custom.css';
 
 const Locations = Router.Locations;
 const Location = Router.Location;

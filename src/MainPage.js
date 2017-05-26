@@ -19,7 +19,21 @@ class MainPage extends Component {
       loading: true
     };
   }
+
+  findMember=(members,name) => {
+    let rs = false
+     _.forEach(members,(value)=>{
+        if(_.isEqual(name,value)){ rs = true}
+      })
+    return rs
+  }
+
+  findManager = (bus, name) => {
+    console.log((_.find(bus, (bu)=>{ return this.findMember(bu.members,name)})).manager)
+  }
+
   componentDidMount() {
+    getData('BU_projects').then((bus)=> this.findManager(bus,'Hihi'))
     Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
       this.setState({
         baseline,

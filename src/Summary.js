@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card } from 'antd';
 import _ from 'lodash';
-import './ant-custom.css';
 const Summary = (props) => {
     return <Card title='Summary' extra={<a href="#">More</a>} style={{ width: 500}}>
         {       

@@ -10,7 +10,7 @@ const RadioGroup = Radio.Group;
 class SetWeight extends Component {
   state = {
     loading: true,
-    constraints: { minRange: 0, maxRange: 0, weight: {} },
+    constraints: { minRange: 0, maxRange: 0, weight: {}, level: _.toNumber(this.props.level)},
     disabledSetWeight: [],
     defaultOption: 'none'
   }
@@ -129,6 +129,13 @@ class SetWeight extends Component {
     } else {
       this.state.disabledSetWeight[index] = false
       this.setState({
+        constraints: {
+          ...this.state.constraints,
+          weight: {
+            ...this.state.constraints.weight,
+            [index]: _.toNumber(this.props.level)
+          }
+        },
         disabledSetWeight: this.state.disabledSetWeight
       })
     }
@@ -141,7 +148,7 @@ class SetWeight extends Component {
 
   saveConstraints() {
     const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-    update(`competencies/${option}/${this.props.index}/constraints/${this.props.level}`, this.state.constraints);
+    update(`competencies/${option}/${this.props.index}/constraints/${this.state.constraints.level-1}`, this.state.constraints);
     this.success()
   }
 
