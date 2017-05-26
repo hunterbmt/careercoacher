@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { Button, Modal, Input, Table, Select, Popconfirm, message } from 'antd'
+import { Button, Modal, Input, Table, Select, Popconfirm, message, Form, Icon, Checkbox } from 'antd'
 import Loading from './Loading'
-import WrappedTestForm from './TestForm'
+import {CreateProjectBaselineForm} from './CreateProjectBaselineForm'
+import {EditProjectBaselineForm} from './EditProjectBaselineForm'
+import {CloneProjectBaselineForm} from './CloneProjectBaselineForm'
 import './App.css'
 import { getData, update, getLastIndex } from './firebase'
+
 
 class ProjectBaseline extends Component {
 
@@ -36,6 +39,8 @@ class ProjectBaseline extends Component {
                         <Popconfirm title='Are you sure delete this item?' onConfirm={() => this.onConfirmDelete(record.no)} onCancel={this.onConfirmCancelDelete} okText='Yes' cancelText='No'>
                             <a>Delete</a>
                         </Popconfirm>
+                        <span className='ant-divider' />
+                        <a onClick={() => this.onSelectBaseline(record.no, record.baseline)} >Clone</a>
                     </span>
                 ),
             }]
@@ -46,7 +51,7 @@ class ProjectBaseline extends Component {
             showEditPopup : true,
             selectedBaseline : baseline,
             selectedbaselineKey : no
-        }, () => Promise.all([getData(`project_baseline`), getData(`project_baseline/${no}/Kms_optional/competencies`)]).then(([projectBaselines, projectBaselineCompetencies]) =>
+        }, () => Promise.all([getData(`project_baseline`), getData(`project_baseline/${no}/competencies`)]).then(([projectBaselines, projectBaselineCompetencies]) =>
             this.setState({
                 projectBaselines,
                 projectBaselineCompetencies,
@@ -56,7 +61,10 @@ class ProjectBaseline extends Component {
     }
 
     componentDidMount() {
-     Promise.all([getData(`project_baseline`), getData(`project_baseline/0/Kms_optional/competencies`), getData('baseline'), getData(`baseline/0/Kms_optional/competencies`)]).then(([projectBaselines, projectBaselineCompetencies, baselines, optionalBaselines]) =>
+     Promise.all([getData(`project_baseline`), getData(`project_baseline/0/competencies`), 
+     getData('baseline'), 
+     getData(`baseline/0/Kms_optional/competencies`)])
+     .then(([projectBaselines, projectBaselineCompetencies, baselines, optionalBaselines]) =>
             this.setState({
                 projectBaselines,
                 projectBaselineCompetencies,
@@ -74,7 +82,6 @@ class ProjectBaseline extends Component {
 
     saveNewProjectBaselineData = (lastIndex, newProjectBaselineName, projectBaselineCompetencies) => {
         lastIndex = _.toNumber(lastIndex) + 1
-        console.log('prepare to save ' + lastIndex)
 
         this.setState({
             projectBaselineToBeSaved: {
@@ -91,30 +98,14 @@ class ProjectBaseline extends Component {
                     this.setState({
                         projectBaselines,
                         loading: false,
-                        showEditProfilePopup: false
+                        showEditPopup: false
                     }))
             })
-    }
-
-    handleEditCancel = () => {
-        this.setState({ showEditPopup: false })
-    }
-
-    handleCreateCancel = () => {
-        this.setState({ showCreateNewPopup: false })
     }
 
     handleBaselineChange = (e) => {
         this.setState({
             newBaseline: e
-        })
-    }
-
-    handleCreateOk = () => {
-        this.saveNewProjectBaseline(this.state.newProjectBaselineName, this.state.projectBaselineCompetencies)
-        this.updateDataSource()
-        this.setState({
-            showCreateNewPopup : false
         })
     }
 
@@ -181,6 +172,55 @@ class ProjectBaseline extends Component {
         update(`project_baseline/${baselineKey}`, null)
     }
 
+    handleCreateCancel = () => {
+        this.setState({ showCreateNewPopup: false })
+    }
+
+    handleCreate = () => {
+        const form = this.state.createFormRef
+        form.validateFields((err, values) => {
+            if (err) {
+                return
+            }
+            this.saveNewProjectBaseline(values.baselineName, this.state.competenciesToBeSaved)
+            
+            this.setState({
+                showCreateNewPopup: false
+            })
+            form.resetFields()
+        })
+    }
+
+    createFormRef = (form) => {
+       this.setState({
+           createFormRef : form
+       })
+    }
+
+    handleEditCancel = () => {
+        this.setState({ showEditPopup: false })
+    }
+
+    handleEdit = () => {
+        const form = this.state.editFormRef
+        form.validateFields((err, values) => {
+            if (err) {
+                return
+            }
+            console.log(values)
+            this.setState({
+                showEditPopup: false
+            })
+            form.resetFields()
+        })
+    }
+
+     editFormRef = (form) => {
+         this.setState({
+           editFormRef : form
+       })
+    }
+
     render() {
         if (this.state.loading) return <Loading />
 
@@ -194,9 +234,14 @@ class ProjectBaseline extends Component {
             optionalBaselines.push(<Option key={item.name + ':' + item.proficiency}>{item.name} : {item.proficiency}</Option>)
         ))
 
+         let selectedProjectBaselineCompetencies = []
+        _.forEach(this.state.projectBaselineCompetencies, (item, index) => (
+            selectedProjectBaselineCompetencies.push(item.name + ' : ' + item.proficiency)
+        ))
+
         let projectBaselineCompetencies = []
         _.forEach(this.state.projectBaselineCompetencies, (item, index) => (
-            projectBaselineCompetencies.push(<Option key={item.name}>{item.name} : {item.proficiency}</Option>)
+            projectBaselineCompetencies.push(<Select.Option key={index}>{item.name} : {item.proficiency}</Select.Option>)
         ))
 
         let dataSource = []
@@ -213,34 +258,38 @@ class ProjectBaseline extends Component {
             <div>
                 <Button icon='user-add' onClick={this.handleAddNewProfile}>Add New Profile</Button>
                 <Table dataSource={dataSource} columns={this.state.columns} />
+
+                <CloneProjectBaselineForm 
+                    visible={this.state.showEditPopup}
+                    ref={this.editFormRef}
+                    onCancel={this.handleEditCancel}
+                    onEdit={this.handleEdit}
+                    projectBaselineCompetencies={projectBaselineCompetencies}
+                    handleChange={this.handleChange}
+                    selectedBaseline={this.state.selectedBaseline}
+                />
+
+                <EditProjectBaselineForm 
+                    visible={this.state.showEditPopup}
+                    ref={this.editFormRef}
+                    onCancel={this.handleEditCancel}
+                    onEdit={this.handleEdit}
+                    projectBaselineCompetencies={optionalBaselines}
+                    handleChange={this.handleChange}
+                    selectedBaseline={this.state.selectedBaseline}
+                    selectedProjectBaselineCompetencies={selectedProjectBaselineCompetencies}
+                />
                 
-                <Modal
-                visible={this.state.showEditPopup}
-                title={'Edit ' + this.state.selectedBaseline}
-                onOk={this.handleEditOk}
-                onCancel={this.handleEditCancel}
-                footer={[
-                    <Button key='back' size='large' onClick={this.handleEditCancel}>Return</Button>,
-                    <Button key='submit' type='primary' size='large' loading={this.state.loading} onClick={this.handleEditOk}>
-                    Save
-                    </Button>
-                ]}
-                >
-                <p>Requiried Baselines: </p>
-                <Input value='KMS Baseline' onChange={this.handleBaselineChange.bind(this)} disabled='true'/>
-                <p>Additional Baselines: </p>
-                <Select
-                    mode='multiple'
-                    style={{ width: '100%' }}
-                    placeholder='Please select'
-                    allowClear='true'
-                    onChange={this.handleChange}
-                >
-                    {projectBaselineCompetencies}
-                </Select>
-                </Modal>
-                
-                <WrappedTestForm showCreateNewPopup={this.state.showCreateNewPopup}/>
+                <CreateProjectBaselineForm 
+                    visible={this.state.showCreateNewPopup}
+                    ref={this.createFormRef}
+                    onCancel={this.handleCreateCancel}
+                    onCreate={this.handleCreate}
+                    baselines={baselines}
+                    optionalBaselines={optionalBaselines}
+                    handleChangeRequiredBaselineOnCreate={this.handleChangeRequiredBaselineOnCreate}
+                    handleChangeAdditionalBaselineOnCreate={this.handleChangeAdditionalBaselineOnCreate}
+                />
                 
             </div>
         )

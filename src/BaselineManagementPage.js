@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { Layout, Icon, Row, Col, Card, Tabs, Popconfirm } from 'antd'
+import { Layout, Icon, Row, Col, Card, Tabs, Popconfirm, BackTop } from 'antd'
 import Loading from './Loading'
 import CoreBaseline from './CoreBaseline'
 import OptionalBaseline from './OptionalBaseline'
@@ -91,7 +91,7 @@ class BaselineManagementPage extends Component {
               <img alt='logo' src={logo} style={{ height: 64, padding: 10 }} />
             </Col>
             <Col style={{ paddingRight: 20 }}>
-
+              <BackTop />
             </Col>
           </Row>
         </Header>
