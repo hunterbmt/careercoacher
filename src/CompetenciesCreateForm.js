@@ -18,8 +18,8 @@ const CompetenciesCreateForm = Form.create()(
         <Form layout="vertical">
           <FormItem label="Competency name">
             {getFieldDecorator('competencyName', {
-              rules: [{ required: true, message: 'Please input competency name!' }],
-            })(
+              rules: [{ required: true, message: 'Please input competency name!' }]}
+            )(
               <Input />
             )}
           </FormItem>

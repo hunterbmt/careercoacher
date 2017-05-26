@@ -3,7 +3,7 @@ import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
 import _ from 'lodash';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
-
+import CompetencyRadar from './CompetencyRadar'
 import {getData, update} from './firebase';
 
 const Option = Select.Option;
@@ -27,7 +27,8 @@ const compentencies = [
   'Customer Focus',
   'Achievement Orientation',
   'Developing Others',
-  'Self Development'
+  'Self Development',
+  'Something i dont know'
 ]
 
 const getSelectedCompentencies = (profile) => {
@@ -61,6 +62,7 @@ export default class ProfilePage extends Component {
   }
 
   getProfileDataToState = (profile) =>  {
+    //console.log('profile is ' + profile)
     this.setState({
       loading: true
     });
@@ -75,17 +77,18 @@ export default class ProfilePage extends Component {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
     const selectedCompentencies = getSelectedCompentencies(profile);
+
     return (
-      <Row type="flex" style={{padding: '20px 10px 10px'}}>
+      <Row type='flex' style={{padding: '20px 10px 10px'}}>
         <Col span={14}>
           <Row>
             <Select
               showSearch
-              size="large"
+              size='large'
               style={{ width: 200 }}
               defaultValue={this.state.compareAgain}
-              placeholder="Select a comparation"
-              optionFilterProp="children"
+              placeholder='Select a comparation'
+              optionFilterProp='children'
               onChange={this.comparationOnChange}
               filterOption={(input, option) => option.props.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
@@ -97,7 +100,13 @@ export default class ProfilePage extends Component {
             </Select>
           </Row>
           <Row type="flex" justify="center">
-
+              <Col span={24}>
+              
+              {!_.isObject(profile)?
+              <h1>Is NULL</h1>:
+              <CompetencyRadar data={profile} compentencies={compentencies} />
+              }              
+              </Col>
           </Row>
         </Col>
         <Col span={9} offset={1}>
@@ -129,7 +138,7 @@ export default class ProfilePage extends Component {
             <Card title='Compentency historical'>
               <Timeline pending={<a href="#">See more...</a>}>
               {_.map(profile.historical, (historical) =>
-                <Timeline.Item color="green">
+                <Timeline.Item color='green'>
                   <p>{historical.time}</p>
                   {_.map(historical.changelog, (change) => <p>{change}</p>)}
                 </Timeline.Item>
@@ -169,6 +178,6 @@ export default class ProfilePage extends Component {
     this.updateConfiguratedCompentencies(configuratedCompentencies);
   }
   updateConfiguratedCompentencies = (configuratedCompentencies) => {
-    update(`/profiles/${this.props.profile}/configuratedCompentencies`, configuratedCompentencies)
+    update(`/profiles/${this.props.profile}/configuratedCompetencies`, configuratedCompentencies)
   }
 };

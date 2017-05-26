@@ -9,6 +9,7 @@ import CompareAssessment from './CompareAssessment';
 import FinishPage from './FinishPage';
 import Competencies from './Competencies'
 import QuestionCompetency from './QuestionCompetency'
+import PersonalProfile from './PersonalProfile'
 
 
 import './App.css';
@@ -23,6 +24,7 @@ class App extends Component {
       <LocaleProvider locale={enUS}>
         <Locations hash style={{height: '100%'}}>
           <Location path='/' handler={MainPage} />
+          <Location path='/:id' handler={PersonalProfile} />
           <Location path='/finish' handler={FinishPage} />
           <Location path='/selfassessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name/final' handler={SelfAssessment} />

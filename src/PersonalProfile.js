@@ -1,18 +1,18 @@
 
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import _ from 'lodash'
 import { Layout, Menu, Icon, Row, Col, Button, Modal, Input } from 'antd'
 import Loading from './Loading'
 import './App.css'
 import logo from './logo.png'
-import {getData} from './firebase'
-import GroupManagement from './GroupManagement'
-import {Link} from 'react-router-component'
+import { getData } from './firebase'
+import PersonalInformation from './PersonalInformation'
+import { Link } from 'react-router-component'
 
 const { Header, Content, Sider } = Layout
 const SubMenu = Menu.SubMenu
 
-class MainPage extends Component {
+class PersonalProfile extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -49,13 +49,13 @@ class MainPage extends Component {
   render() {
     if (this.state.loading) return <Loading />
     return (
-      <Layout style={{height: '100%'}}>
+      <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
-          <Row type='flex' justify='space-between' style={{height: '100%'}}>
+          <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Col span={4}>
-              <img alt='logo' src={logo} style={{height: 64, padding: 10}}/>
+              <img alt='logo' src={logo} style={{ height: 64, padding: 10 }} />
             </Col>
-            <Col style={{paddingRight: 20}}>
+            <Col style={{ paddingRight: 20 }}>
             </Col>
           </Row>
         </Header>
@@ -70,33 +70,17 @@ class MainPage extends Component {
               onClick={this.onSelectProject}
               selectedKeys={[this.state.selectedProject]}
             >
-              <SubMenu
-                key='sub1'
-                title={<span><Icon type='database' /><span className='nav-text'>BU - Projects</span></span>}
-              >
-                {
-                  _.map(Object.keys(this.state.projectList), (project) => <Menu.Item key={project}>{project}</Menu.Item>)
-                }
-              </SubMenu>
-              <Menu.Item key='Report'>
-                <span>
-                  <Icon type='area-chart' />
-                  <span className='nav-text'>Report</span>
-                </span>
-              </Menu.Item>
               <Menu.Item>
                 <Link href='/roleProfile'>
-                <Icon type='user' />
-                <span>Baselines</span>
+                  <Icon type='user' />
+                  <span>Personal Profile</span>
                 </Link>
               </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
             <Content style={{ margin: '0 16px' }}>
-              <GroupManagement
-                project={this.state.selectedProject}
-              />
+            <PersonalInformation id={this.props.id}/>
             </Content>
           </Layout>
         </Layout>
@@ -105,4 +89,4 @@ class MainPage extends Component {
   }
 }
 
-export default MainPage
+export default PersonalProfile
