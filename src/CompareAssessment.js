@@ -25,14 +25,16 @@ class CompareAssessment extends Component {
     this.setState({
       loading: true
     })
-    Promise.all([getData('competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`), getData('profiles')])
-      .then(([competencies, selfAnswers, managerAnswers, profiles]) => {
+    Promise.all([getData('competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`), getData('profiles'), getData('baseline')])
+      .then(([competencies, selfAnswers, managerAnswers, profiles, baseline]) => {
         this.setState({
           loading: false,
           competencies,
           conflicts: this.getConflictsView(selfAnswers, managerAnswers),
           finalAnswers: managerAnswers,
-          indexProfile : _.findKey(profiles,['aliasName',this.props.name])
+          profile: _.find(profiles, ['aliasName', this.props.name]),
+          indexProfile: _.findKey(profiles, ['aliasName', this.props.name]),
+          baseline
         })
       })
   }
@@ -49,22 +51,22 @@ class CompareAssessment extends Component {
   next(competenciesName, level) {
     const current = this.state.current + 1
     this.setState({
-       current,
-       levels:{
-         ...this.state.levels,
-         [competenciesName]: level
-       }
-       })
+      current,
+      levels: {
+        ...this.state.levels,
+        [competenciesName]: level
+      }
+    })
   }
   prev(competenciesName, level) {
     const current = this.state.current - 1
     this.setState({
-       current,
-       levels:{
-         ...this.state.levels,
-         [competenciesName]: level
-       }
-       })
+      current,
+      levels: {
+        ...this.state.levels,
+        [competenciesName]: level
+      }
+    })
   }
   openHint(hint) {
     this.setState({
@@ -78,25 +80,81 @@ class CompareAssessment extends Component {
     })
   }
 
-  saveProficiency=()=>{
+  findBaseLine(levels) {
+    let a = _.get(this.state.baseline,0)
+    let competencies
+    _.isUndefined(a)?null:
+    competencies = _.concat(a.Kms_core.competencies, a.Kms_optional.competencies )
+    console.log(competencies)
+  }
+
+  saveProficiencies = () => {
+    update(`profiles/${this.state.indexProfile}/preCompetencies`, this.state.profile.competencies)
     update(`profiles/${this.state.indexProfile}/competencies`, this.state.levels)
+    this.saveHistory()
   }
 
   saveSummary = (lastIndex) => {
     let newIndex = _.toNumber(lastIndex) + 1
     update(`summary/${this.props.name}/${newIndex}`, this.underWeightsState)
+    window.location.replace(`/#/compare/${this.props.name}/final`)
+  }
+
+  createChangeLog(lastIndex) {
+    let history
+    let i = 0
+    _.lt(lastIndex, 0) ?
+      _.map(this.state.levels, (proficiency, competenciesName) =>
+        history = {
+          ...history,
+          [i++]: `${competenciesName} proficiency started at level ${proficiency}`
+        }
+      )
+      :
+      _.map(this.state.levels, (proficiency, competenciesName) =>
+        _.isEqual(proficiency, this.state.profile.competencies[competenciesName]) ?
+          history = {
+            ...history,
+            [i++]: `${competenciesName} proficiency remain at level ${proficiency}`
+          }
+          :
+          _.lt(proficiency, this.state.profile.competencies[competenciesName]) ?
+            history = {
+              ...history,
+              [i++]: `Decreasing ${competenciesName} proficiency to level ${proficiency}`
+            }
+            :
+            history = {
+              ...history,
+              [i++]: `Increasing ${competenciesName} proficiency to level ${proficiency}`
+            }
+      )
+    return history
+  }
+
+  saveHistory = () => {
+    getLastIndex(`profiles/${this.state.indexProfile}/historical`).then((lastIndex) => {
+      let changelog = this.createChangeLog(lastIndex)
+      let newIndex = _.toNumber(lastIndex)+1
+      let history = {
+        changelog,
+        time: new Date(_.now()).toLocaleDateString()
+      }
+      update(`profiles/${this.state.indexProfile}/historical/${newIndex}`, history)
+    })
   }
 
   saveFinalAnswers(competenciesName, level) {
     this.setState({
-       levels:{
-         ...this.state.levels,
-         [competenciesName]: level
-       }}, () => this.saveProficiency())
-    
+      levels: {
+        ...this.state.levels,
+        [competenciesName]: level
+      }
+    }, () => this.saveProficiencies())
+
     writeAnswers(`${this.props.name}_final`, this.state.finalAnswers)
     getLastIndex(`summary/${this.props.name}`).then((lastIndex) => this.saveSummary(lastIndex))
-    window.location.replace(`/#/compare/${this.props.name}/final`)
+
   }
 
   getUnderWeight = (weights, answers, competenciesName) => {
@@ -113,10 +171,12 @@ class CompareAssessment extends Component {
         :
         null
     )
-    this.underWeightsState = {
-      ...this.underWeightsState,
-      [competenciesName]: underWeights
-    }
+    _.isUndefined(underWeights) ? null
+      :
+      this.underWeightsState = {
+        ...this.underWeightsState,
+        [competenciesName]: underWeights
+      }
   }
 
   onChangeAnswer = (value, index, currentCompetencyName) => {
@@ -129,17 +189,18 @@ class CompareAssessment extends Component {
     question.options ? question.options[value - 1] : value
 
   filterUndifinedObjects = (objects) =>
-    _.filter(objects,(o)=>{return _.isObject(o)})
+    _.filter(objects, (o) => { return _.isObject(o) })
 
   getCurrentConstraintByRange = (range, competenciesName, isCore) =>
     isCore ?
-      _.filter(this.filterUndifinedObjects(_.find(this.state.competencies.Kms_core, { name: competenciesName }).constraints), (constraint) => 
+      _.filter(this.filterUndifinedObjects(_.find(this.state.competencies.Kms_core, { name: competenciesName }).constraints), (constraint) =>
       { return _.inRange(range, constraint.minRange, constraint.maxRange) })[0]
       :
       _.filter(this.filterUndifinedObjects(_.find(this.state.competencies.Kms_optional, { name: competenciesName }).constraints), (constraint) =>
       { return _.inRange(range, constraint.minRange, constraint.maxRange) })[0]
 
   render() {
+    this.findBaseLine();
     if (this.state.loading) return <Loading />
     const competenciesName = Object.keys(this.state.conflicts)
     const listConflicts = Object.values(this.state.conflicts)
@@ -181,10 +242,10 @@ class CompareAssessment extends Component {
                 </Steps>
               </Row>
               <Row style={{ padding: '20px 0' }} type='flex'>
-                <h3>Your {currentCompetencyName} is in level {currentConstrain.level}</h3>             
+                <h3>Your {currentCompetencyName} is in level {currentConstrain.level}</h3>
               </Row>
               <Row>
-                  <strong style={{ color: '#d73435' }}>*The highlighted questions mean that you are not meet the requirement of this level </strong>
+                <strong style={{ color: '#d73435' }}>*The highlighted questions mean that you are not meet the requirement of this level </strong>
               </Row>
               <div className='steps-content'>
                 <Row type='flex'>
@@ -231,7 +292,7 @@ class CompareAssessment extends Component {
                   <Button
                     style={{ marginRight: 8 }}
                     size='large'
-                    onClick={() => this.prev(currentCompetencyName,currentConstrain.level)}
+                    onClick={() => this.prev(currentCompetencyName, currentConstrain.level)}
                   >
                     Previous
                 </Button>
@@ -242,7 +303,7 @@ class CompareAssessment extends Component {
                   <Button
                     type='primary'
                     size='large'
-                    onClick={() => this.next(currentCompetencyName,currentConstrain.level)}
+                    onClick={() => this.next(currentCompetencyName, currentConstrain.level)}
                   >
                     Next
                 </Button>
@@ -256,7 +317,7 @@ class CompareAssessment extends Component {
                     style={{
                       width: 80
                     }}
-                    onClick={() => this.saveFinalAnswers(currentCompetencyName,currentConstrain.level)}
+                    onClick={() => this.saveFinalAnswers(currentCompetencyName, currentConstrain.level)}
                   >
                     Resolve
                 </Button>
