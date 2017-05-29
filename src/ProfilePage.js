@@ -9,27 +9,6 @@ import {getData, update} from './firebase';
 
 const Option = Select.Option;
 
-const compentencies = [
-  'Coding',
-  'Source Control',
-  'Web back-end',
-  'Web front-end',
-  'Mobile',
-  'Desktop',
-  'Database',
-  'Enterprise',
-  'Cloud',
-  'DevOps',
-  'Test',
-  'Report',
-  'ETL',
-  'Big Data',
-  'Effective Communication',
-  'Customer Focus',
-  'Achievement Orientation',
-  'Developing Others',
-  'Self Development'
-]
 
 const getSelectedCompetencies = (profile) => {
   const configuratedCompetencies = profile.configuratedCompetencies;
@@ -50,33 +29,22 @@ export default class ProfilePage extends Component {
       loading: true
     }
   }
-
-  componentDidMount() {
-    this.getProfileDataToState(this.props.profile);
-  }
-
-  componentWillReceiveProps(props) {
-    if(props.profile !== this.props.profile) {
-      this.getProfileDataToState(props.profile);
-    }
-  }
-
-  getProfileDataToState = (profile) =>  {
-    this.setState({
-      loading: true
-    });
-    getData(`profiles/${profile}`)
-    .then((profileData) => this.setState({
-      profile: profileData,
-      loading: false
-    }));
+  
+  componentWillMount(){
+   Promise.all([getData(`profiles/${this.props.id}/competencies`), getData(`profiles/${this.props.id}`)]).then(([personalCompetencies,personalProfile]) => this.setState({
+     competencies : Object.keys(personalCompetencies),
+     profile : personalProfile,
+     loading : false
+   }))
   }
 
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
-    const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
+    const radarData = [this.props.previousCompetencies, this.props.presentCompetencies];
     const selectedCompetencies = getSelectedCompetencies(profile);
+    console.log(selectedCompetencies)
+
     return (
       <Row type="flex" style={{padding: '20px 10px 10px'}}>
         <Col span={14}>
@@ -108,7 +76,7 @@ export default class ProfilePage extends Component {
         <Col span={9} offset={1}>
           <Row type='flex' justify='end'>
             <CompentencyConfig
-              compentencies={compentencies}
+              compentencies={this.state.competencies}
               selectedCompentencies={selectedCompetencies}
               removeCompentency={this.removeCompentency}
               addCompentency={this.addCompentency}
@@ -148,8 +116,6 @@ export default class ProfilePage extends Component {
   }
 
   comparationOnChange = (comparation) => this.setState({compareAgain: comparation})
-
-  getBaseLineData = (baselineName) => _.find(this.props.baseline, (baseline) => baseline.name === baselineName)
 
   removeCompentency = (compentency) => {
     const targetProfile = this.state.profile;

@@ -50,6 +50,12 @@ export default class PersionalInformation extends Component {
   componentWillMount() {
     getData(`BU_projects`).then((data) => this.findManagerInformation(data, this.props.id))
     this.getPersonalInformation();
+    getData(`profiles/${this.props.id}/preCompetencies`).then((preCompetencies) => this.setState({
+      previousCompetencies : preCompetencies
+    }))
+    getData(`profiles/${this.props.id}/competencies`).then((competencies) => this.setState({
+      presentCompetencies : competencies
+    }))
   }
 
   render() {
@@ -69,7 +75,10 @@ export default class PersionalInformation extends Component {
               </Col>
               <Col span={16}>
                 <Card>
-                  <ProfilePage id={this.props.id}
+                  <ProfilePage
+                   id={this.props.id}
+                   previousCompetencies={this.state.previousCompetencies}
+                   presentCompetencies={this.state.presentCompetencies}
                   />
                 </Card>
               </Col>
