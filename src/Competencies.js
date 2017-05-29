@@ -261,6 +261,18 @@ class Competencies extends Component {
     this.getCompetencyOptional();
   }
 
+  handleCheckUniqueCompetency = (rule, value, callback) =>{
+      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    if(value && _.some(this.state.competenciesKMSCore,['name',value])){
+      callback('competency has already existed in KMS Core')
+      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') 
+    }
+    if(value && _.some(this.state.competenciesKmsOptional,['name',value])){
+       callback('competency has already existed in KMS Optional')
+    }
+    callback()
+  }
+
   render() {
     if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
     return (
@@ -277,6 +289,7 @@ class Competencies extends Component {
                 visible={this.state.visible}
                 onCancel={this.handleCancel}
                 onCreate={this.handleCreate}
+                handleCheckUniqueCompetency={this.handleCheckUniqueCompetency}
               />
             </Col>
           </Row>

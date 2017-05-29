@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { Layout, Menu, Icon, Row, Col, Button, Modal, Input } from 'antd'
+import { Layout, Menu, Icon, Row, Col } from 'antd'
 import Loading from './Loading'
 import './App.css'
 import logo from './logo.png'
@@ -10,7 +10,7 @@ import PersonalInformation from './PersonalInformation'
 import { Link } from 'react-router-component'
 
 const { Header, Content, Sider } = Layout
-const SubMenu = Menu.SubMenu
+
 
 class PersonalProfile extends Component {
   constructor(props) {

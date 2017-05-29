@@ -1,11 +1,11 @@
 import { Form, Modal, Select, Input } from 'antd';
-import React, { Component } from 'react';
+import React, { } from 'react';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
 const CompetenciesCreateForm = Form.create()(
   (props) => {
-    const { visible, onCancel, onCreate, form } = props;
+    const { visible, onCancel, onCreate, form, handleCheckUniqueCompetency } = props;
     const { getFieldDecorator } = form;
     return (
       <Modal
@@ -18,7 +18,7 @@ const CompetenciesCreateForm = Form.create()(
         <Form layout="vertical">
           <FormItem label="Competency name">
             {getFieldDecorator('competencyName', {
-              rules: [{ required: true, message: 'Please input competency name!' }]}
+              rules: [{ required: true, message: 'Please input competency name!' },{ validator : handleCheckUniqueCompetency }]}
             )(
               <Input />
             )}

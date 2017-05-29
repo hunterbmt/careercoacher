@@ -59,7 +59,7 @@ export default class PersionalInformation extends Component {
           <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Content style={{ margin: '0 40px' }}>
               <Col span={8}>
-                <Card title={'Persional Information'} style={{ width: '60%' }}>
+                <Card title={'Personal Information'} style={{ width: '60%' }}>
                  <Avatar size="200" round="true" src="http://careers.kms-technology.com/wp-content/uploads/2015/09/kms-next-avatar.png" />
                   <h3>Name : {this.state.personalName}</h3>
                   <p>Title: {this.state.personalTitle}</p>
