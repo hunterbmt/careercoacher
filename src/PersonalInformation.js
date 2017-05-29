@@ -69,7 +69,7 @@ export default class PersionalInformation extends Component {
               </Col>
               <Col span={16}>
                 <Card>
-                  <ProfilePage 
+                  <ProfilePage id={this.props.id}
                   />
                 </Card>
               </Col>

@@ -62,7 +62,6 @@ export default class ProfilePage extends Component {
   }
 
   getProfileDataToState = (profile) =>  {
-    //console.log('profile is ' + profile)
     this.setState({
       loading: true
     });
