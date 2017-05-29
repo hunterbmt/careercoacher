@@ -8,8 +8,9 @@ const CheckboxGroup = Checkbox.Group
 export const EditProjectBaselineForm = Form.create()(
     
   (props) => {
-    const { visible, onCancel, onEdit, form, projectBaselineCompetencies, selectedProjectBaselineCompetencies, handleChange, selectedBaseline } = props
+    const { visible, onCancel, onEdit, form, projectBaselineCompetencies, optionalBaselines, selectedProjectBaselineCompetencies, handleChange, selectedBaseline, differences } = props
     const { getFieldDecorator } = form
+    
     return (
         <Modal
             visible={visible}
@@ -23,24 +24,22 @@ export const EditProjectBaselineForm = Form.create()(
                     {getFieldDecorator('requiredBaseline', {
                         rules: [{ required: true, message: 'Please input Required Baseline!' }],
                     })(
-                        <Input prefix={<Icon type='user' style={{ fontSize: 13 }} />} placeholder={selectedBaseline}  disabled='true' />
+                        <Input prefix={<Icon type='user' style={{ fontSize: 13 }} />} placeholder={selectedBaseline} disabled='true' />
                         )}
                 </FormItem>
 
+                <p>Selected Baselines</p>
                 <FormItem>
-                    {getFieldDecorator('projectBaselineComptencies', {
-                        rules: [{ required: true, message: 'Please input Project Competencies!' }], initialValue:selectedProjectBaselineCompetencies
-                    })(
-                        <Select
-                            mode='multiple'
-                            style={{ width: '100%' }}
-                            placeholder='Please select'
-                            allowClear='true'
-                            onChange={handleChange}
-                        >
-                            {projectBaselineCompetencies}
-                        </Select>
-                        )}
+                <Select
+                mode='multiple' 
+                style={{ width: '100%' }}
+                placeholder='Please select'
+                allowClear='true'
+                onChange={handleChange}
+                value={optionalBaselines}
+              > 
+                {projectBaselineCompetencies}
+              </Select>
                 </FormItem>
             </Form>
         </Modal>

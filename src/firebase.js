@@ -20,16 +20,8 @@ export const update = (part, data) => database.ref().update({[part]: data});
 
 export const writeAnswers = (user, data) => database.ref(`answers/${user}`).set(data);
 
-export const getLastIndexDefault = (data) => {
-  if (_.isEmpty(data)) {
-    return -1
-  } else {
-    return _.last(Object.keys(data))
-  }
-}
+const getLastIndexDefault = (data) => _.isEmpty(data) ? -1 : _.last(Object.keys(data))
 
-export const getLastIndex = (part) => {
-  return getData(part).then((data) => getLastIndexDefault(data))
-}
+export const getLastIndex = (part) => getData(part).then((data) => getLastIndexDefault(data))
 
 export default firebase;

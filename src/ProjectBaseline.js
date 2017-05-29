@@ -51,10 +51,11 @@ class ProjectBaseline extends Component {
             showEditPopup : true,
             selectedBaseline : baseline,
             selectedbaselineKey : no
-        }, () => Promise.all([getData(`project_baseline`), getData(`project_baseline/${no}/competencies`)]).then(([projectBaselines, projectBaselineCompetencies]) =>
+        }, () => Promise.all([getData(`project_baseline`), getData(`project_baseline/${no}/competencies`), getData(`baseline/${no}/Kms_optional/competencies`)]).then(([projectBaselines, projectBaselineCompetencies, optionalBaselines]) =>
             this.setState({
                 projectBaselines,
                 projectBaselineCompetencies,
+                optionalBaselines,
                 loading: false
             })
         ))
@@ -141,6 +142,7 @@ class ProjectBaseline extends Component {
 
     handleChangeAdditionalBaselineOnCreate = (selectedItem) => {
         let data = []
+       
         _.forEach(selectedItem, (item) => {
             data.push({
                 name : item.split(':')[0],
@@ -207,7 +209,7 @@ class ProjectBaseline extends Component {
             if (err) {
                 return
             }
-            console.log(values)
+            
             this.setState({
                 showEditPopup: false
             })
@@ -226,22 +228,27 @@ class ProjectBaseline extends Component {
 
         let baselines = []
         _.forEach(this.state.baselines, (item, index) => (
-            baselines.push(<Option key={index}>{item.name}</Option>)
+            baselines.push(<Option key={index}>{item.name} : {item.proficiency}</Option>)
         ))
 
         let optionalBaselines = []
         _.forEach(this.state.optionalBaselines, (item) => (
-            optionalBaselines.push(<Option key={item.name + ':' + item.proficiency}>{item.name} : {item.proficiency}</Option>)
+            optionalBaselines.push(<Option key={item.name}>{item.name} : {item.proficiency}</Option>)
         ))
 
          let selectedProjectBaselineCompetencies = []
         _.forEach(this.state.projectBaselineCompetencies, (item, index) => (
-            selectedProjectBaselineCompetencies.push(item.name + ' : ' + item.proficiency)
+            selectedProjectBaselineCompetencies.push(<Option key={item.name}>{`${item.name} : ${item.proficiency}`}</Option>)
         ))
+
+        let defaultOptionalBaselines = []
+        defaultOptionalBaselines = _.map(this.state.projectBaselineCompetencies, (item) => 
+            item.name
+        )
 
         let projectBaselineCompetencies = []
         _.forEach(this.state.projectBaselineCompetencies, (item, index) => (
-            projectBaselineCompetencies.push(<Select.Option key={index}>{item.name} : {item.proficiency}</Select.Option>)
+            projectBaselineCompetencies.push(<Option key={index}>{item.name} : {item.proficiency}</Option>)
         ))
 
         let dataSource = []
@@ -275,6 +282,7 @@ class ProjectBaseline extends Component {
                     onCancel={this.handleEditCancel}
                     onEdit={this.handleEdit}
                     projectBaselineCompetencies={optionalBaselines}
+                    optionalBaselines={defaultOptionalBaselines}
                     handleChange={this.handleChange}
                     selectedBaseline={this.state.selectedBaseline}
                     selectedProjectBaselineCompetencies={selectedProjectBaselineCompetencies}

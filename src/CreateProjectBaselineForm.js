@@ -49,7 +49,7 @@ export const CreateProjectBaselineForm = Form.create()(
                 placeholder='Please select'
                 allowClear='true'
                 onChange={handleChangeAdditionalBaselineOnCreate}
-              >
+              > 
                 {optionalBaselines}
               </Select>
               )}
