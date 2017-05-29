@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
 import _ from 'lodash';
-import CompentencyRadar from './CompentencyRadar';
+import CompetencyRadar from './CompetencyRadar';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
 
@@ -99,7 +99,7 @@ export default class ProfilePage extends Component {
             </Select>
           </Row>
           <Row type="flex" justify="center">
-            <CompentencyRadar
+            <CompetencyRadar
               data={radarData}
               competencies={selectedCompetencies}
             />
