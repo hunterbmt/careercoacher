@@ -23,11 +23,14 @@ class MainPage extends Component {
   }
 
   componentDidMount() {
-    Promise.all([getData('baseline'), getData('BU_projects')]).then(([baseline, projectList]) =>
+    Promise.all([getData('baseline'), getData('BU_projects/0'), getData('profileList')]).then(([baseline, projectList, profileList]) =>
       this.setState({
-        baseline,
+        baseline: _.map(baseline, (base) =>({name: base.name, competencies: _.flatten([base.Kms_core.competencies, base.Kms_optional.competencies])})),
+        profileList,
         projectList,
+        test:baseline,
         selectedProject: _.first(Object.keys(projectList)),
+        selectedProfile: _.first(Object.keys(profileList)),
         loading: false
       })
     )

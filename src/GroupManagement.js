@@ -42,10 +42,11 @@ export default class GroupManagement extends Component {
   }
 
   getGroupDataToState = (projectName) =>  {
+    console.log('pj name is ' + projectName)
     this.setState({
       loading: true
     })
-    getData(`BU_projects/${projectName}`)
+    getData(`BU_projects/0`)
     .then(({members, manager}) => this.setState({
       projectName: projectName,
       members: members,
