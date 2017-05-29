@@ -1,53 +1,48 @@
+import React, {Component} from 'react';
+import _ from 'lodash';
+import { Layout, Menu, Icon, Row, Col, Button } from 'antd';
+import ProfilePage from './ProfilePage';
+import Loading from './Loading';
+import './App.css';
+import logo from './logo.png';
+import {getData} from './firebase';
 
-import React, {Component} from 'react'
-import _ from 'lodash'
-import { Layout, Menu, Icon, Row, Col, Button, Modal, Input } from 'antd'
-import Loading from './Loading'
-import './App.css'
-import logo from './logo.png'
-import {getData} from './firebase'
-import GroupManagement from './GroupManagement'
-import {Link} from 'react-router-component'
-
-const { Header, Content, Sider } = Layout
-const SubMenu = Menu.SubMenu
+const { Header, Content, Sider } = Layout;
+const SubMenu = Menu.SubMenu;
 
 class MainPage extends Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       collapsed: false,
       mode: 'inline',
       loading: true
-    }
+    };
   }
-
   componentDidMount() {
-    Promise.all([getData('baseline'), getData('BU_projects')]).then(([baseline, projectList]) =>
+    Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
       this.setState({
-        baseline,
-        projectList,
-        selectedProject: _.first(Object.keys(projectList)),
+        baseline: _.map(baseline, (base) =>({name: base.name, competencies: _.flatten([base.Kms_core.competencies, base.Kms_optional.competencies])})),
+        profileList,
+        test:baseline,
+        selectedProfile: _.first(profileList),
         loading: false
       })
-    )
+    );
   }
-
   onCollapse = (collapsed) => {
     this.setState({
       collapsed,
       mode: collapsed ? 'vertical' : 'inline',
-    })
+    });
   }
-
-  onSelectProject = (e) => {
+  onSelectProfile = (e) => {
     this.setState({
-      selectedProject: e.key,
-    })
+      selectedProfile: e.key,
+    });
   }
-
   render() {
-    if (this.state.loading) return <Loading />
+    if (this.state.loading) return <Loading />;
     return (
       <Layout style={{height: '100%'}}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -56,6 +51,7 @@ class MainPage extends Component {
               <img alt='logo' src={logo} style={{height: 64, padding: 10}}/>
             </Col>
             <Col style={{paddingRight: 20}}>
+              <Button type='primary' style={{height: 40, fontSize: 14}}>Add new profile</Button>
             </Col>
           </Row>
         </Header>
@@ -65,44 +61,39 @@ class MainPage extends Component {
             collapsed={this.state.collapsed}
             onCollapse={this.onCollapse}
           >
-            <Menu theme='dark'
+            <Menu theme="dark"
               mode={this.state.mode}
-              onClick={this.onSelectProject}
-              selectedKeys={[this.state.selectedProject]}
+              onClick={this.onSelectProfile}
+              selectedKeys={[this.state.selectedProfile]}
             >
               <SubMenu
-                key='sub1'
-                title={<span><Icon type='database' /><span className='nav-text'>BU - Projects</span></span>}
+                key="sub1"
+                title={<span><Icon type="user" /><span className="nav-text">Members</span></span>}
               >
                 {
-                  _.map(Object.keys(this.state.projectList), (project) => <Menu.Item key={project}>{project}</Menu.Item>)
+                  _.map(this.state.profileList, (profile) => <Menu.Item key={profile}>{profile}</Menu.Item>)
                 }
               </SubMenu>
               <Menu.Item key='Report'>
                 <span>
-                  <Icon type='area-chart' />
-                  <span className='nav-text'>Report</span>
+                  <Icon type="area-chart" />
+                  <span className="nav-text">Report</span>
                 </span>
-              </Menu.Item>
-              <Menu.Item>
-                <Link href='/roleProfile'>
-                <Icon type='user' />
-                <span>Baselines</span>
-                </Link>
               </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
             <Content style={{ margin: '0 16px' }}>
-              <GroupManagement
-                project={this.state.selectedProject}
+              <ProfilePage
+                baseline={this.state.baseline}
+                profile={this.state.selectedProfile}
               />
             </Content>
           </Layout>
         </Layout>
       </Layout>
-    )
+    );
   }
 }
 
-export default MainPage
+export default MainPage;

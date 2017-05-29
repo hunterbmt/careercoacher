@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
 import _ from 'lodash';
+import CompentencyRadar from './CompentencyRadar';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
-import CompetencyRadar from './CompetencyRadar'
+
 import {getData, update} from './firebase';
 
 const Option = Select.Option;
@@ -27,18 +28,17 @@ const compentencies = [
   'Customer Focus',
   'Achievement Orientation',
   'Developing Others',
-  'Self Development',
-  'Something i dont know'
+  'Self Development'
 ]
 
-const getSelectedCompentencies = (profile) => {
-  const configuratedCompentencies = profile.configuratedCompentencies;
-  if (!_.isEmpty(configuratedCompentencies)) return configuratedCompentencies;
-  const nonEmptyCompentencies = _.reduce(profile.compentencies, (result, proficiency, compentency) => {
-    if (proficiency > 0) result.push(compentency);
+const getSelectedCompetencies = (profile) => {
+  const configuratedCompetencies = profile.configuratedCompetencies;
+  if (!_.isEmpty(configuratedCompetencies)) return configuratedCompetencies;
+  const nonEmptyCompetencies = _.reduce(profile.compentecies, (result, proficiency, competency) => {
+    if (proficiency > 0) result.push(competency);
     return result;
   }, []);
-  return nonEmptyCompentencies;
+  return nonEmptyCompetencies;
 }
 
 export default class ProfilePage extends Component {
@@ -75,19 +75,19 @@ export default class ProfilePage extends Component {
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
-    const selectedCompentencies = getSelectedCompentencies(profile);
-
+    const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
+    const selectedCompetencies = getSelectedCompetencies(profile);
     return (
-      <Row type='flex' style={{padding: '20px 10px 10px'}}>
+      <Row type="flex" style={{padding: '20px 10px 10px'}}>
         <Col span={14}>
           <Row>
             <Select
               showSearch
-              size='large'
+              size="large"
               style={{ width: 200 }}
               defaultValue={this.state.compareAgain}
-              placeholder='Select a comparation'
-              optionFilterProp='children'
+              placeholder="Select a comparation"
+              optionFilterProp="children"
               onChange={this.comparationOnChange}
               filterOption={(input, option) => option.props.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
@@ -99,20 +99,17 @@ export default class ProfilePage extends Component {
             </Select>
           </Row>
           <Row type="flex" justify="center">
-              <Col span={24}>
-              
-              {!_.isObject(profile)?
-              <h1>Is NULL</h1>:
-              <CompetencyRadar data={profile} compentencies={compentencies} />
-              }              
-              </Col>
+            <CompentencyRadar
+              data={radarData}
+              competencies={selectedCompetencies}
+            />
           </Row>
         </Col>
         <Col span={9} offset={1}>
           <Row type='flex' justify='end'>
             <CompentencyConfig
               compentencies={compentencies}
-              selectedCompentencies={selectedCompentencies}
+              selectedCompentencies={selectedCompetencies}
               removeCompentency={this.removeCompentency}
               addCompentency={this.addCompentency}
             />
@@ -137,7 +134,7 @@ export default class ProfilePage extends Component {
             <Card title='Compentency historical'>
               <Timeline pending={<a href="#">See more...</a>}>
               {_.map(profile.historical, (historical) =>
-                <Timeline.Item color='green'>
+                <Timeline.Item color="green">
                   <p>{historical.time}</p>
                   {_.map(historical.changelog, (change) => <p>{change}</p>)}
                 </Timeline.Item>
@@ -156,27 +153,27 @@ export default class ProfilePage extends Component {
 
   removeCompentency = (compentency) => {
     const targetProfile = this.state.profile;
-    const configuratedCompentencies = _.filter(getSelectedCompentencies(targetProfile), (value) => compentency !== value);
+    const configuratedCompetencies = _.filter(getSelectedCompetencies(targetProfile), (value) => compentency !== value);
     this.setState({
       profile: {
         ...targetProfile,
-        configuratedCompentencies
+        configuratedCompetencies
       }
     });
-    this.updateConfiguratedCompentencies(configuratedCompentencies);
+    this.updateConfiguratedCompentencies(configuratedCompetencies);
   }
   addCompentency = (compentency) => {
     const targetProfile = this.state.profile;
-    const configuratedCompentencies = _.concat(getSelectedCompentencies(targetProfile), compentency);
+    const configuratedCompetencies = _.concat(getSelectedCompetencies(targetProfile), compentency);
     this.setState({
       profile: {
         ...targetProfile,
-        configuratedCompentencies
+        configuratedCompetencies
       }
     });
-    this.updateConfiguratedCompentencies(configuratedCompentencies);
+    this.updateConfiguratedCompetencies(configuratedCompetencies);
   }
-  updateConfiguratedCompentencies = (configuratedCompentencies) => {
-    update(`/profiles/${this.props.profile}/configuratedCompetencies`, configuratedCompentencies)
+  updateConfiguratedCompetencies = (configuratedCompetencies) => {
+    update(`/profiles/${this.props.profile}/configuratedCompetencies`, configuratedCompetencies)
   }
 };
