@@ -20,20 +20,26 @@ export default class GroupManagement extends Component {
   componentDidMount() {
     this.getGroupDataToState(this.props.project)
 
-    Promise.all([getData('profiles/3/preCompetencies'), getData('profileList')]).then(([baseline, profileList]) =>
+    Promise.all([getData('profiles/3/preCompetencies'), getData('profileList'), getData(`profiles/3/preCompetencies`), getData(`profiles/3/competencies`)])
+    .then(([baseline, profileList, previousCompetencies, currentCompetencies]) =>
       this.setState({
         baseline,
         profileList,
+        previousCompetencies,
+        currentCompetencies,
         selectedProfile: _.first(profileList)
-      })
+      }, () => this.flattenData())
     )
+  }
 
-    getData(`profiles/3/preCompetencies`).then((preCompetencies) => this.setState({
-      previousCompetencies : preCompetencies
-    }))
-    getData(`profiles/3/competencies`).then((competencies) => this.setState({
-      presentCompetencies : competencies
-    }))
+  flattenData = () => {
+    const x = _.concat(this.state.previousCompetencies.required, this.state.previousCompetencies.custom)
+    const y = _.concat(this.state.currentCompetencies.required, this.state.currentCompetencies.custom)
+
+    this.setState({
+      previousCompetencies: x,
+      currentCompetencies: y
+    })
   }
 
   componentWillReceiveProps(props) {
@@ -86,7 +92,7 @@ export default class GroupManagement extends Component {
                   <ProfilePage
                    id={3}
                    previousCompetencies={this.state.previousCompetencies}
-                   presentCompetencies={this.state.presentCompetencies}
+                   currentCompetencies={this.state.currentCompetencies}
                   />
                 </Card>
               </Col>

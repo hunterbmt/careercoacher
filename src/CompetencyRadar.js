@@ -37,8 +37,8 @@ const getBorderColor = (index) => colorList[index].setAlpha(1).toRgbString();
 
 const CompentencyRadar = ({width = 600, height = 'auto', data, competencies}) => {   
   const radarData = _.map(data, (item, index) => ({
-    label: 'Must change',
-    data: _.map(competencies, (competencyName) => _.isNumber(competencyName) ?  item.competencyName : _.get(item,competencyName)),
+    label: _.isEqual(index, 0) ? 'previous' : 'current',
+    data: _.map(competencies, (competency) => _.find(item,['name', competency]).proficiency),
     backgroundColor: getBackgroundColorString(index),
     borderColor: getBorderColor(index),
     pointBackgroundColor: getBackgroundColorString(index),

@@ -41,8 +41,9 @@ export default class ProfilePage extends Component {
   render() {
     if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
     const profile = this.state.profile;
-    const radarData = [this.props.previousCompetencies, this.props.presentCompetencies];
+    const radarData = [this.props.previousCompetencies, this.props.currentCompetencies];
     const selectedCompetencies = getSelectedCompetencies(profile);
+    console.log(selectedCompetencies.xxx)
 
     return (
       <Row type="flex" style={{padding: '20px 10px 10px'}}>
@@ -75,7 +76,7 @@ export default class ProfilePage extends Component {
         <Col span={9} offset={1}>
           <Row type='flex' justify='end'>
             <CompentencyConfig
-              compentencies={this.state.competencies}
+              compentencies={_.map(this.props.currentCompetencies, (item) => item.name)}
               selectedCompentencies={selectedCompetencies}
               removeCompentency={this.removeCompentency}
               addCompentency={this.addCompentency}
