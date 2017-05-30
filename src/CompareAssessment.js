@@ -25,19 +25,22 @@ class CompareAssessment extends Component {
     this.setState({
       loading: true
     })
-    Promise.all([getData('competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`), getData('profiles'), getData('baseline')])
-      .then(([competencies, selfAnswers, managerAnswers, profiles, baseline]) => {
+    Promise.all([getData('competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`), getData('profiles'), getData('project_baseline'), getData('baseline'), getData('BU_projects')])
+      .then(([competencies, selfAnswers, managerAnswers, profiles, projectBaseline, baseline, BU_projects]) => {
         this.setState({
           loading: false,
           competencies,
           conflicts: this.getConflictsView(selfAnswers, managerAnswers),
           finalAnswers: managerAnswers,
           profile: _.find(profiles, ['aliasName', this.props.name]),
+          employeeID: _.findKey(profiles, ['aliasName', this.props.name]),
           indexProfile: _.findKey(profiles, ['aliasName', this.props.name]),
-          baseline
+          coreBaseline:_.map(baseline,'Kms_core'),
+          projectRequired : _.filter(projectBaseline,['projectName',_.find(BU_projects,(project)=>{return _.some(project.members,this.state.employeeID)}).name])
         })
       })
   }
+
   getConflictsView = (selfAnswers, managerAnswers) => {
     const conflicts = _.mergeWith(selfAnswers, managerAnswers, (selfAnswer, managerAnswer) =>
       _.map(selfAnswer, (answer, index) => [answer, managerAnswer[index]])
@@ -54,7 +57,11 @@ class CompareAssessment extends Component {
       current,
       levels: {
         ...this.state.levels,
-        [competenciesName]: level
+        [this.state.current]:
+        {
+          name: competenciesName,
+          proficiency: level
+        }
       }
     })
   }
@@ -64,7 +71,11 @@ class CompareAssessment extends Component {
       current,
       levels: {
         ...this.state.levels,
-        [competenciesName]: level
+        [this.state.current]:
+        {
+          name: competenciesName,
+          proficiency: level
+        }
       }
     })
   }
@@ -80,18 +91,46 @@ class CompareAssessment extends Component {
     })
   }
 
+  isMatchBaseline=(baselines)=>{
+    let isMatch = false
+    _.forEach(baselines,(value)=>{
+      _.gte(_.find(this.state.levels,['name',value.name]).proficiency, value.proficiency)?
+      isMatch = true
+      :
+      null
+    })
+    return isMatch
+  } 
+
   findBaseLine(levels) {
-    let a = _.get(this.state.baseline,0)
-    let competencies
-    _.isUndefined(a)?null:
-    competencies = _.concat(a.Kms_core.competencies, a.Kms_optional.competencies )
-    console.log(competencies)
+    let title = 'SE'
+    let baseline
+   _.forEach(this.state.projectRequired,(value,key)=>{
+     let competencies
+     _.isUndefined(value)?null:
+     competencies = _.concat(value.competencies,this.state.coreBaseline[value.coreId].competencies)
+     baseline={
+       ...baseline,
+       [key]:{competencies,
+       title: value.name}
+     }
+   })
+   _.forEach(baseline,(value)=>
+    this.isMatchBaseline(value.competencies)?
+    this.setState({
+      title: baseline.title
+    })
+    :
+    null
+  )  
+  console.log(title)
   }
 
   saveProficiencies = () => {
     update(`profiles/${this.state.indexProfile}/preCompetencies`, this.state.profile.competencies)
-    update(`profiles/${this.state.indexProfile}/competencies`, this.state.levels)
+    update(`profiles/${this.state.indexProfile}/competencies/required`, this.state.levels)
     this.saveHistory()
+    this.findBaseLine()
   }
 
   saveSummary = (lastIndex) => {
@@ -104,29 +143,29 @@ class CompareAssessment extends Component {
     let history
     let i = 0
     _.lt(lastIndex, 0) ?
-      _.map(this.state.levels, (proficiency, competenciesName) =>
+      _.map(this.state.levels, (competency) =>
         history = {
           ...history,
-          [i++]: `${competenciesName} proficiency started at level ${proficiency}`
+          [i++]: `${competency.name} proficiency started at level ${competency.proficiency}`
         }
       )
       :
-      _.map(this.state.levels, (proficiency, competenciesName) =>
-        _.isEqual(proficiency, this.state.profile.competencies[competenciesName]) ?
+      _.map(this.state.levels, (competency) =>
+        _.isEqual(competency.proficiency, _.find(this.state.profile.competencies.required,['name',competency.name]).proficiency) ?
           history = {
             ...history,
-            [i++]: `${competenciesName} proficiency remain at level ${proficiency}`
+            [i++]: `${competency.name} proficiency remain at level ${competency.proficiency}`
           }
           :
-          _.lt(proficiency, this.state.profile.competencies[competenciesName]) ?
+          _.lt(competency.proficiency, _.find(this.state.profile.competencies.required,['name',competency.name]).proficiency) ?
             history = {
               ...history,
-              [i++]: `Decreasing ${competenciesName} proficiency to level ${proficiency}`
+              [i++]: `Decreasing ${competency.name} proficiency to level ${competency.proficiency}`
             }
             :
             history = {
               ...history,
-              [i++]: `Increasing ${competenciesName} proficiency to level ${proficiency}`
+              [i++]: `Increasing ${competency.name} proficiency to level ${competency.proficiency}`
             }
       )
     return history
@@ -135,7 +174,7 @@ class CompareAssessment extends Component {
   saveHistory = () => {
     getLastIndex(`profiles/${this.state.indexProfile}/historical`).then((lastIndex) => {
       let changelog = this.createChangeLog(lastIndex)
-      let newIndex = _.toNumber(lastIndex)+1
+      let newIndex = _.toNumber(lastIndex) + 1
       let history = {
         changelog,
         time: new Date(_.now()).toLocaleDateString()
@@ -148,7 +187,11 @@ class CompareAssessment extends Component {
     this.setState({
       levels: {
         ...this.state.levels,
-        [competenciesName]: level
+        [this.state.current]:
+        {
+          name: competenciesName,
+          proficiency: level
+        }
       }
     }, () => this.saveProficiencies())
 
@@ -200,7 +243,7 @@ class CompareAssessment extends Component {
       { return _.inRange(range, constraint.minRange, constraint.maxRange) })[0]
 
   render() {
-    this.findBaseLine();
+    
     if (this.state.loading) return <Loading />
     const competenciesName = Object.keys(this.state.conflicts)
     const listConflicts = Object.values(this.state.conflicts)
