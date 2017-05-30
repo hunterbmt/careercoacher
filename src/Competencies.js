@@ -262,10 +262,8 @@ class Competencies extends Component {
   }
 
   handleCheckUniqueCompetency = (rule, value, callback) =>{
-      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     if(value && _.some(this.state.competenciesKMSCore,['name',value])){
       callback('competency has already existed in KMS Core')
-      console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') 
     }
     if(value && _.some(this.state.competenciesKmsOptional,['name',value])){
        callback('competency has already existed in KMS Optional')
