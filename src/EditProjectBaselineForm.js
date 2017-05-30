@@ -8,7 +8,7 @@ const CheckboxGroup = Checkbox.Group
 export const EditProjectBaselineForm = Form.create()(
     
   (props) => {
-    const { visible, onCancel, onEdit, form, projectBaselineCompetencies, optionalBaselines, selectedProjectBaselineCompetencies, handleChange, selectedBaseline, differences } = props
+    const { visible, onCancel, onEdit, form, projectBaselineCompetencies, optionalBaselines, handleChange, selectedBaseline } = props
     const { getFieldDecorator } = form
     
     return (

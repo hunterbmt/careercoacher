@@ -20,13 +20,20 @@ export default class GroupManagement extends Component {
   componentDidMount() {
     this.getGroupDataToState(this.props.project)
 
-    Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
+    Promise.all([getData('profiles/3/preCompetencies'), getData('profileList')]).then(([baseline, profileList]) =>
       this.setState({
         baseline,
         profileList,
         selectedProfile: _.first(profileList)
       })
     )
+
+    getData(`profiles/3/preCompetencies`).then((preCompetencies) => this.setState({
+      previousCompetencies : preCompetencies
+    }))
+    getData(`profiles/3/competencies`).then((competencies) => this.setState({
+      presentCompetencies : competencies
+    }))
   }
 
   componentWillReceiveProps(props) {
@@ -41,14 +48,14 @@ export default class GroupManagement extends Component {
     })
   }
 
-  getGroupDataToState = (projectName) =>  {
-    console.log('pj name is ' + projectName)
+  getGroupDataToState = (selectedProject) =>  {
+    console.log('pj name is ' + selectedProject)
     this.setState({
       loading: true
     })
-    getData(`BU_projects/0`)
+    getData(`BU_projects/${selectedProject}`)
     .then(({members, manager}) => this.setState({
-      projectName: projectName,
+      selectedProject: selectedProject,
       members: members,
       manager: manager,
       loading: false
@@ -63,7 +70,7 @@ export default class GroupManagement extends Component {
           <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Content style={{ margin: '0 16px' }}>
               <Col span={6}>
-                <Card title={this.state.projectName} style={{ width: '34%' }}>
+                <Card title={this.state.selectedProject} style={{ width: '34%' }}>
                   <h3>Manager : <Tag color='#108ee9'>{this.state.manager}</Tag></h3>
                   <h3>Members :</h3>
                   {_.map(this.state.members, (member, index) =>
@@ -75,9 +82,11 @@ export default class GroupManagement extends Component {
               </Col>
               <Col span={18}>
                 <Card>
+                  
                   <ProfilePage
-                    baseline={this.state.baseline}
-                    profile={this.state.selectedProfile}
+                   id={3}
+                   previousCompetencies={this.state.previousCompetencies}
+                   presentCompetencies={this.state.presentCompetencies}
                   />
                 </Card>
               </Col>

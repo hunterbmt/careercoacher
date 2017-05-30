@@ -6,7 +6,7 @@ const FormItem = Form.Item
 
 export const CreateProjectBaselineForm = Form.create()(
   (props) => {
-    const { visible, onCancel, onCreate, form, baselines, optionalBaselines, handleChangeRequiredBaselineOnCreate, handleChangeAdditionalBaselineOnCreate } = props;
+    const { visible, onCancel, onCreate, form, baselines, optionalBaselines, handleChangeRequiredBaselineOnCreate, handleChangeAdditionalBaselineOnCreate, handleChangeProjectName, projectNames } = props;
     const { getFieldDecorator } = form;
     return (
       <Modal
@@ -17,6 +17,19 @@ export const CreateProjectBaselineForm = Form.create()(
         onCancel={onCancel}
       >
         <Form className='login-form'>
+          <FormItem>
+            {getFieldDecorator('projectName', {
+              rules: [{ required: true, message: 'Please input Project Name!' }],
+            })(
+              <Select
+                style={{ width: '100%' }}
+                placeholder='Please select Project Name'
+                onChange={handleChangeProjectName}
+              > 
+                {projectNames}
+              </Select>
+              )}
+          </FormItem>
           <FormItem>
             {getFieldDecorator('baselineName', {
               rules: [{ required: true, message: 'Please input Baseline Name!' }],
@@ -29,9 +42,8 @@ export const CreateProjectBaselineForm = Form.create()(
               rules: [{ required: true, message: 'Please input Requiried Baselines!' }],
             })(
               <Select
-                mode='combobox'
                 style={{ width: '100%' }}
-                placeholder='Please select'
+                placeholder='Please select Required Baseline'
                 allowClear='true'
                 onChange={handleChangeRequiredBaselineOnCreate}
               >
@@ -46,7 +58,7 @@ export const CreateProjectBaselineForm = Form.create()(
               <Select
                 mode='multiple'
                 style={{ width: '100%' }}
-                placeholder='Please select'
+                placeholder='Please select Additional Baseline(s)'
                 allowClear='true'
                 onChange={handleChangeAdditionalBaselineOnCreate}
               > 
