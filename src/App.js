@@ -10,6 +10,7 @@ import FinishPage from './FinishPage';
 import Competencies from './Competencies'
 import QuestionCompetency from './QuestionCompetency'
 import PersonalProfile from './PersonalProfile'
+import Login from './Login'
 
 
 import './App.css';
@@ -32,6 +33,7 @@ class App extends Component {
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/competencies' handler={Competencies} />
           <Location path='/competencies/:option/:index' handler={QuestionCompetency} />
+          <Location path='/login' handler={Login}/>
         </Locations>
       </LocaleProvider>
     );
