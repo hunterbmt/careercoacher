@@ -28,26 +28,30 @@ export default class PersionalInformation extends Component {
     })
 
   }
-  
+
   getPersonalInformation = () => {
     getData(`profiles/${this.props.id}`).then((personalInformation) => this.setState({
       personalName: personalInformation.name,
       personalTitle : personalInformation.title,
     }))
   }
+  componentDidMount() {
+    this.setState({loading:false})
+  }
 
   componentWillMount() {
     getData(`BU_projects`).then((data) => this.findManagerInformation(data, this.props.id))
     this.getPersonalInformation();
-    getData(`profiles/${this.props.id}/preCompetencies`).then((preCompetencies) => this.setState({
-      previousCompetencies : preCompetencies
-    }))
-    getData(`profiles/${this.props.id}/competencies`).then((competencies) => this.setState({
-      presentCompetencies : competencies
+    Promise.all([getData(`profiles/${this.props.id}/preCompetencies`),getData(`profiles/${this.props.id}/competencies`)])
+    .then(([previousCompetenciesData,currentCompetenciesData]) => 
+    this.setState({
+      previousCompetencies : _.concat(previousCompetenciesData.required,previousCompetenciesData.custom),
+      currentCompetencies : _.concat(currentCompetenciesData.required,currentCompetenciesData.custom),
     }))
   }
 
   render() {
+   if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
     return (
       <div>
         <Layout>
@@ -67,7 +71,7 @@ export default class PersionalInformation extends Component {
                   <ProfilePage
                    id={this.props.id}
                    previousCompetencies={this.state.previousCompetencies}
-                   presentCompetencies={this.state.presentCompetencies}
+                   currentCompetencies={this.state.currentCompetencies}
                   />
                 </Card>
               </Col>

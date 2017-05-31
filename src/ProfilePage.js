@@ -71,11 +71,9 @@ export default class ProfilePage extends Component {
 
 
   componentWillMount() {
-    Promise.all([getData(`profiles/${this.props.id}/competencies`), getData(`profiles/${this.props.id}`),
-    getData(`profiles/${this.props.id}/competencies/required`), getData(`competencies/Kms_optional`)])
-      .then(([personalCompetencies, personalProfile, required, kmsOptional]) =>
+    Promise.all([getData(`profiles/${this.props.id}`),getData(`profiles/${this.props.id}/competencies/required`), getData(`competencies/Kms_optional`)])
+      .then(([personalProfile, required, kmsOptional]) =>
         this.setState({
-          competencies: Object.keys(personalCompetencies),
           profile: personalProfile,
           customCompetencies: _.difference(_.map((_.filter(kmsOptional, ['activated', true])), 'name'), _.map(required, 'name')),
           loading: false
@@ -85,7 +83,7 @@ export default class ProfilePage extends Component {
   render() {
     if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
     const profile = this.state.profile;
-    const radarData = [this.props.previousCompetencies, this.props.presentCompetencies];
+    const radarData = [this.props.previousCompetencies, this.props.currentCompetencies];
     const selectedCompetencies = getSelectedCompetencies(profile);
     const optionalCompetency = _.map(this.state.customCompetencies, (item) => (
       <Option value={item}>{item}</Option>
@@ -132,7 +130,7 @@ export default class ProfilePage extends Component {
               />
             </Col>
             <Col span={6} offset={6}><CompentencyConfig
-              compentencies={this.state.competencies}
+              compentencies={_.map(this.props.currentCompetencies, (item) => item.name)}
               selectedCompentencies={selectedCompetencies}
               removeCompentency={this.removeCompentency}
               addCompentency={this.addCompentency}
