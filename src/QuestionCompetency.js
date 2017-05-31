@@ -29,7 +29,7 @@ class QuestionCompetency extends Component {
 
     componentWillMount() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        getData(`competencies1/${option}/${this.props.index}/questions`)
+        getData(`competencies/${option}/${this.props.index}/questions`)
             .then((data) => this.setState({
                 dataQuestion: _.filter(data, (o) => _.isObject(o)),
                 loading: false
@@ -73,12 +73,12 @@ class QuestionCompetency extends Component {
             dataQuestion: newDataQuestion
         })
         message.success("Create question successfully", 3)
-        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newData);
+        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newData);
     }
 
     saveOptionIdIncrement(question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) =>
+        getLastIndex(`competencies/${option}/${this.props.index}/questions`).then((lastIndex) =>
             this.saveOptionQuestion(lastIndex, question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5))
     }
 
@@ -99,12 +99,12 @@ class QuestionCompetency extends Component {
         })
 
         message.success("Create question successfully", 3)
-        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newDataOthers);
+        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newDataOthers);
     }
 
     saveOthersIdIncrement(question, hint, selectedoption) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOthersQuestion(lastIndex, question, hint, selectedoption))
+        getLastIndex(`competencies/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOthersQuestion(lastIndex, question, hint, selectedoption))
     }
 
     editOptionQuestion(question, hint, answer1, answer2, answer3, answer4, answer5) {
@@ -121,7 +121,7 @@ class QuestionCompetency extends Component {
             dataQuestion: this.state.dataQuestion
         })
         message.success("update question successfully", 3)
-        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption);
+        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption);
     }
 
     editOthersQuestion(question, hint) {
@@ -137,7 +137,7 @@ class QuestionCompetency extends Component {
             dataQuestion: this.state.dataQuestion
         })
         message.success("update question successfully", 3)
-        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers);
+        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers);
     }
 
     editQuestionFormRef = (form) => {
@@ -176,7 +176,7 @@ class QuestionCompetency extends Component {
             dataQuestion: this.state.dataQuestion
         })
 
-        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null);
+        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null);
     }
 
 
@@ -195,7 +195,7 @@ class QuestionCompetency extends Component {
     }
 
     getColumns() {
-        let columns = [{
+        const columns = [{
             title: 'No',
             dataIndex: 'no',
             key: 'no',
@@ -240,7 +240,7 @@ class QuestionCompetency extends Component {
     onSelectQuestion(index) {
         let realIndex = index - 1;
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
-        getData(`competencies1/${option}/${this.props.index}/questions/${realIndex}`)
+        getData(`competencies/${option}/${this.props.index}/questions/${realIndex}`)
             .then((detailQuestionData) => this.setState({
                 questionDataDetail: detailQuestionData,
                 keyUpdate: realIndex,
@@ -328,7 +328,7 @@ class QuestionCompetency extends Component {
                 <Row style={{ margin: 100 }}>
                     <Col>
                         <Card>
-                            <Table columns={this.getColumns()} dataSource={this.getDataSouce()} />
+                            <Table columns={this.getColumns()} dataSource={this.getDataSouce()} style={{whiteSpace: 'pre-wrap'}}/>
                         </Card>
                     </Col>
                 </Row>

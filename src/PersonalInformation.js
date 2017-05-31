@@ -19,27 +19,16 @@ export default class PersionalInformation extends Component {
     }
   }
 
-  findManagerAndTeam = (members, id) => {
-    let result = false
-    _.forEach(members, (value) => {
-      if (_.isEqual(_.toNumber(id), value)) {
-        result = true
-      }
-    })
-    return result
-  }
-
   findManagerInformation = (allProjects, id) => {
-    let manager = _.find(allProjects, (project) => {
-      return this.findManagerAndTeam(project.members, id)
+    const manager = _.find(allProjects, (project) => {
+      return _.some(project.members,(value) => _.isEqual(value,_.toNumber(id)))
     })
-
     this.setState({
       managerInformation: manager
     })
 
   }
-
+  
   getPersonalInformation = () => {
     getData(`profiles/${this.props.id}`).then((personalInformation) => this.setState({
       personalName: personalInformation.name,

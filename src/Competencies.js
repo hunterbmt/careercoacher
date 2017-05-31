@@ -30,13 +30,13 @@ class Competencies extends Component {
     }
 
     if (_.isEqual(this.state.selectOption, 'Kms_core')) {
-      _.update(this.state.competenciesKMSCore[this.state.keyUpdate], 'activated', () => { return this.state.optionActivated })
+      _.update(this.state.competenciesKMSCore[this.state.keyUpdate], 'activated', () => this.state.optionActivated )
     } else {
-      _.update(this.state.competenciesKmsOptional[this.state.keyUpdate], 'activated', () => { return this.state.optionActivated })
+      _.update(this.state.competenciesKmsOptional[this.state.keyUpdate], 'activated', () =>  this.state.optionActivated )
     }
     message.success("Update Competency successfully", 3)
 
-    update(`competencies1/${this.state.selectOption}/${this.state.keyUpdate}`, dataUpdate);
+    update(`competencies/${this.state.selectOption}/${this.state.keyUpdate}`, dataUpdate);
     this.setState({
       competenciesKMSCore: this.state.competenciesKMSCore,
       showEditPopup: false,
@@ -85,11 +85,11 @@ class Competencies extends Component {
     }
     message.success("Create Competency successfully", 3)
 
-    update(`competencies1/${option}/${lastId}`, newCompetency)
+    update(`competencies/${option}/${lastId}`, newCompetency)
   }
 
   addNewCompetency(competencyName, option) {
-    getLastIndex(`competencies1/${option}`).then((lastIndex) => this.addNew(lastIndex, competencyName, option))
+    getLastIndex(`competencies/${option}`).then((lastIndex) => this.addNew(lastIndex, competencyName, option))
   }
 
   handleCancel = (e) => {
@@ -99,7 +99,7 @@ class Competencies extends Component {
   }
 
   getColumnKMSCore() {
-    let columnsKMSCore = [{
+    const columnsKMSCore = [{
       title: 'No',
       dataIndex: 'no',
       key: 'no',
@@ -146,10 +146,10 @@ class Competencies extends Component {
   }
 
   onSelectCompetency(name) {
-    getData(`competencies1/Kms_core`)
+    getData(`competencies/Kms_core`)
       .then((dataKmsCore) => _.map(dataKmsCore, (competency, key) => {
         if (competency.name === name) {
-          getData(`competencies1/Kms_core/${key}`).then((selectedCompetency) => this.setState({
+          getData(`competencies/Kms_core/${key}`).then((selectedCompetency) => this.setState({
             optionActivated: selectedCompetency.activated,
             keyUpdate: key,
             competencyName: selectedCompetency.name,
@@ -162,7 +162,7 @@ class Competencies extends Component {
   }
 
   getColumnKMSOptional() {
-    let columnsKMSOptional = [{
+    const columnsKMSOptional = [{
       title: 'No',
       dataIndex: 'no',
       key: 'no',
@@ -208,10 +208,10 @@ class Competencies extends Component {
   }
 
   onSelectKmsOptionalCompetency(name) {
-    getData(`competencies1/Kms_optional`)
+    getData(`competencies/Kms_optional`)
       .then((dataKmsOptional) => _.map(dataKmsOptional, (competency, key) => {
         if (competency.name === name) {
-          getData(`competencies1/Kms_optional/${key}`).then((selectedCompetency) => this.setState({
+          getData(`competencies/Kms_optional/${key}`).then((selectedCompetency) => this.setState({
             optionActivated: selectedCompetency.activated,
             keyUpdate: key,
             competencyName: selectedCompetency.name,
@@ -242,14 +242,14 @@ class Competencies extends Component {
   }
 
   getCompetencyKMSCore() {
-    getData(`competencies1/Kms_core`)
+    getData(`competencies/Kms_core`)
       .then((kmsCoreData) => this.setState({
         competenciesKMSCore: kmsCoreData
       }));
   }
 
   getCompetencyOptional() {
-    getData(`competencies1/Kms_optional`)
+    getData(`competencies/Kms_optional`)
       .then((kmsOptionalData) => this.setState({
         competenciesKmsOptional: kmsOptionalData,
         loading: false

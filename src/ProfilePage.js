@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { Timeline, Select, Row, Col, Card, Tag, Button } from 'antd';
+import { Timeline, Select, Row, Col, Card, Tag, Button, message } from 'antd';
 import _ from 'lodash';
 import CompetencyRadar from './CompetencyRadar';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
 import CreateCustomCompetencyPersonalProfile from './CreateCustomCompetencyPersonalProfile'
 
-import { getData, update } from './firebase';
+import { getData, update,getLastIndex } from './firebase';
 
 const Option = Select.Option;
 
@@ -48,9 +48,14 @@ export default class ProfilePage extends Component {
     this.form = form;
   }
 
-  // saveCustomCompetncy = (customCompetency) =>{
-  //   update(`profiles/`)
-  // }
+  getLastIndexCustomCompetency = (customCompetency) =>{
+    getLastIndex(`profiles/${this.props.id}/customCompetencies`).then((lastId) => this.saveCustomCompetency(lastId,customCompetency))
+  }
+
+  saveCustomCompetency = (lastId,customCompetencies) =>{
+    let index = _.toNumber(lastId) + 1
+    update(`profiles/${this.props.id}/customCompetencies/${index}`,customCompetencies)
+  }
 
   handleCreate = () => {
     const form = this.form;
@@ -58,7 +63,7 @@ export default class ProfilePage extends Component {
       if (err) {
         return;
       }
-      this.saveCustomCompetncy(values.customCompetency)
+      this.getLastIndexCustomCompetency(values.customCompetency)
       form.resetFields();
       this.setState({ visible: false });
     });
