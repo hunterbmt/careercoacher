@@ -1,35 +1,15 @@
-import React, {Component} from 'react';
-import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
+import React, { Component } from 'react';
+import { Timeline, Select, Row, Col, Card, Tag, Button, message } from 'antd';
 import _ from 'lodash';
-import CompentencyRadar from './CompentencyRadar';
+import CompetencyRadar from './CompetencyRadar';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
+import CreateCustomCompetencyPersonalProfile from './CreateCustomCompetencyPersonalProfile'
 
-import {getData, update} from './firebase';
+import { getData, update,getLastIndex } from './firebase';
 
 const Option = Select.Option;
 
-const compentencies = [
-  'Coding',
-  'Source Control',
-  'Web back-end',
-  'Web front-end',
-  'Mobile',
-  'Desktop',
-  'Database',
-  'Enterprise',
-  'Cloud',
-  'DevOps',
-  'Test',
-  'Report',
-  'ETL',
-  'Big Data',
-  'Effective Communication',
-  'Customer Focus',
-  'Achievement Orientation',
-  'Developing Others',
-  'Self Development'
-]
 
 const getSelectedCompetencies = (profile) => {
   const configuratedCompetencies = profile.configuratedCompetencies;
@@ -47,38 +27,69 @@ export default class ProfilePage extends Component {
     super(props);
     this.state = {
       compareAgain: 'Previous Assessment',
+      visible: false,
       loading: true
     }
   }
 
-  componentDidMount() {
-    this.getProfileDataToState(this.props.profile);
-  }
-
-  componentWillReceiveProps(props) {
-    if(props.profile !== this.props.profile) {
-      this.getProfileDataToState(props.profile);
-    }
-  }
-
-  getProfileDataToState = (profile) =>  {
+  showModal = () => {
     this.setState({
-      loading: true
+      visible: true,
     });
-    getData(`profiles/${profile}`)
-    .then((profileData) => this.setState({
-      profile: profileData,
-      loading: false
-    }));
+  }
+
+  handleCancel = () => {
+    this.setState({
+      visible: false,
+    });
+  }
+
+  saveFormRef = (form) => {
+    this.form = form;
+  }
+
+  getLastIndexCustomCompetency = (customCompetency) =>{
+    getLastIndex(`profiles/${this.props.id}/customCompetencies`).then((lastId) => this.saveCustomCompetency(lastId,customCompetency))
+  }
+
+  saveCustomCompetency = (lastId,customCompetencies) =>{
+    let index = _.toNumber(lastId) + 1
+    update(`profiles/${this.props.id}/customCompetencies/${index}`,customCompetencies)
+  }
+
+  handleCreate = () => {
+    const form = this.form;
+    form.validateFields((err, values) => {
+      if (err) {
+        return;
+      }
+      this.getLastIndexCustomCompetency(values.customCompetency)
+      form.resetFields();
+      this.setState({ visible: false });
+    });
+  }
+
+
+  componentWillMount() {
+    Promise.all([getData(`profiles/${this.props.id}`),getData(`profiles/${this.props.id}/competencies/required`), getData(`competencies/Kms_optional`)])
+      .then(([personalProfile, required, kmsOptional]) =>
+        this.setState({
+          profile: personalProfile,
+          customCompetencies: _.difference(_.map((_.filter(kmsOptional, ['activated', true])), 'name'), _.map(required, 'name')),
+          loading: false
+        }))
   }
 
   render() {
-    if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
+    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
     const profile = this.state.profile;
-    const radarData = [this.getBaseLineData(this.state.compareAgain), profile];
+    const radarData = [this.props.previousCompetencies, this.props.currentCompetencies];
     const selectedCompetencies = getSelectedCompetencies(profile);
+    const optionalCompetency = _.map(this.state.customCompetencies, (item) => (
+      <Option value={item}>{item}</Option>
+    ))
     return (
-      <Row type="flex" style={{padding: '20px 10px 10px'}}>
+      <Row type="flex" style={{ padding: '20px 10px 10px' }}>
         <Col span={14}>
           <Row>
             <Select
@@ -99,7 +110,7 @@ export default class ProfilePage extends Component {
             </Select>
           </Row>
           <Row type="flex" justify="center">
-            <CompentencyRadar
+            <CompetencyRadar
               data={radarData}
               competencies={selectedCompetencies}
             />
@@ -107,21 +118,32 @@ export default class ProfilePage extends Component {
         </Col>
         <Col span={9} offset={1}>
           <Row type='flex' justify='end'>
-            <CompentencyConfig
-              compentencies={compentencies}
+            <Col span={6} offset={6}>
+              <Button icon="file-add" shape="circle" style={{ width: 40, height: 40, fontSize: 20 }} onClick={this.showModal}></Button>
+              <CreateCustomCompetencyPersonalProfile
+                ref={this.saveFormRef}
+                visible={this.state.visible}
+                onCancel={this.handleCancel}
+                onCreate={this.handleCreate}
+                optionalCompetency={optionalCompetency}
+                onChangeOption={this.onChangeOption}
+              />
+            </Col>
+            <Col span={6} offset={6}><CompentencyConfig
+              compentencies={_.map(this.props.currentCompetencies, (item) => item.name)}
               selectedCompentencies={selectedCompetencies}
               removeCompentency={this.removeCompentency}
               addCompentency={this.addCompentency}
-            />
+            /></Col>
           </Row>
-          <Row style={{paddingTop: 10}}>
-            <Card title={`${profile.name} - ${profile.title}`} style={{fontSize: 14}}>
-              <div style={{padding: '10px 0'}}>
-                <span style={{fontWeight: 800, paddingRight: 10}}>Summary: </span>
+          <Row style={{ paddingTop: 10 }}>
+            <Card title={`${profile.name} - ${profile.title}`} style={{ fontSize: 14 }}>
+              <div style={{ padding: '10px 0' }}>
+                <span style={{ fontWeight: 800, paddingRight: 10 }}>Summary: </span>
                 <span>{profile.summary}</span>
               </div>
               <div>
-                <span style={{fontWeight: 800, paddingRight: 10}}>Skills: </span>
+                <span style={{ fontWeight: 800, paddingRight: 10 }}>Skills: </span>
                 <span>
                   {_.map(profile.skills, (skill) =>
                     <Tag>{skill}</Tag>
@@ -130,15 +152,15 @@ export default class ProfilePage extends Component {
               </div>
             </Card>
           </Row>
-          <Row style={{paddingTop: 10}}>
+          <Row style={{ paddingTop: 10 }}>
             <Card title='Compentency historical'>
               <Timeline pending={<a href="#">See more...</a>}>
-              {_.map(profile.historical, (historical) =>
-                <Timeline.Item color="green">
-                  <p>{historical.time}</p>
-                  {_.map(historical.changelog, (change) => <p>{change}</p>)}
-                </Timeline.Item>
-              )}
+                {_.map(profile.historical, (historical) =>
+                  <Timeline.Item color="green">
+                    <p>{historical.time}</p>
+                    {_.map(historical.changelog, (change) => <p>{change}</p>)}
+                  </Timeline.Item>
+                )}
               </Timeline>
             </Card>
           </Row>
@@ -147,9 +169,7 @@ export default class ProfilePage extends Component {
     )
   }
 
-  comparationOnChange = (comparation) => this.setState({compareAgain: comparation})
-
-  getBaseLineData = (baselineName) => _.find(this.props.baseline, (baseline) => baseline.name === baselineName)
+  comparationOnChange = (comparation) => this.setState({ compareAgain: comparation })
 
   removeCompentency = (compentency) => {
     const targetProfile = this.state.profile;
@@ -160,7 +180,7 @@ export default class ProfilePage extends Component {
         configuratedCompetencies
       }
     });
-    this.updateConfiguratedCompentencies(configuratedCompetencies);
+    this.updateConfiguratedCompetencies(configuratedCompetencies);
   }
   addCompentency = (compentency) => {
     const targetProfile = this.state.profile;
@@ -173,7 +193,8 @@ export default class ProfilePage extends Component {
     });
     this.updateConfiguratedCompetencies(configuratedCompetencies);
   }
+
   updateConfiguratedCompetencies = (configuratedCompetencies) => {
-    update(`/profiles/${this.props.profile}/configuratedCompetencies`, configuratedCompetencies)
+    update(`/profiles/${this.props.id}/configuratedCompetencies`, configuratedCompetencies)
   }
 };
