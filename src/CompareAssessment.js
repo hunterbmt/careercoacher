@@ -33,10 +33,9 @@ class CompareAssessment extends Component {
           conflicts: this.getConflictsView(selfAnswers, managerAnswers),
           finalAnswers: managerAnswers,
           profile: _.find(profiles, ['aliasName', this.props.name]),
-          employeeID: _.findKey(profiles, ['aliasName', this.props.name]),
           indexProfile: _.findKey(profiles, ['aliasName', this.props.name]),
-          coreBaseline:_.map(baseline,'Kms_core'),
-          projectRequired : _.filter(projectBaseline,['projectName',_.find(BU_projects,(project)=>{return _.some(project.members,this.state.employeeID)}).name])
+          coreBaseline: _.map(baseline, 'Kms_core'),
+          projectRequired: _.filter(projectBaseline, ['projectName', _.find(BU_projects, (project) => { return _.some(project.members, (memberID) => _.isEqual(memberID, _.toNumber(_.findKey(profiles, ['aliasName', this.props.name])))) }).name])
         })
       })
   }
@@ -91,46 +90,46 @@ class CompareAssessment extends Component {
     })
   }
 
-  isMatchBaseline=(baselines)=>{
-    let isMatch = false
-    _.forEach(baselines,(value)=>{
-      _.gte(_.find(this.state.levels,['name',value.name]).proficiency, value.proficiency)?
-      isMatch = true
-      :
-      null
+  isMatchBaseline = (baselines) => {
+    let isMatch = true
+    _.forEach(baselines, (value) => {
+      _.gte(_.toNumber(_.find(this.state.levels, ['name', value.name]).proficiency), _.toNumber(value.proficiency)) ?
+        null
+        :
+        isMatch = false
     })
     return isMatch
-  } 
+  }
 
-  findBaseLine(levels) {
+  findNewTitle() {
     let title = 'SE'
     let baseline
-   _.forEach(this.state.projectRequired,(value,key)=>{
-     let competencies
-     _.isUndefined(value)?null:
-     competencies = _.concat(value.competencies,this.state.coreBaseline[value.coreId].competencies)
-     baseline={
-       ...baseline,
-       [key]:{competencies,
-       title: value.name}
-     }
-   })
-   _.forEach(baseline,(value)=>
-    this.isMatchBaseline(value.competencies)?
-    this.setState({
-      title: baseline.title
+    _.forEach(this.state.projectRequired, (value, key) => {
+      let competencies
+      _.isUndefined(value) ? null :
+        competencies = _.concat(value.competencies, this.state.coreBaseline[value.coreId].competencies)
+      baseline = {
+        ...baseline,
+        [key]: {
+          competencies,
+          title: value.name
+        }
+      }
     })
-    :
-    null
-  )  
-  console.log(title)
+    _.forEach(baseline, (value) =>
+      this.isMatchBaseline(value.competencies) ?
+        title = value.title
+        :
+        null
+    )
+    return title
   }
 
   saveProficiencies = () => {
     update(`profiles/${this.state.indexProfile}/preCompetencies`, this.state.profile.competencies)
     update(`profiles/${this.state.indexProfile}/competencies/required`, this.state.levels)
+    update(`profiles/${this.state.indexProfile}/title`, this.findNewTitle())
     this.saveHistory()
-    this.findBaseLine()
   }
 
   saveSummary = (lastIndex) => {
@@ -140,6 +139,30 @@ class CompareAssessment extends Component {
   }
 
   createChangeLog(lastIndex) {
+    const currentTitle = this.findNewTitle()
+    const lastTitle = this.state.profile.title
+    let promotion
+    switch (currentTitle) {
+      case 'SE':
+        if (_.isEqual(lastTitle, 'SSE') || _.isEqual(lastTitle, 'SA')) {
+          promotion = 'Demote to SE'
+        }
+        break;
+      case 'SSE':
+        if (_.isEqual(lastTitle, 'SE')) {
+          promotion = 'Promote to SEE'
+        }
+        if (_.isEqual(lastTitle, 'SA')) {
+          promotion = 'Demote to SEE'
+        }
+        break;
+      case 'SA':
+        if (_.isEqual(lastTitle, 'SSE') || _.isEqual(lastTitle, 'SE')) {
+          promotion = 'Promote to SA'
+        }
+        break;
+      default:
+    }
     let history
     let i = 0
     _.lt(lastIndex, 0) ?
@@ -151,13 +174,13 @@ class CompareAssessment extends Component {
       )
       :
       _.map(this.state.levels, (competency) =>
-        _.isEqual(competency.proficiency, _.find(this.state.profile.competencies.required,['name',competency.name]).proficiency) ?
+        _.isEqual(competency.proficiency, _.find(this.state.profile.competencies.required, ['name', competency.name]).proficiency) ?
           history = {
             ...history,
             [i++]: `${competency.name} proficiency remain at level ${competency.proficiency}`
           }
           :
-          _.lt(competency.proficiency, _.find(this.state.profile.competencies.required,['name',competency.name]).proficiency) ?
+          _.lt(competency.proficiency, _.find(this.state.profile.competencies.required, ['name', competency.name]).proficiency) ?
             history = {
               ...history,
               [i++]: `Decreasing ${competency.name} proficiency to level ${competency.proficiency}`
@@ -168,6 +191,12 @@ class CompareAssessment extends Component {
               [i++]: `Increasing ${competency.name} proficiency to level ${competency.proficiency}`
             }
       )
+    if (_.isString(promotion)) {
+      history = {
+        ...history,
+        [i++]: promotion
+      }
+    }
     return history
   }
 
@@ -243,7 +272,7 @@ class CompareAssessment extends Component {
       { return _.inRange(range, constraint.minRange, constraint.maxRange) })[0]
 
   render() {
-    
+
     if (this.state.loading) return <Loading />
     const competenciesName = Object.keys(this.state.conflicts)
     const listConflicts = Object.values(this.state.conflicts)
