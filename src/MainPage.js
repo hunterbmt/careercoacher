@@ -36,8 +36,9 @@ class MainPage extends Component {
     getData('BU_projects').then((bus)=> this.findManager(bus,'Hihi'))
     Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
       this.setState({
-        baseline,
+        baseline: _.map(baseline, (base) =>({name: base.name, competencies: _.flatten([base.Kms_core.competencies, base.Kms_optional.competencies])})),
         profileList,
+        test:baseline,
         selectedProfile: _.first(profileList),
         loading: false
       })
