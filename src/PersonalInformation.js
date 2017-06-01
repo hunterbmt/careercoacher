@@ -35,23 +35,21 @@ export default class PersionalInformation extends Component {
       personalTitle : personalInformation.title,
     }))
   }
-  componentDidMount() {
-    this.setState({loading:false})
-  }
+
 
   componentWillMount() {
     getData(`BU_projects`).then((data) => this.findManagerInformation(data, this.props.id))
-    this.getPersonalInformation();
+    this.getPersonalInformation()
     Promise.all([getData(`profiles/${this.props.id}/preCompetencies`),getData(`profiles/${this.props.id}/competencies`)])
-    .then(([previousCompetenciesData,currentCompetenciesData]) => 
-    this.setState({
+    .then(([previousCompetenciesData,currentCompetenciesData]) => this.setState({
       previousCompetencies : _.concat(previousCompetenciesData.required,previousCompetenciesData.custom),
       currentCompetencies : _.concat(currentCompetenciesData.required,currentCompetenciesData.custom),
+      loading : false
     }))
   }
 
   render() {
-   if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
+   if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>
     return (
       <div>
         <Layout>

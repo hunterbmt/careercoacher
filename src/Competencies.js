@@ -1,17 +1,17 @@
-import React, { Component } from 'react';
-import { Layout, Modal, Switch, Icon, Button, Row, Col, Table, Card, message } from 'antd';
-import { getData, update, getLastIndex } from './firebase';
-import _ from 'lodash';
-import Loading from './Loading';
+import React, { Component } from 'react'
+import { Layout, Modal, Switch, Icon, Button, Row, Col, Table, Card, message } from 'antd'
+import { getData, update, getLastIndex } from './firebase'
+import _ from 'lodash'
+import Loading from './Loading'
 import CompetenciesCreateForm from './CompetenciesCreateForm'
-import { Link } from 'react-router-component';
-const { Header } = Layout;
-import logo from './logo.png';
+import { Link } from 'react-router-component'
+const { Header } = Layout
+import logo from './logo.png'
 
 class Competencies extends Component {
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       visible: false,
       showEditPopup: false,
@@ -20,7 +20,7 @@ class Competencies extends Component {
       optionActivatedKmsOptional: false,
       loading: true,
       loadingActivated: true,
-    };
+    }
   }
 
   handleSaveActivated = (e) => {
@@ -36,7 +36,7 @@ class Competencies extends Component {
     }
     message.success("Update Competency successfully", 3)
 
-    update(`competencies/${this.state.selectOption}/${this.state.keyUpdate}`, dataUpdate);
+    update(`competencies/${this.state.selectOption}/${this.state.keyUpdate}`, dataUpdate)
     this.setState({
       competenciesKMSCore: this.state.competenciesKMSCore,
       showEditPopup: false,
@@ -48,7 +48,7 @@ class Competencies extends Component {
     this.setState({
       showEditPopup: false,
       loadingActivated: true
-    });
+    })
   }
 
   handleChangeOptionActivated = () => {
@@ -61,7 +61,7 @@ class Competencies extends Component {
   showModal = () => {
     this.setState({
       visible: true
-    });
+    })
   }
 
   addNew(lastIndex, competencyName, option) {
@@ -95,7 +95,7 @@ class Competencies extends Component {
   handleCancel = (e) => {
     this.setState({
       visible: false,
-    });
+    })
   }
 
   getColumnKMSCore() {
@@ -121,14 +121,14 @@ class Competencies extends Component {
           <Link href={`#competencies/core/${record.no}`}>Add question</Link>
         </span>
       ),
-    }];
+    }]
     return columnsKMSCore
   }
 
   getDataSourceKMSCore = () => {
-    let dataSourceKMSCore = [];
+    let dataSourceKMSCore = []
     _.forEach(this.state.competenciesKMSCore, (item, index) => {
-      let activate;
+      let activate
       if (item.activated === true) {
         activate = "On"
       } else {
@@ -139,7 +139,7 @@ class Competencies extends Component {
         kmscore: item.name,
         activatedKmscore: activate,
       }
-      dataSourceKMSCore.push(kmsCoreDataPushTable);
+      dataSourceKMSCore.push(kmsCoreDataPushTable)
 
     })
     return dataSourceKMSCore
@@ -184,14 +184,14 @@ class Competencies extends Component {
           <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
         </span>
       ),
-    }];
+    }]
     return columnsKMSOptional
   }
 
   getDataSourceKMSOptional = () => {
-    let dataSourceKMSOptional = [];
+    let dataSourceKMSOptional = []
     _.forEach(this.state.competenciesKmsOptional, (item, index) => {
-      let activate;
+      let activate
       if (item.activated === true) {
         activate = "On"
       } else {
@@ -202,7 +202,7 @@ class Competencies extends Component {
         kmsoptional: item.name,
         activatedKmsOptional: activate,
       }
-      dataSourceKMSOptional.push(kmsOptionalDataPushTable);
+      dataSourceKMSOptional.push(kmsOptionalDataPushTable)
     })
     return dataSourceKMSOptional
   }
@@ -225,27 +225,27 @@ class Competencies extends Component {
 
 
   saveFormRef = (form) => {
-    this.form = form;
+    this.form = form
   }
 
   handleCreate = () => {
-    const form = this.form;
+    const form = this.form
     form.validateFields((err, values) => {
       if (err) {
-        return;
+        return
       }
 
       this.addNewCompetency(values.competencyName, values.competencyOption)
-      form.resetFields();
-      this.setState({ visible: false });
-    });
+      form.resetFields()
+      this.setState({ visible: false })
+    })
   }
 
   getCompetencyKMSCore() {
     getData(`competencies/Kms_core`)
       .then((kmsCoreData) => this.setState({
         competenciesKMSCore: kmsCoreData
-      }));
+      }))
   }
 
   getCompetencyOptional() {
@@ -253,12 +253,12 @@ class Competencies extends Component {
       .then((kmsOptionalData) => this.setState({
         competenciesKmsOptional: kmsOptionalData,
         loading: false
-      }));
+      }))
   }
 
   componentWillMount() {
-    this.getCompetencyKMSCore();
-    this.getCompetencyOptional();
+    this.getCompetencyKMSCore()
+    this.getCompetencyOptional()
   }
 
   handleCheckUniqueCompetency = (rule, value, callback) =>{
@@ -272,7 +272,7 @@ class Competencies extends Component {
   }
 
   render() {
-    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
+    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>
     return (
       <Layout style={{ height: '100%' }}>
         <Header style={{ background: '#fff', padding: 0 }}>
@@ -316,8 +316,8 @@ class Competencies extends Component {
           </Row>
         </Header>
       </Layout>
-    );
+    )
   }
 }
 
-export default Competencies;
+export default Competencies

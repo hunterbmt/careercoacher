@@ -1,13 +1,13 @@
-import { Form, Modal, Select, Input } from 'antd';
-import React, { } from 'react';
-import _ from 'lodash';
-const FormItem = Form.Item;
-const Option = Select.Option;
+import { Form, Modal, Select, Input } from 'antd'
+import React, { } from 'react'
+import _ from 'lodash'
+const FormItem = Form.Item
+const Option = Select.Option
 
 const CompetenciesCreateForm = Form.create()(
   (props) => {
-    const { visible, onCancel, onCreate, form, onChangeOption, option } = props;
-    const { getFieldDecorator } = form;
+    const { visible, onCancel, onCreate, form, onChangeOption, option } = props
+    const { getFieldDecorator } = form
     return (
       <Modal
         visible={visible}
@@ -83,8 +83,8 @@ const CompetenciesCreateForm = Form.create()(
           
         </Form>
       </Modal>
-    );
+    )
   }
-);
+)
 
 export default CompetenciesCreateForm

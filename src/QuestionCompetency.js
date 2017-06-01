@@ -1,17 +1,17 @@
-import React, { Component } from 'react';
-import { Layout, Button, Row, Col, Modal, Table, Card, message } from 'antd';
-import { getData, update, getLastIndex } from './firebase';
-import _ from 'lodash';
-import Loading from './Loading';
+import React, { Component } from 'react'
+import { Layout, Button, Row, Col, Modal, Table, Card, message } from 'antd'
+import { getData, update, getLastIndex } from './firebase'
+import _ from 'lodash'
+import Loading from './Loading'
 import CreateQuestionCompetencyForm from './CreateQuestionCompetencyForm'
 import EditQuestionCompetencyForm from './EditQuestionCompetencyForm'
-import logo from './logo.png';
-const { Header } = Layout;
+import logo from './logo.png'
+const { Header } = Layout
 
 class QuestionCompetency extends Component {
 
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             visibleEdit: false,
             showEditPopup: false,
@@ -19,7 +19,7 @@ class QuestionCompetency extends Component {
             selectValue: 'scale',
             loading: true,
             showDeletePopup: false
-        };
+        }
     }
 
     onChangeOption = (value) => {
@@ -28,7 +28,7 @@ class QuestionCompetency extends Component {
 
 
     componentWillMount() {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         getData(`competencies/${option}/${this.props.index}/questions`)
             .then((data) => this.setState({
                 dataQuestion: _.filter(data, (o) => _.isObject(o)),
@@ -39,26 +39,26 @@ class QuestionCompetency extends Component {
     showModal = () => {
         this.setState({
             visible: true,
-        });
+        })
     }
 
     handleSave = (e) => {
-        this.saveQuestion(this.state.selectValue);
+        this.saveQuestion(this.state.selectValue)
         this.setState({
             visible: false,
 
-        });
+        })
     }
 
     handleCancel = (e) => {
         this.setState({
             visible: false,
-        });
+        })
     }
 
     saveOptionQuestion(lastIndex, question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5) {
         let lastId = parseInt(lastIndex, 10) + 1
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         let newData = {
             "id": lastId,
             "desc": question,
@@ -73,18 +73,18 @@ class QuestionCompetency extends Component {
             dataQuestion: newDataQuestion
         })
         message.success("Create question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newData);
+        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newData)
     }
 
     saveOptionIdIncrement(question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5) {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         getLastIndex(`competencies/${option}/${this.props.index}/questions`).then((lastIndex) =>
             this.saveOptionQuestion(lastIndex, question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5))
     }
 
     saveOthersQuestion(lastIndex, question, hint, selectedoption) {
         let lastId = parseInt(lastIndex, 10) + 1
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         let newDataOthers = {
             "id": lastId,
             "desc": question,
@@ -99,16 +99,16 @@ class QuestionCompetency extends Component {
         })
 
         message.success("Create question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newDataOthers);
+        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newDataOthers)
     }
 
     saveOthersIdIncrement(question, hint, selectedoption) {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         getLastIndex(`competencies/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOthersQuestion(lastIndex, question, hint, selectedoption))
     }
 
     editOptionQuestion(question, hint, answer1, answer2, answer3, answer4, answer5) {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         let newDataOption = {
             "id": this.state.keyUpdate,
             "desc": question,
@@ -121,11 +121,11 @@ class QuestionCompetency extends Component {
             dataQuestion: this.state.dataQuestion
         })
         message.success("update question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption);
+        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption)
     }
 
     editOthersQuestion(question, hint) {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         let newDataOthers = {
             "id": this.state.keyUpdate,
             "desc": question,
@@ -137,7 +137,7 @@ class QuestionCompetency extends Component {
             dataQuestion: this.state.dataQuestion
         })
         message.success("update question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers);
+        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers)
     }
 
     editQuestionFormRef = (form) => {
@@ -147,51 +147,51 @@ class QuestionCompetency extends Component {
     }
 
     handleEdit = () => {
-        const form = this.state.editQuestionFormRef;
+        const form = this.state.editQuestionFormRef
         form.validateFields((err, values) => {
             if (err) {
-                return;
+                return
             }
             if (_.isEqual(this.state.typeEdit, 'option')) {
-                this.editOptionQuestion(values.questionEdit, values.hintQuestionEdit, values.answer1Edit, values.answer2Edit, values.answer3Edit, values.answer4Edit, values.answer5Edit);
+                this.editOptionQuestion(values.questionEdit, values.hintQuestionEdit, values.answer1Edit, values.answer2Edit, values.answer3Edit, values.answer4Edit, values.answer5Edit)
             } else {
-                this.editOthersQuestion(values.questionEdit, values.hintQuestionEdit);
+                this.editOthersQuestion(values.questionEdit, values.hintQuestionEdit)
             }
-            form.resetFields();
-            this.setState({ showEditPopup: false });
-        });
+            form.resetFields()
+            this.setState({ showEditPopup: false })
+        })
     }
 
     handleEditCancel = (e) => {
         this.setState({
             showEditPopup: false,
-        });
+        })
     }
 
     deleteQuestion() {
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
 
         _.remove(this.state.dataQuestion, this.state.dataQuestion[this.state.keyDelete])
         this.setState({
             dataQuestion: this.state.dataQuestion
         })
 
-        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null);
+        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null)
     }
 
 
     handleDeleteSave = (e) => {
-        this.deleteQuestion();
+        this.deleteQuestion()
         this.setState({
             showDeletePopup: false
-        });
+        })
 
     }
 
     handleDeleteCancel = (e) => {
         this.setState({
             showDeletePopup: false,
-        });
+        })
     }
 
     getColumns() {
@@ -213,33 +213,33 @@ class QuestionCompetency extends Component {
                     <a onClick={() => this.onSelectedDeleteQuestion(record.no)}>Delete</a>
                 </span>
             ),
-        }];
+        }]
         return columns
     }
 
     getDataSouce(indexData) {
-        let dataSource = [];
+        let dataSource = []
         _.forEach(this.state.dataQuestion, (item) => {
             const dataPushTable = {
                 no: item.id + 1,
                 question: item.desc
             }
-            dataSource.push(dataPushTable);
+            dataSource.push(dataPushTable)
         })
-        return dataSource;
+        return dataSource
     }
 
     onSelectedDeleteQuestion(index) {
-        let realIndex = index - 1;
+        let realIndex = index - 1
         this.setState({
             keyDelete: realIndex,
             showDeletePopup: true
-        });
+        })
     }
 
     onSelectQuestion(index) {
-        let realIndex = index - 1;
-        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
+        let realIndex = index - 1
+        const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
         getData(`competencies/${option}/${this.props.index}/questions/${realIndex}`)
             .then((detailQuestionData) => this.setState({
                 questionDataDetail: detailQuestionData,
@@ -253,7 +253,7 @@ class QuestionCompetency extends Component {
                 answer4Edit: _.nth(detailQuestionData.options, 3),
                 answer5Edit: _.nth(detailQuestionData.options, 4),
                 showEditPopup: true,
-            }));
+            }))
     }
 
     createQuestionFormRef = (form) => {
@@ -263,23 +263,23 @@ class QuestionCompetency extends Component {
     }
 
     handleCreate = () => {
-        const form = this.state.createQuestionFormRef;
+        const form = this.state.createQuestionFormRef
         form.validateFields((err, values) => {
             if (err) {
-                return;
+                return
             }
             if (_.isEqual(values.questionOption, 'option')) {
                 this.saveOptionIdIncrement(values.question, values.hintQuestion, values.questionOption, values.answer1, values.answer2, values.answer3, values.answer4, values.answer5)
             } else {
                 this.saveOthersIdIncrement(values.question, values.hintQuestion, values.questionOption)
             }
-            form.resetFields();
-            this.setState({ visible: false });
-        });
+            form.resetFields()
+            this.setState({ visible: false })
+        })
     }
 
     render() {
-        if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>;
+        if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>
         return (
             <Layout style={{ height: '100%' }}>
                 <Header style={{ background: '#fff', padding: 0 }}>
@@ -334,9 +334,9 @@ class QuestionCompetency extends Component {
                 </Row>
             </Layout>
 
-        );
+        )
     }
 }
 
 
-export default QuestionCompetency;
+export default QuestionCompetency
