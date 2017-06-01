@@ -25,7 +25,9 @@ class CompareAssessment extends Component {
     this.setState({
       loading: true
     })
-    Promise.all([getData('competencies'), getData(`answers/${this.props.name}`), getData(`answers/${this.props.name}_manager`), getData('profiles'), getData('project_baseline'), getData('baseline'), getData('BU_projects')])
+    Promise.all([getData('competencies'), getData(`answers/${this.props.name}`), 
+      getData(`answers/${this.props.name}_manager`), getData('profiles'), 
+      getData('project_baseline'), getData('baseline'), getData('BU_projects')])
       .then(([competencies, selfAnswers, managerAnswers, profiles, projectBaseline, baseline, BU_projects]) => {
         this.setState({
           loading: false,
@@ -35,7 +37,11 @@ class CompareAssessment extends Component {
           profile: _.find(profiles, ['aliasName', this.props.name]),
           indexProfile: _.findKey(profiles, ['aliasName', this.props.name]),
           coreBaseline: _.map(baseline, 'Kms_core'),
-          projectRequired: _.filter(projectBaseline, ['projectName', _.find(BU_projects, (project) => { return _.some(project.members, (memberID) => _.isEqual(memberID, _.toNumber(_.findKey(profiles, ['aliasName', this.props.name])))) }).name])
+          projectRequired: _.filter(projectBaseline, ['projectName', _.find(BU_projects, (project) => 
+          { 
+            return _.some(project.members, (memberID) => 
+              _.isEqual(memberID, _.toNumber(_.findKey(profiles, ['aliasName', this.props.name])))) 
+          }).name])
         })
       })
   }
@@ -126,7 +132,9 @@ class CompareAssessment extends Component {
   }
 
   saveProficiencies = () => {
-    update(`profiles/${this.state.indexProfile}/preCompetencies`, this.state.profile.competencies)
+    if(!_.isUndefined(this.state.profile.competencies)) {
+      update(`profiles/${this.state.indexProfile}/preCompetencies`, this.state.profile.competencies)
+    }  
     update(`profiles/${this.state.indexProfile}/competencies/required`, this.state.levels)
     update(`profiles/${this.state.indexProfile}/title`, this.findNewTitle())
     this.saveHistory()
