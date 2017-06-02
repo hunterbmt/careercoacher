@@ -5,7 +5,7 @@ import { Layout, Steps, Row, Col, Button, Modal, BackTop } from 'antd';
 import QuestionInput from './QuestionInput';
 import Loading from './Loading';
 import Summary from './Summary'
-import { getData, writeAnswers } from './firebase';
+import { getData, writeAnswers, update } from './firebase';
 import logo from './logo.png';
 const { Header, Content } = Layout;
 const Step = Steps.Step;
@@ -43,6 +43,7 @@ class SelfAssessment extends Component {
       .then(([answers, competencies, profiles, project_baseline, BU_projects, summary]) => {
         this.setState({
           answers: answers || {},
+          indexProfile: _.findKey(profiles, ['aliasName', this.props.name]),
           customCompetencies: _.find(profiles, ['aliasName', this.props.name]).customCompetencies,
           coreCompetencies: competencies.Kms_core,
           optionalCompetencies: competencies.Kms_optional,
@@ -109,11 +110,32 @@ class SelfAssessment extends Component {
     });
   }
 
+  saveCustomCompetencyLevels = () => {
+    const customCompetenciesResult = _.pick(this.state.answers,this.state.customCompetencies)
+    let customLevels
+    let i = 0
+    _.forEach(customCompetenciesResult,(weights,competenciesName)=>{
+      let range = _.sum(weights)
+      const currentCompentencyConstraint = _.find(this.state.optionalCompetencies,['name',competenciesName]).constraints
+      const level = _.find(currentCompentencyConstraint,(constraint)=>{ 
+        return _.inRange(range, constraint.minRange, constraint.maxRange) }).level
+      customLevels = {
+        ...customLevels,
+        [i++] :{
+          name: competenciesName,
+          proficiency: level
+        }
+      }
+    })
+    update(`profiles/${this.state.indexProfile}/competencies/custom`,customLevels)
+  }
+
   onDone = () => {
     const part = _.isEmpty(this.props.manager) ? this.props.name : `${this.props.name}_manager`;
     this.setState({
       saving: true
     });
+    this.saveCustomCompetencyLevels()
     writeAnswers(part, this.state.answers).then(() => window.location.replace('/careercoacher/#/finish'));
   }
 
