@@ -55,6 +55,7 @@ export default class ProfilePage extends Component {
   saveCustomCompetency = (lastId,customCompetencies) =>{
     let index = _.toNumber(lastId) + 1
     update(`profiles/${this.props.id}/customCompetencies/${index}`,customCompetencies)
+    message.success('save custom competency successfully',3)
   }
 
   handleCreate = () => {
@@ -71,11 +72,11 @@ export default class ProfilePage extends Component {
 
 
   componentWillMount() {
-    Promise.all([getData(`profiles/${this.props.id}`),getData(`profiles/${this.props.id}/competencies/required`), getData(`competencies/Kms_optional`)])
-      .then(([personalProfile, required, kmsOptional]) =>
+    Promise.all([getData(`profiles/${this.props.id}`),getData(`profiles/${this.props.id}/competencies/required`), getData(`competencies/Kms_optional`),getData(`profiles/${this.props.id}/competencies/custom`)])
+      .then(([personalProfile, required, kmsOptional,custom]) =>
         this.setState({
           profile: personalProfile,
-          customCompetencies: _.difference(_.map((_.filter(kmsOptional, ['activated', true])), 'name'), _.map(required, 'name')),
+          customCompetencies: _.difference(_.map((_.filter(kmsOptional, ['activated', true])), 'name'), _.map(_.concat(required,custom), 'name')),
           loading: false
         }))
   }

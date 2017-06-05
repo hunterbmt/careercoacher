@@ -21,7 +21,7 @@ export default class PersionalInformation extends Component {
 
   findManagerInformation = (allProjects, id) => {
     const manager = _.find(allProjects, (project) => {
-      return _.some(project.members,(value) => _.isEqual(value,_.toNumber(id)))
+      return _.some(project.members, (value) => _.isEqual(value, _.toNumber(id)))
     })
     this.setState({
       managerInformation: manager
@@ -32,7 +32,7 @@ export default class PersionalInformation extends Component {
   getPersonalInformation = () => {
     getData(`profiles/${this.props.id}`).then((personalInformation) => this.setState({
       personalName: personalInformation.name,
-      personalTitle : personalInformation.title,
+      personalTitle: personalInformation.title,
     }))
   }
 
@@ -40,16 +40,16 @@ export default class PersionalInformation extends Component {
   componentWillMount() {
     getData(`BU_projects`).then((data) => this.findManagerInformation(data, this.props.id))
     this.getPersonalInformation()
-    Promise.all([getData(`profiles/${this.props.id}/preCompetencies`),getData(`profiles/${this.props.id}/competencies`)])
-    .then(([previousCompetenciesData,currentCompetenciesData]) => this.setState({
-      previousCompetencies : _.concat(previousCompetenciesData.required,previousCompetenciesData.custom),
-      currentCompetencies : _.concat(currentCompetenciesData.required,currentCompetenciesData.custom),
-      loading : false
-    }))
+    Promise.all([getData(`profiles/${this.props.id}/preCompetencies`), getData(`profiles/${this.props.id}/competencies`)])
+      .then(([previousCompetenciesData, currentCompetenciesData]) => this.setState({
+        previousCompetencies: _.concat(previousCompetenciesData.required, previousCompetenciesData.custom),
+        currentCompetencies: _.concat(currentCompetenciesData.required, currentCompetenciesData.custom),
+        loading: false
+      }))
   }
 
   render() {
-   if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>
+    if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>
     return (
       <div>
         <Layout>
@@ -57,7 +57,7 @@ export default class PersionalInformation extends Component {
             <Content style={{ margin: '0 40px' }}>
               <Col span={8}>
                 <Card title={'Personal Information'} style={{ width: '60%' }}>
-                 <Avatar size="200" round="true" src="http://careers.kms-technology.com/wp-content/uploads/2015/09/kms-next-avatar.png" />
+                  <Avatar size="200" round="true" src="http://careers.kms-technology.com/wp-content/uploads/2015/09/kms-next-avatar.png" />
                   <h3>Name : {this.state.personalName}</h3>
                   <p>Title: {this.state.personalTitle}</p>
                   <p>Manager : {this.state.managerInformation.manager}</p>
@@ -66,11 +66,14 @@ export default class PersionalInformation extends Component {
               </Col>
               <Col span={16}>
                 <Card>
-                  <ProfilePage
-                   id={this.props.id}
-                   previousCompetencies={this.state.previousCompetencies}
-                   currentCompetencies={this.state.currentCompetencies}
-                  />
+                  {
+                      (_.isEmpty(this.state.previousCompetencies) && _.isEmpty(this.state.currentCompetencies)) ? 'you have not completed any self - assessment' : <ProfilePage
+                        id={this.props.id}
+                        previousCompetencies={this.state.previousCompetencies}
+                        currentCompetencies={this.state.currentCompetencies}
+                      />
+                  }
+
                 </Card>
               </Col>
             </Content>
