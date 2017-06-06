@@ -29,9 +29,10 @@ class QuestionCompetency extends Component {
 
     componentWillMount() {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        getData(`competencies/${option}/${this.props.index}/questions`)
-            .then((data) => this.setState({
+        Promise.all([getData(`competencies1/${option}/${this.props.index}/questions`), getData(`competencies1/${option}/${this.props.index}`)])
+            .then(([data, competency]) => this.setState({
                 dataQuestion: _.filter(data, (o) => _.isObject(o)),
+                name: competency.name,
                 loading: false
             }))
     }
@@ -59,12 +60,37 @@ class QuestionCompetency extends Component {
     saveOptionQuestion(lastIndex, question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5) {
         let lastId = parseInt(lastIndex, 10) + 1
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        let newData = {
-            "id": lastId,
-            "desc": question,
-            "hint": hint,
-            "options": [answer1, answer2, answer3, answer4, answer5],
-            "type": selectedoption
+        let newData
+        if (_.isUndefined(hint) && _.isUndefined(answer5)) {
+            newData = {
+                "id": lastId,
+                "desc": question,
+                "options": [answer1, answer2, answer3, answer4],
+                "type": selectedoption
+            }
+        } else if (_.isUndefined(hint)) {
+            newData = {
+                "id": lastId,
+                "desc": question,
+                "options": [answer1, answer2, answer3, answer4, answer5],
+                "type": selectedoption
+            }
+        } else if (_.isUndefined(answer5)) {
+            newData = {
+                "id": lastId,
+                "desc": question,
+                "hint": hint,
+                "options": [answer1, answer2, answer3, answer4],
+                "type": selectedoption
+            }
+        } else {
+            newData = {
+                "id": lastId,
+                "desc": question,
+                "hint": hint,
+                "options": [answer1, answer2, answer3, answer4, answer5],
+                "type": selectedoption
+            }
         }
 
         let newDataQuestion = this.state.dataQuestion
@@ -73,23 +99,32 @@ class QuestionCompetency extends Component {
             dataQuestion: newDataQuestion
         })
         message.success("Create question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newData)
+        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newData)
     }
 
     saveOptionIdIncrement(question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        getLastIndex(`competencies/${option}/${this.props.index}/questions`).then((lastIndex) =>
+        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) =>
             this.saveOptionQuestion(lastIndex, question, hint, selectedoption, answer1, answer2, answer3, answer4, answer5))
     }
 
     saveOthersQuestion(lastIndex, question, hint, selectedoption) {
         let lastId = parseInt(lastIndex, 10) + 1
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        let newDataOthers = {
-            "id": lastId,
-            "desc": question,
-            "hint": hint,
-            "type": selectedoption
+        let newDataOthers
+        if (_.isUndefined(hint)) {
+            newDataOthers = {
+                "id": lastId,
+                "desc": question,
+                "type": selectedoption
+            }
+        } else {
+            newDataOthers = {
+                "id": lastId,
+                "desc": question,
+                "hint": hint,
+                "type": selectedoption
+            }
         }
 
         let newDataQuestion = this.state.dataQuestion
@@ -99,45 +134,80 @@ class QuestionCompetency extends Component {
         })
 
         message.success("Create question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${lastId}`, newDataOthers)
+        update(`competencies1/${option}/${this.props.index}/questions/${lastId}`, newDataOthers)
     }
 
     saveOthersIdIncrement(question, hint, selectedoption) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        getLastIndex(`competencies/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOthersQuestion(lastIndex, question, hint, selectedoption))
+        getLastIndex(`competencies1/${option}/${this.props.index}/questions`).then((lastIndex) => this.saveOthersQuestion(lastIndex, question, hint, selectedoption))
     }
 
     editOptionQuestion(question, hint, answer1, answer2, answer3, answer4, answer5) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        let newDataOption = {
-            "id": this.state.keyUpdate,
-            "desc": question,
-            "hint": hint,
-            "options": [answer1, answer2, answer3, answer4, answer5],
-            "type": this.state.typeEdit
+        let newDataOption
+        if (_.isUndefined(hint) && _.isUndefined(answer5)) {
+            newDataOption = {
+                "id": this.state.keyUpdate,
+                "desc": question,
+                "options": [answer1, answer2, answer3, answer4],
+                "type": this.state.typeEdit
+            }
+        } else if (_.isUndefined(hint)) {
+            newDataOption = {
+                "id": this.state.keyUpdate,
+                "desc": question,
+                "options": [answer1, answer2, answer3, answer4, answer5],
+                "type": this.state.typeEdit
+            }
+        } else if (_.isUndefined(answer5)) {
+            newDataOption = {
+                "id": this.state.keyUpdate,
+                "desc": question,
+                "hint": hint,
+                "options": [answer1, answer2, answer3, answer4],
+                "type": this.state.typeEdit
+            }
+        } else {
+            newDataOption = {
+                "id": this.state.keyUpdate,
+                "desc": question,
+                "hint": hint,
+                "options": [answer1, answer2, answer3, answer4, answer5],
+                "type": this.state.typeEdit
+            }
         }
         _.merge((_.find(this.state.dataQuestion, this.state.dataQuestion[this.state.keyUpdate])), newDataOption)
         this.setState({
             dataQuestion: this.state.dataQuestion
         })
         message.success("update question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption)
+        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOption)
     }
 
     editOthersQuestion(question, hint) {
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        let newDataOthers = {
-            "id": this.state.keyUpdate,
-            "desc": question,
-            "hint": hint,
-            "type": this.state.typeEdit
+        let newDataOthers
+        if (_.isUndefined(hint)) {
+            newDataOthers = {
+                "id": this.state.keyUpdate,
+                "desc": question,
+                "type": this.state.typeEdit
+            }
+        } else {
+            newDataOthers = {
+                "id": this.state.keyUpdate,
+                "desc": question,
+                "hint": hint,
+                "type": this.state.typeEdit
+            }
         }
+
         _.merge((_.find(this.state.dataQuestion, this.state.dataQuestion[this.state.keyUpdate])), newDataOthers)
         this.setState({
             dataQuestion: this.state.dataQuestion
         })
         message.success("update question successfully", 3)
-        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers)
+        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyUpdate}`, newDataOthers)
     }
 
     editQuestionFormRef = (form) => {
@@ -176,7 +246,7 @@ class QuestionCompetency extends Component {
             dataQuestion: this.state.dataQuestion
         })
 
-        update(`competencies/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null)
+        update(`competencies1/${option}/${this.props.index}/questions/${this.state.keyDelete}`, null)
     }
 
 
@@ -200,17 +270,17 @@ class QuestionCompetency extends Component {
             dataIndex: 'no',
             key: 'no',
         }, {
-            title: 'Question',
-            dataIndex: 'question',
-            key: 'question',
+            title: 'Type',
+            dataIndex: 'type',
+            key: 'type',
         }, {
             title: 'Action',
             key: 'action',
             render: (text, record) => (
                 <span>
-                    <a onClick={() => this.onSelectQuestion(record.no)}>Edit</a>
+                    <Button icon="edit" shape="circle" onClick={() => this.onSelectQuestion(record.no)}></Button>
                     <span className="ant-divider" />
-                    <a onClick={() => this.onSelectedDeleteQuestion(record.no)}>Delete</a>
+                    <Button icon="delete" shape="circle" onClick={() => this.onSelectedDeleteQuestion(record.no)}></Button>
                 </span>
             ),
         }]
@@ -222,7 +292,15 @@ class QuestionCompetency extends Component {
         _.forEach(this.state.dataQuestion, (item) => {
             const dataPushTable = {
                 no: item.id + 1,
-                question: item.desc
+                type: item.type,
+                question: item.desc,
+                hint: item.hint,
+                answer1: _.nth(item.options, 0),
+                answer2: _.nth(item.options, 1),
+                answer3: _.nth(item.options, 2),
+                answer4: _.nth(item.options, 3),
+                answer5: _.nth(item.options, 4),
+
             }
             dataSource.push(dataPushTable)
         })
@@ -240,7 +318,7 @@ class QuestionCompetency extends Component {
     onSelectQuestion(index) {
         let realIndex = index - 1
         const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional'
-        getData(`competencies/${option}/${this.props.index}/questions/${realIndex}`)
+        getData(`competencies1/${option}/${this.props.index}/questions/${realIndex}`)
             .then((detailQuestionData) => this.setState({
                 questionDataDetail: detailQuestionData,
                 keyUpdate: realIndex,
@@ -277,6 +355,7 @@ class QuestionCompetency extends Component {
             this.setState({ visible: false })
         })
     }
+
 
     render() {
         if (this.state.loading) return <div style={{ height: 600 }}><Loading /> </div>
@@ -327,8 +406,8 @@ class QuestionCompetency extends Component {
                 </Row>
                 <Row style={{ margin: 100 }}>
                     <Col>
-                        <Card>
-                            <Table columns={this.getColumns()} dataSource={this.getDataSouce()} style={{whiteSpace: 'pre-wrap'}}/>
+                        <Card title={this.state.name}>
+                            <Table columns={this.getColumns()} rowKey={record => record.no} expandedRowRender={record =>  <p style={{ whiteSpace: 'pre-wrap', fontSize: 14}}>{record.question}</p>} dataSource={this.getDataSouce()} />
                         </Card>
                     </Col>
                 </Row>

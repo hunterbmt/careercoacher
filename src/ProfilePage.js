@@ -49,12 +49,12 @@ export default class ProfilePage extends Component {
   }
 
   getLastIndexCustomCompetency = (customCompetency) =>{
-    getLastIndex(`profiles/${this.props.id}/customCompetencies`).then((lastId) => this.saveCustomCompetency(lastId,customCompetency))
+    getLastIndex(`profiles/${this.props.id}/pendding`).then((lastId) => this.saveCustomCompetency(lastId,customCompetency))
   }
 
   saveCustomCompetency = (lastId,customCompetencies) =>{
     let index = _.toNumber(lastId) + 1
-    update(`profiles/${this.props.id}/customCompetencies/${index}`,customCompetencies)
+    update(`profiles/${this.props.id}/pendding/${index}`,customCompetencies)
     message.success('save custom competency successfully',3)
   }
 

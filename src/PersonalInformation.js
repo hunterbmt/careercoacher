@@ -55,27 +55,23 @@ export default class PersionalInformation extends Component {
         <Layout>
           <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Content style={{ margin: '0 40px' }}>
-              <Col span={8}>
-                <Card title={'Personal Information'} style={{ width: '60%' }}>
-                  <Avatar size="200" round="true" src="http://careers.kms-technology.com/wp-content/uploads/2015/09/kms-next-avatar.png" />
-                  <h3>Name : {this.state.personalName}</h3>
-                  <p>Title: {this.state.personalTitle}</p>
-                  <p>Manager : {this.state.managerInformation.manager}</p>
-                  <p>Project name :  {this.state.managerInformation.name}</p>
-                </Card>
-              </Col>
-              <Col span={16}>
-                <Card>
-                  {
-                      (_.isEmpty(this.state.previousCompetencies) && _.isEmpty(this.state.currentCompetencies)) ? 'you have not completed any self - assessment' : <ProfilePage
-                        id={this.props.id}
-                        previousCompetencies={this.state.previousCompetencies}
-                        currentCompetencies={this.state.currentCompetencies}
-                      />
-                  }
+              <Row type="flex" justify="center">
+                <Col span={4}>  <Avatar size="100" round="true" src="http://careers.kms-technology.com/wp-content/uploads/2015/09/kms-next-avatar.png" /></Col>
+                <Col span={4} style={{ marginTop: 40 }}><h3>Name : {this.state.personalName}</h3></Col>
+                <Col span={4} style={{ marginTop: 40 }}><h3>Title: {this.state.personalTitle}</h3></Col>
+                <Col span={4} style={{ marginTop: 40 }}><h3>Manager : {this.state.managerInformation.manager}</h3></Col>
+                <Col span={4} style={{ marginTop: 40 }}> <h3>Project name :  {this.state.managerInformation.name}</h3></Col>
+              </Row>
+              <Row>
+                {
+                  (_.isEmpty(this.state.previousCompetencies) && _.isEmpty(this.state.currentCompetencies)) ? 'you have not completed any self - assessment' : <ProfilePage
+                    id={this.props.id}
+                    previousCompetencies={this.state.previousCompetencies}
+                    currentCompetencies={this.state.currentCompetencies}
+                  />
+                }
+              </Row>
 
-                </Card>
-              </Col>
             </Content>
           </Row>
         </Layout>
