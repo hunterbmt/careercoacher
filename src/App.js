@@ -33,7 +33,7 @@ class App extends Component {
           <Location path='/:manager/assessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name' handler={CompareAssessment} />
           <Location path='/competencies' handler={Competencies} />
-          <Location path='/competencies1/:option/:index' handler={QuestionCompetency} />
+          <Location path='/competencies/:option/:index' handler={QuestionCompetency} />
           <Location path='/login' handler={Login}/>
           <Location path='/project/:id' handler={GroupManagementForManager}/>
         </Locations>

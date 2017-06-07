@@ -77,7 +77,7 @@ class Competencies extends Component {
 
     message.success("Update Competency successfully", 3)
 
-    update(`competencies1/${this.state.selectOption}/${this.state.keyUpdate}`, dataUpdate)
+    update(`competencies/${this.state.selectOption}/${this.state.keyUpdate}`, dataUpdate)
 
 
   }
@@ -131,16 +131,16 @@ class Competencies extends Component {
 
     message.success("Create Competency successfully", 3)
 
-    update(`competencies1/Kms_core/${lastId}`, newCompetency)
+    update(`competencies/Kms_core/${lastId}`, newCompetency)
   }
 
   addNewKMSCoreCompetency(competencyName) {
-    getLastIndex(`competencies1/Kms_core`).then((lastIndex) => this.addNewKmsCore(lastIndex, competencyName))
+    getLastIndex(`competencies/Kms_core`).then((lastIndex) => this.addNewKmsCore(lastIndex, competencyName))
   }
 
   addNewKMSOptionalCompetency(competencyName) {
 
-    getLastIndex(`competencies1/Kms_optional`).then((lastIndex) => this.addNewKmsOptional(lastIndex, competencyName))
+    getLastIndex(`competencies/Kms_optional`).then((lastIndex) => this.addNewKmsOptional(lastIndex, competencyName))
   }
 
   addNewKmsOptional(lastIndex, competencyName) {
@@ -158,7 +158,7 @@ class Competencies extends Component {
 
     message.success("Create Competency successfully", 3)
 
-    update(`competencies1/Kms_optional/${lastId}`, newCompetency)
+    update(`competencies/Kms_optional/${lastId}`, newCompetency)
   }
 
   handleCancelKMSCore = (e) => {
@@ -195,7 +195,7 @@ class Competencies extends Component {
           <span className="ant-divider" />
           <Button icon="right" shape="circle" onClick={() => this.moveCompetencyOptional(record.kmscore)}></Button>
           <span className="ant-divider" />
-          <Link href={`#competencies1/core/${record.no}`}>Add question</Link>
+          <Link href={`#competencies/core/${record.no}`}>Add question</Link>
         </span>
       ),
     }]
@@ -223,10 +223,10 @@ class Competencies extends Component {
   }
 
   onSelectCompetency(name) {
-    getData(`competencies1/Kms_core`)
+    getData(`competencies/Kms_core`)
       .then((dataKmsCore) => _.map(dataKmsCore, (competency, key) => {
         if (competency.name === name) {
-          getData(`competencies1/Kms_core/${key}`).then((selectedCompetency) => this.setState({
+          getData(`competencies/Kms_core/${key}`).then((selectedCompetency) => this.setState({
             activateCompetency: selectedCompetency.activated,
             keyUpdate: key,
             competencyName: selectedCompetency.name,
@@ -251,22 +251,22 @@ class Competencies extends Component {
       competenciesKmsCore: newDataCompeteciesKMSCore
     })
 
-    update(`competencies1/Kms_optional/${lastId}`, competency)
-    update(`competencies1/Kms_core/${key}`, null)
+    update(`competencies/Kms_optional/${lastId}`, competency)
+    update(`competencies/Kms_core/${key}`, null)
 
     message.success("Move Competency successfully", 3)
   }
 
   moveKmsOptional(key, competency) {
-    getLastIndex(`competencies1/Kms_optional`).then((lastIndex) => this.moveOptional(lastIndex, competency, key))
+    getLastIndex(`competencies/Kms_optional`).then((lastIndex) => this.moveOptional(lastIndex, competency, key))
   }
 
 
   moveCompetencyOptional = (name) => {
-    getData(`competencies1/Kms_core`)
+    getData(`competencies/Kms_core`)
       .then((dataKmsCore) => _.map(dataKmsCore, (competency, key) => {
         if (competency.name === name) {
-          getData(`competencies1/Kms_core/${key}`).then((selectedCompetency) => this.moveKmsOptional(key, selectedCompetency))
+          getData(`competencies/Kms_core/${key}`).then((selectedCompetency) => this.moveKmsOptional(key, selectedCompetency))
         }
       }))
   }
@@ -293,7 +293,7 @@ class Competencies extends Component {
           <span className="ant-divider" />
            <Button icon="left" shape="circle" onClick={() => this.moveCompetencyCore(record.kmsoptional)}></Button>
           <span className="ant-divider" />
-          <Link href={`#competencies1/optional/${record.no}`}>Add question</Link>
+          <Link href={`#competencies/optional/${record.no}`}>Add question</Link>
         </span>
       ),
     }]
@@ -320,10 +320,10 @@ class Competencies extends Component {
   }
 
   onSelectKmsOptionalCompetency(name) {
-    getData(`competencies1/Kms_optional`)
+    getData(`competencies/Kms_optional`)
       .then((dataKmsOptional) => _.map(dataKmsOptional, (competency, key) => {
         if (competency.name === name) {
-          getData(`competencies1/Kms_optional/${key}`).then((selectedCompetency) => this.setState({
+          getData(`competencies/Kms_optional/${key}`).then((selectedCompetency) => this.setState({
             activateCompetency: selectedCompetency.activated,
             keyUpdate: key,
             competencyName: selectedCompetency.name,
@@ -350,22 +350,22 @@ class Competencies extends Component {
 
     })
 
-    update(`competencies1/Kms_core/${lastId}`, competency)
-    update(`competencies1/Kms_optional/${key}`, null)
+    update(`competencies/Kms_core/${lastId}`, competency)
+    update(`competencies/Kms_optional/${key}`, null)
 
     message.success("Move Competency successfully", 3)
   }
 
   moveKmsCore(key, competency) {
-    getLastIndex(`competencies1/Kms_core`).then((lastIndex) => this.moveCore(lastIndex, competency, key))
+    getLastIndex(`competencies/Kms_core`).then((lastIndex) => this.moveCore(lastIndex, competency, key))
   }
 
 
   moveCompetencyCore = (name) => {
-    getData(`competencies1/Kms_optional`)
+    getData(`competencies/Kms_optional`)
       .then((dataKmsCore) => _.map(dataKmsCore, (competency, key) => {
         if (competency.name === name) {
-          getData(`competencies1/Kms_optional/${key}`).then((selectedCompetency) => this.moveKmsCore(key, selectedCompetency))
+          getData(`competencies/Kms_optional/${key}`).then((selectedCompetency) => this.moveKmsCore(key, selectedCompetency))
         }
       }))
   }
@@ -417,14 +417,14 @@ class Competencies extends Component {
 
 
   getCompetencyKMSCore() {
-    getData(`competencies1/Kms_core`)
+    getData(`competencies/Kms_core`)
       .then((kmsCoreData) => this.setState({
         competenciesKmsCore: kmsCoreData
       }))
   }
 
   getCompetencyOptional() {
-    getData(`competencies1/Kms_optional`)
+    getData(`competencies/Kms_optional`)
       .then((kmsOptionalData) => this.setState({
         competenciesKmsOptional: kmsOptionalData,
         loading: false
