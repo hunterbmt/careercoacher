@@ -19,6 +19,7 @@ class MainPage extends Component {
       loading: true
     };
   }
+
   componentDidMount() {
     Promise.all([getData('baseline'), getData('profileList')]).then(([baseline, profileList]) =>
       this.setState({

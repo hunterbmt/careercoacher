@@ -7,15 +7,16 @@ import MainPage from './MainPage';
 import SelfAssessment from './SelfAssessment';
 import CompareAssessment from './CompareAssessment';
 import FinishPage from './FinishPage';
+import ProfilePage from './ProfilePage';
+import SetWeight from './SetWeight';
 import Competencies from './Competencies'
 import QuestionCompetency from './QuestionCompetency'
 import PersonalProfile from './PersonalProfile'
 import Login from './Login'
 import GroupManagementForManager from './GroupManagementForManager'
 
-
 import './App.css';
-
+import './ant-custom.css';
 
 const Locations = Router.Locations;
 const Location = Router.Location;
@@ -32,6 +33,9 @@ class App extends Component {
           <Location path='/compare/:name/final' handler={SelfAssessment} />
           <Location path='/:manager/assessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name' handler={CompareAssessment} />
+          <Location path='/:name' handler={ProfilePage} />
+          <Location path='/profiles/:profile' handler={ProfilePage} />
+          <Location path='/competencies/:option/:index/:level' handler={SetWeight} />
           <Location path='/competencies' handler={Competencies} />
           <Location path='/competencies1/:option/:index' handler={QuestionCompetency} />
           <Location path='/login' handler={Login}/>
