@@ -20,4 +20,5 @@ const getLastIndexDefault = (data) => _.isEmpty(data) ? -1 : _.last(Object.keys(
 
 export const getLastIndex = (part) => getData(part).then((data) => getLastIndexDefault(data))
 
+
 export default firebase;

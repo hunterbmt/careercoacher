@@ -95,11 +95,11 @@ export default class ProfilePage extends Component {
           <Row>
             <Select
               showSearch
-              size="large"
+              size='large'
               style={{ width: 200 }}
               defaultValue={this.state.compareAgain}
-              placeholder="Select a comparation"
-              optionFilterProp="children"
+              placeholder='Select a comparation'
+              optionFilterProp='children'
               onChange={this.comparationOnChange}
               filterOption={(input, option) => option.props.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
@@ -194,7 +194,6 @@ export default class ProfilePage extends Component {
     });
     this.updateConfiguratedCompetencies(configuratedCompetencies);
   }
-
   updateConfiguratedCompetencies = (configuratedCompetencies) => {
     update(`/profiles/${this.props.id}/configuratedCompetencies`, configuratedCompetencies)
   }
