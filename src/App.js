@@ -42,7 +42,7 @@ class App extends Component {
           <Location path='/roleProfile' handler={BaselineManagementPage} />
           <Location path='/competencies/:option/:index/:level' handler={SetWeight} />
           <Location path='/competencies' handler={Competencies} />
-          <Location path='/competencies1/:option/:index' handler={QuestionCompetency} />
+          <Location path='/competencies/:option/:index' handler={QuestionCompetency} />
           <Location path='/login' handler={Login}/>
           <Location path='/project/:id' handler={GroupManagementForManager}/>
         </Locations>
