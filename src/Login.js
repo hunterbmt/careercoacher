@@ -58,7 +58,8 @@ class Login extends Component {
                 <Row>
                     <Card style={{ margin: 300, marginLeft: 700, width: 500, height: '100%', backgroundColor: '#e9e9e9' }}>
                         <Col span={12} offset={6}><img alt='logo' src={logo} style={{ height: 64, padding: 10 }} /></Col>
-                        <Col span={12} offset={6} style={{ marginTop: 50 }}><LoginForm
+                        <Col span={12} offset={6} style={{ marginTop: 50 }}>
+                        <LoginForm
                             ref={this.loginFormRef}
                             handleSubmit={this.handleSubmit}
                             handleCheckUSerName={this.handleCheckUSerName} />
