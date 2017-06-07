@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import { Checkbox, Modal, Button, Row, Col } from 'antd';
-import _ from 'lodash';
+import React, {Component} from 'react'
+import { Checkbox, Modal, Button, Row, Col } from 'antd'
+import _ from 'lodash'
 
 export default class CompentencyConfig extends Component {
   state = {
@@ -10,8 +10,8 @@ export default class CompentencyConfig extends Component {
   render() {
     const {
       compentencies
-    } = this.props;
-    const chunkedCompentencyList = _.chunk(compentencies, 2);
+    } = this.props
+    const chunkedCompentencyList = _.chunk(compentencies, 2)
     return (
       <div>
         <Button
@@ -53,12 +53,12 @@ export default class CompentencyConfig extends Component {
   open = () => this.setState({open: true})
   close = () => this.setState({open: false})
   compentencyOnChange = (e) => {
-    const checked = e.target.checked;
-    const value = e.target.value;
+    const checked = e.target.checked
+    const value = e.target.value
     if (!checked) {
-      this.props.removeCompentency(value);
+      this.props.removeCompentency(value)
     } else {
-      this.props.addCompentency(value);
-    };
+      this.props.addCompentency(value)
+    }
   }
 }
