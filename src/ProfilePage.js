@@ -1,49 +1,56 @@
-import React, {Component} from 'react';
-import { Timeline, Select, Row, Col, Card, Tag } from 'antd';
-import _ from 'lodash';
-import CompetencyRadar from './CompetencyRadar';
-import CompentencyConfig from './CompentencyConfig';
-import Loading from './Loading';
+import React, {Component} from 'react'
+import { Timeline, Select, Row, Col, Card, Tag } from 'antd'
+import _ from 'lodash'
+import CompetencyRadar from './CompetencyRadar'
+import CompentencyConfig from './CompentencyConfig'
+import Loading from './Loading'
 
-import {getData, update} from './firebase';
+import {getData, update} from './firebase'
 
-const Option = Select.Option;
+const Option = Select.Option
 
 
 const getSelectedCompetencies = (profile) => {
-  const configuratedCompetencies = profile.configuratedCompetencies;
-  if (!_.isEmpty(configuratedCompetencies)) return configuratedCompetencies;
+  const configuratedCompetencies = profile.configuratedCompetencies
+  if (!_.isEmpty(configuratedCompetencies)) return configuratedCompetencies
   const nonEmptyCompetencies = _.reduce(profile.compentecies, (result, proficiency, competency) => {
-    if (proficiency > 0) result.push(competency);
-    return result;
-  }, []);
-  return nonEmptyCompetencies;
+    if (proficiency > 0) result.push(competency)
+    return result
+  }, [])
+  return nonEmptyCompetencies
 }
 
 export default class ProfilePage extends Component {
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       compareAgain: 'Previous Assessment',
-      loading: true
+      loading: true,
+      id: props.id
     }
   }
+
+  componentWillReceiveProps(newProps) {
+    console.log('Received ' + newProps.id)
+    this.setState({
+      id: newProps.id
+    })
+    
+  }
   
-  componentWillMount(){
-   Promise.all([getData(`profiles/${this.props.id}/competencies`), getData(`profiles/${this.props.id}`)]).then(([personalCompetencies,personalProfile]) => this.setState({
-     competencies : Object.keys(personalCompetencies),
+  componentDidMount(){
+   Promise.all([getData(`profiles/${this.state.id}/competencies`), getData(`profiles/${this.state.id}`)]).then(([personalCompetencies, personalProfile]) => this.setState({
      profile : personalProfile,
      loading : false
    }))
   }
 
   render() {
-    if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>;
-    const profile = this.state.profile;
-    const radarData = [this.props.previousCompetencies, this.props.currentCompetencies];
-    const selectedCompetencies = getSelectedCompetencies(profile);
-    console.log(selectedCompetencies.xxx)
+    if (this.state.loading) return <div style={{height: 600}}><Loading /> </div>
+    const profile = this.state.profile
+    const radarData = [this.props.previousCompetencies, this.props.currentCompetencies]
+    const selectedCompetencies = getSelectedCompetencies(profile)
 
     return (
       <Row type="flex" style={{padding: '20px 10px 10px'}}>
@@ -118,29 +125,29 @@ export default class ProfilePage extends Component {
   comparationOnChange = (comparation) => this.setState({compareAgain: comparation})
 
   removeCompentency = (compentency) => {
-    const targetProfile = this.state.profile;
-    const configuratedCompetencies = _.filter(getSelectedCompetencies(targetProfile), (value) => compentency !== value);
+    const targetProfile = this.state.profile
+    const configuratedCompetencies = _.filter(getSelectedCompetencies(targetProfile), (value) => compentency !== value)
     this.setState({
       profile: {
         ...targetProfile,
         configuratedCompetencies
       }
-    });
-    this.updateConfiguratedCompetencies(configuratedCompetencies);
+    })
+    this.updateConfiguratedCompetencies(configuratedCompetencies)
   }
   addCompentency = (compentency) => {
-    const targetProfile = this.state.profile;
-    const configuratedCompetencies = _.concat(getSelectedCompetencies(targetProfile), compentency);
+    const targetProfile = this.state.profile
+    const configuratedCompetencies = _.concat(getSelectedCompetencies(targetProfile), compentency)
     this.setState({
       profile: {
         ...targetProfile,
         configuratedCompetencies
       }
-    });
-    this.updateConfiguratedCompetencies(configuratedCompetencies);
+    })
+    this.updateConfiguratedCompetencies(configuratedCompetencies)
   }
 
   updateConfiguratedCompetencies = (configuratedCompetencies) => {
     update(`/profiles/${this.props.id}/configuratedCompetencies`, configuratedCompetencies)
   }
-};
+}

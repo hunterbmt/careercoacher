@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { Button, Modal, Input, Table, Select, Popconfirm, message, Form, Icon, Checkbox } from 'antd'
+import { Button, Modal, Input, Table, Select, Popconfirm, message, Form, Icon, Checkbox, Tag } from 'antd'
 import Loading from './Loading'
 import {CreateProjectBaselineForm} from './CreateProjectBaselineForm'
 import {EditProjectBaselineForm} from './EditProjectBaselineForm'
@@ -30,6 +30,11 @@ class ProjectBaseline extends Component {
                 dataIndex: 'baseline',
                 key: 'baseline',
             }, {
+                title: 'Project',
+                dataIndex: 'project',
+                key: 'project',
+                render: (text, record) => <Tag color='#108ee9'>{record.project}</Tag>
+            }, {
                 title: 'Action',
                 key: 'action',
                 render: (text, record) => (
@@ -47,7 +52,6 @@ class ProjectBaseline extends Component {
     }
 
     onSelectBaseline = (no, baseline) => {     
-        
         this.setState({
             showEditPopup : true,
             selectedBaseline : baseline,
@@ -60,23 +64,23 @@ class ProjectBaseline extends Component {
                 loading: false
             })
         ))
-        console.log('Selected  ' + no) 
     }
 
     componentDidMount() {
-     Promise.all([getData(`project_baseline`), getData(`project_baseline/0/competencies`), 
-     getData('baseline'), 
-     getData(`baseline/0/Kms_optional/competencies`), getData(`BU_projects`)])
-     .then(([projectBaselines, projectBaselineCompetencies, baselines, optionalBaselines, projects]) =>
-            this.setState({
-                projectBaselines,
-                projectBaselineCompetencies,
-                optionalBaselines,
-                baselines,
-                projects,
-                loading: false
-            })
-        )
+        Promise.all([getData(`project_baseline`), getData(`project_baseline/0/competencies`),
+                getData('baseline'),
+                getData(`baseline/0/Kms_optional/competencies`), getData(`BU_projects`)
+            ])
+            .then(([projectBaselines, projectBaselineCompetencies, baselines, optionalBaselines, projects]) =>
+                this.setState({
+                    projectBaselines,
+                    projectBaselineCompetencies,
+                    optionalBaselines,
+                    baselines,
+                    projects,
+                    loading: false
+                })
+            )
     }
 
     saveNewProjectBaseline = (newProjectBaselineName, projectBaselineCompetencies) => {
@@ -263,7 +267,8 @@ class ProjectBaseline extends Component {
             let row = {
                 key : index,
                 no: item.id,
-                baseline : item.name
+                baseline: item.name,
+                project: item.projectName
             }
             dataSource.push(row)
         })
