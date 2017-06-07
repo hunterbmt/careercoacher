@@ -11,7 +11,16 @@ import ProfilePage from './ProfilePage';
 import GroupManagement from './GroupManagement';
 import BaselineManagementPage from './BaselineManagementPage';
 import './App.css';
+import SetWeight from './SetWeight';
+import Competencies from './Competencies'
+import QuestionCompetency from './QuestionCompetency'
+import PersonalProfile from './PersonalProfile'
+import Login from './Login'
+import GroupManagementForManager from './GroupManagementForManager'
 
+
+import './App.css';
+import './ant-custom.css';
 
 const Locations = Router.Locations;
 const Location = Router.Location;
@@ -22,6 +31,7 @@ class App extends Component {
       <LocaleProvider locale={enUS}>
         <Locations hash style={{height: '100%'}}>
           <Location path='/' handler={MainPage} />
+          <Location path='/personal/:id' handler={PersonalProfile} />
           <Location path='/finish' handler={FinishPage} />
           <Location path='/selfassessment/:name' handler={SelfAssessment} />
           <Location path='/compare/:name/final' handler={SelfAssessment} />
@@ -30,6 +40,11 @@ class App extends Component {
           <Location path='/profiles/:profile' handler={ProfilePage} />
           <Location path='/projects/:project' handler={GroupManagement} />
           <Location path='/roleProfile' handler={BaselineManagementPage} />
+          <Location path='/competencies/:option/:index/:level' handler={SetWeight} />
+          <Location path='/competencies' handler={Competencies} />
+          <Location path='/competencies1/:option/:index' handler={QuestionCompetency} />
+          <Location path='/login' handler={Login}/>
+          <Location path='/project/:id' handler={GroupManagementForManager}/>
         </Locations>
       </LocaleProvider>
     );

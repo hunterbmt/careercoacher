@@ -25,9 +25,10 @@ class MainPage extends Component {
   componentDidMount() {
     Promise.all([getData('baseline'), getData('BU_projects')]).then(([baseline, projectList]) =>
       this.setState({
-        baseline,
-        projectList,
-        selectedProject: _.first(Object.keys(projectList)),
+        baseline: _.map(baseline, (base) =>({name: base.name, competencies: _.flatten([base.Kms_core.competencies, base.Kms_optional.competencies])})),
+        profileList,
+        test:baseline,
+        selectedProfile: _.first(profileList),
         loading: false
       })
     )
