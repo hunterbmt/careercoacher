@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Timeline, Select, Row, Col, Card, Tag, Button, message } from 'antd';
+import { Timeline, Select, Row, Col, Card, Tag, message } from 'antd';
 import _ from 'lodash';
 import CompetencyRadar from './CompetencyRadar';
 import CompentencyConfig from './CompentencyConfig';
 import Loading from './Loading';
-import CreateCustomCompetencyPersonalProfile from './CreateCustomCompetencyPersonalProfile'
 
 import { getData, update,getLastIndex } from './firebase';
 

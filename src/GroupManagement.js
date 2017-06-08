@@ -1,9 +1,8 @@
 import React, {Component} from 'react'
 import _ from 'lodash'
 import { Layout, Row, Col, Card, Tag, Table} from 'antd'
-import logo from './logo.png'
 import Loading from './Loading'
-import {getData, update} from './firebase'
+import {getData} from './firebase'
 import ProfilePage from './ProfilePage'
 
 const { Content } = Layout
