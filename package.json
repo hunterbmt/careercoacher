@@ -98,5 +98,4 @@
   "eslintConfig": {
     "extends": "react-app"
   }
-  } 
 }
