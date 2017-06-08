@@ -28,6 +28,7 @@ export default class GroupManagementForManager extends Component {
       id : member,
       modeApprove : "on",
     }))
+   
   }
 
   getChildren = () => {

@@ -1,8 +1,8 @@
-import { Form, Modal, Select, Input } from 'antd'
+import { Form, Modal, Select } from 'antd'
 import React, { } from 'react'
 import _ from 'lodash'
 const FormItem = Form.Item
-const Option = Select.Option
+
 
 const CustomCompetenciesForm = Form.create()(
   (props) => {

@@ -8,8 +8,7 @@ class CoreBaseline extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            dataSource : [],
-            selectedBaseline : 0,
+            selectedBaseline : this.props.selectedBaseline,
             columns : this.prepareColumns()
         }
     }
@@ -63,16 +62,16 @@ class CoreBaseline extends Component {
     }
 
     render() {
-        let dataSource = []
+        const dataSource = []
         _.forEach(this.state.coreBaselineCompetencyList, (item, index) => {
             
-            let object = {
-                key : index,
-                no: index,
+            const row = {
+                key : _.findKey(this.state.coreBaselineCompetencyList, ['name', item.name]),
+                no: _.findKey(this.state.coreBaselineCompetencyList, ['name', item.name]),
                 competency : Object.values(item.name),
                 proficiency: item.proficiency
             }
-            dataSource.push(object)
+            dataSource.push(row)
             
         })
         return <Table dataSource={dataSource} columns={this.state.columns} />
