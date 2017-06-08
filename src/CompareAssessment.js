@@ -47,9 +47,11 @@ class CompareAssessment extends Component {
   }
 
   getConflictsView = (selfAnswers, managerAnswers) => {
+    
     const conflicts = _.mergeWith(selfAnswers, managerAnswers, (selfAnswer, managerAnswer) =>
       _.map(selfAnswer, (answer, index) => [answer, managerAnswer[index]])
     )
+    console.log(conflicts)
     return _.omitBy(
       _.mapValues(conflicts, (answers) => _.omitBy(answers, (answer) => answer[0] === answer[1]))
       , _.isEmpty)
