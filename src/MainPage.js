@@ -23,12 +23,14 @@ class MainPage extends Component {
   }
 
   componentDidMount() {
-    Promise.all([getData('baseline'), getData('BU_projects')]).then(([baseline, projectList]) =>
+    Promise.all([getData('baseline'), getData('BU_projects'), getData('profileList')]).then(([baseline, projectList, profileList]) =>
       this.setState({
         baseline: _.map(baseline, (base) =>({name: base.name, competencies: _.flatten([base.Kms_core.competencies, base.Kms_optional.competencies])})),
+        profileList,
         projectList,
         test:baseline,
-        selectedProfile: _.first(projectList),
+        selectedProject: _.first(Object.keys(projectList)),
+        selectedProfile: _.first(Object.keys(profileList)),
         loading: false
       })
     )
@@ -42,6 +44,7 @@ class MainPage extends Component {
   }
 
   onSelectProject = (e) => {
+    console.log(e.key)
     this.setState({
       selectedProject: e.key,
     })
@@ -77,7 +80,7 @@ class MainPage extends Component {
                 title={<span><Icon type='database' /><span className='nav-text'>BU - Projects</span></span>}
               >
                 {
-                  _.map(Object.keys(this.state.projectList), (project) => <Menu.Item key={project}>{project}</Menu.Item>)
+                  _.map(this.state.projectList, (project, index) => <Menu.Item key={index}>{project.name}</Menu.Item>)
                 }
               </SubMenu>
               <Menu.Item key='Report'>

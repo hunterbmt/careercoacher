@@ -4,7 +4,7 @@ import { Layout, Row, Col, Card, Tag } from 'antd'
 import logo from './logo.png'
 import Loading from './Loading'
 import { getData, update } from './firebase'
-import ProfilePage from './ProfilePage'
+import ProfilePersonalPage from './ProfilePersonalPage'
 import Avatar from 'react-avatar'
 
 const { Content } = Layout
@@ -64,7 +64,7 @@ export default class PersionalInformation extends Component {
               </Row>
               <Row>
                 {
-                  (_.isEmpty(this.state.previousCompetencies) && _.isEmpty(this.state.currentCompetencies)) ? 'you have not completed any self - assessment' : <ProfilePage
+                  (_.isEmpty(this.state.previousCompetencies) && _.isEmpty(this.state.currentCompetencies)) ? 'you have not completed any self - assessment' : <ProfilePersonalPage
                     id={this.props.id}
                     previousCompetencies={this.state.previousCompetencies}
                     currentCompetencies={this.state.currentCompetencies}

@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Loading from './Loading'
 import _ from 'lodash'
 import { Button, Modal, Input, Popconfirm, message, InputNumber, Table } from 'antd'
 import './App.css'
@@ -8,7 +9,7 @@ class OptionalBaseline extends Component {
      constructor(props) {
         super(props)
         this.state = {
-            selectedBaseline : 0,
+            selectedBaseline : this.props.selectedBaseline,
             showEditProfilePopup : false,
             columns : this.prepareColumns()
         }
@@ -43,6 +44,7 @@ class OptionalBaseline extends Component {
     }
 
     onSelectBaseline = (competency, proficiency, no) => {
+        console.log('You selected ' + competency + ' ' + proficiency + ' ' + no)
         this.setState({
         showEditProfilePopup : true,
         selectedCompetency : competency,
@@ -53,20 +55,22 @@ class OptionalBaseline extends Component {
 
     componentWillReceiveProps(newProps) {
         this.setState({
-            selectedBaseline : newProps.selectedBaseline
+            selectedBaseline : newProps.selectedBaseline,
+            
         }, () => Promise.all([getData(`baseline/${this.state.selectedBaseline}/Kms_optional/competencies`)]).then(([optionalBaselineCompetencyList]) =>
             this.setState({
                 optionalBaselineCompetencyList,
-                loading: false
+                
             })
         ))
     }
 
     componentDidMount() {
+       
      Promise.all([getData(`baseline/${this.state.selectedBaseline}/Kms_optional/competencies`)]).then(([optionalBaselineCompetencyList]) =>
             this.setState({
                 optionalBaselineCompetencyList,
-                loading: false
+                
             })
         )
     }
@@ -102,17 +106,15 @@ class OptionalBaseline extends Component {
     }
 
     render() {
-        let dataSource = []
+        const dataSource = []
         _.forEach(this.state.optionalBaselineCompetencyList, (item, index) => {
-            
-            let object = {
-                key : index,
-                no: index,
+            const row = {
+                key : _.findKey(this.state.optionalBaselineCompetencyList, ['name', item.name]),
+                no: _.findKey(this.state.optionalBaselineCompetencyList, ['name', item.name]),
                 competency : item.name,
                 proficiency: item.proficiency
             }
-            dataSource.push(object)
-           
+            dataSource.push(row)
         })
         return (
             <div>
@@ -133,7 +135,7 @@ class OptionalBaseline extends Component {
                     <p>Competencies: </p>
                     <Input placeholder='Coding....' value={this.state.selectedCompetency} onChange={this.handleBaselineChange} disabled='true' />
                     <p>Proficency: </p>
-                    <InputNumber min={0} max={4} defaultValue={this.state.selectedCompetencyProficiency} onChange={this.handleBaselineChange} />
+                    <InputNumber min={0} max={4} value={this.state.selectedCompetencyProficiency} onChange={this.handleBaselineChange} />
                 </Modal>
             </div>
         )

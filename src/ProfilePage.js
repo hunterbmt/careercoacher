@@ -22,7 +22,6 @@ const getSelectedCompetencies = (profile) => {
 }
 
 export default class ProfilePage extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -86,20 +85,18 @@ export default class ProfilePage extends Component {
     const profile = this.state.profile;
     const radarData = [this.props.previousCompetencies, this.props.currentCompetencies];
     const selectedCompetencies = getSelectedCompetencies(profile);
-    const optionalCompetency = _.map(this.state.customCompetencies, (item) => (
-      <Option value={item}>{item}</Option>
-    ))
+   
     return (
       <Row type="flex" style={{ padding: '20px 10px 10px' }}>
         <Col span={14}>
           <Row>
             <Select
               showSearch
-              size='large'
+              size="large"
               style={{ width: 200 }}
               defaultValue={this.state.compareAgain}
-              placeholder='Select a comparation'
-              optionFilterProp='children'
+              placeholder="Select a comparation"
+              optionFilterProp="children"
               onChange={this.comparationOnChange}
               filterOption={(input, option) => option.props.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
@@ -120,15 +117,6 @@ export default class ProfilePage extends Component {
         <Col span={9} offset={1}>
           <Row type='flex' justify='end'>
             <Col span={6} offset={6}>
-              <Button icon="file-add" shape="circle" style={{ width: 40, height: 40, fontSize: 20 }} onClick={this.showModal}></Button>
-              <CreateCustomCompetencyPersonalProfile
-                ref={this.saveFormRef}
-                visible={this.state.visible}
-                onCancel={this.handleCancel}
-                onCreate={this.handleCreate}
-                optionalCompetency={optionalCompetency}
-                onChangeOption={this.onChangeOption}
-              />
             </Col>
             <Col span={6} offset={6}><CompentencyConfig
               compentencies={_.map(this.props.currentCompetencies, (item) => item.name)}
@@ -194,7 +182,8 @@ export default class ProfilePage extends Component {
     });
     this.updateConfiguratedCompetencies(configuratedCompetencies);
   }
+
   updateConfiguratedCompetencies = (configuratedCompetencies) => {
     update(`/profiles/${this.props.id}/configuratedCompetencies`, configuratedCompetencies)
   }
-};
+}
