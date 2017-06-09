@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { Layout, Row, Col, Card, Tag } from 'antd'
-import logo from './logo.png'
+import { Layout, Row, Col } from 'antd'
 import Loading from './Loading'
-import { getData, update } from './firebase'
+import { getData } from './firebase'
 import ProfilePersonalPage from './ProfilePersonalPage'
 import Avatar from 'react-avatar'
 

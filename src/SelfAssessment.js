@@ -77,11 +77,9 @@ class SelfAssessment extends Component {
     _.forEach(this.state.projectRequiredCompetencies, (value) => {
       questions.push(_.find(this.state.optionalCompetencies, ['name', value.name]))
     })
-    if (_.isEmpty(this.props.manager) && !this.isFinalPage()) {
       _.forEach(this.state.customCompetencies, (value) => {
         questions.push(_.find(this.state.optionalCompetencies, ['name', value]))
       })
-    }
     this.setState({
       questions,
       loading: false
@@ -135,7 +133,7 @@ class SelfAssessment extends Component {
     this.setState({
       saving: true
     });
-    this.saveCustomCompetencyLevels()
+    //this.saveCustomCompetencyLevels()
     writeAnswers(part, this.state.answers).then(() => window.location.replace('/careercoacher/#/finish'));
   }
 

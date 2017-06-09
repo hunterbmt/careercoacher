@@ -12,7 +12,7 @@ const CreateCompetenciesKmsCore = Form.create()(
         visible={visibleKmsCore}
         title="Create a new competency"
         okText="Create"
-        onCancelKmsCore={onCancelKmsCore}
+        onCancel={onCancelKmsCore}
         onOk={onCreateKmsCore}
       >
         <Form layout="vertical">
