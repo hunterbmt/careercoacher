@@ -133,12 +133,25 @@ class CompareAssessment extends Component {
     return title
   }
 
+  saveConfiguratedCompetencies=()=>{
+    let configuratedCompetencies
+    _.isNil(this.state.profile.competencies.custom)?
+    configuratedCompetencies = _.map(this.state.levels)
+    :
+    configuratedCompetencies = _.map(_.concat(_.map(this.state.levels),this.state.profile.competencies.custom),'name')
+
+    update(`profiles/${this.state.indexProfile}/configuratedCompetencies`,
+      configuratedCompetencies
+    )
+  }
+
   saveProficiencies = () => {
     if(!_.isUndefined(this.state.profile.competencies)) {
       update(`profiles/${this.state.indexProfile}/preCompetencies`, this.state.profile.competencies)
     }  
     update(`profiles/${this.state.indexProfile}/competencies/required`, this.state.levels)
     update(`profiles/${this.state.indexProfile}/title`, this.findNewTitle())
+    this.saveConfiguratedCompetencies()
     this.saveHistory()
   }
 
@@ -242,7 +255,7 @@ class CompareAssessment extends Component {
   getUnderWeight = (weights, answers, competenciesName) => {
     let underWeights
     _.map(answers, (answer, index) =>
-      _.lt(answer, weights[index]) ?
+      answer && _.lt(answer, weights[index]) ?
         underWeights = {
           ...underWeights,
           [index]: {
