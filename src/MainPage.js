@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import _ from 'lodash'
-import { Layout, Menu, Icon, Row, Col, Button, Modal, Input } from 'antd'
+import { Layout, Menu, Icon, Row, Col } from 'antd'
 import Loading from './Loading'
 import AddNewProfilePopup from './AddNewProfilePopup'
 import './App.css'
