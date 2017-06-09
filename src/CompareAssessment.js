@@ -131,12 +131,19 @@ class CompareAssessment extends Component {
     return title
   }
 
+  saveConfiguratedCompetencies=()=>{
+    update(`profiles/${this.state.indexProfile}/configuratedCompetencies`,
+      _.map(_.concat(_.map(this.state.levels),this.state.profile.competencies.custom),'name')
+    )
+  }
+
   saveProficiencies = () => {
     if(!_.isUndefined(this.state.profile.competencies)) {
       update(`profiles/${this.state.indexProfile}/preCompetencies`, this.state.profile.competencies)
     }  
     update(`profiles/${this.state.indexProfile}/competencies/required`, this.state.levels)
     update(`profiles/${this.state.indexProfile}/title`, this.findNewTitle())
+    this.saveConfiguratedCompetencies()
     this.saveHistory()
   }
 

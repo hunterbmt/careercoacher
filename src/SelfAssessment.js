@@ -73,15 +73,14 @@ class SelfAssessment extends Component {
   }
 
   getQuestion() {
-    const questions = _.clone(this.state.coreCompetencies)
+    let questions = _.clone(this.state.coreCompetencies)
     _.forEach(this.state.projectRequiredCompetencies, (value) => {
       questions.push(_.find(this.state.optionalCompetencies, ['name', value.name]))
     })
-    if (_.isEmpty(this.props.manager) && !this.isFinalPage()) {
       _.forEach(this.state.customCompetencies, (value) => {
         questions.push(_.find(this.state.optionalCompetencies, ['name', value]))
       })
-    }
+    questions =_.filter(questions,['activated',true])
     this.setState({
       questions,
       loading: false
@@ -135,12 +134,12 @@ class SelfAssessment extends Component {
     this.setState({
       saving: true
     });
-    this.saveCustomCompetencyLevels()
+    //this.saveCustomCompetencyLevels()
     writeAnswers(part, this.state.answers).then(() => window.location.replace('/careercoacher/#/finish'));
   }
 
   onChangeQuestionInput = (value, competenciesName, index) => {
-    value = value? 4 :_.isBoolean(value)? 0 : value
+    value = (value===true)? 4 :(value===false)? 0 : value
     this.setState({
       answers: {
         ...this.state.answers,
