@@ -5,7 +5,7 @@ import logo from './logo.png'
 import Loading from './Loading'
 import { getData, update } from './firebase'
 import ProfilePersonalPage from './ProfilePersonalPage'
-// import Avatar from 'react-avatar'
+import Avatar from 'react-avatar'
 
 const { Content } = Layout
 
@@ -56,7 +56,7 @@ export default class PersionalInformation extends Component {
           <Row type='flex' justify='space-between' style={{ height: '100%' }}>
             <Content style={{ margin: '0 40px' }}>
               <Row type="flex" justify="center">
-                {/*<Col span={4}>  <Avatar size="100" round="true" src="http://careers.kms-technology.com/wp-content/uploads/2015/09/kms-next-avatar.png" /></Col>*/}
+                {<Col span={4}>  <Avatar size="100" round="true" src="http://careers.kms-technology.com/wp-content/uploads/2015/09/kms-next-avatar.png" /></Col>}
                 <Col span={4} style={{ marginTop: 40 }}><h3>Name : {this.state.personalName}</h3></Col>
                 <Col span={4} style={{ marginTop: 40 }}><h3>Title: {this.state.personalTitle}</h3></Col>
                 <Col span={4} style={{ marginTop: 40 }}><h3>Manager : {this.state.managerInformation.manager}</h3></Col>
