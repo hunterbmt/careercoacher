@@ -11,23 +11,28 @@ class SetWeight extends Component {
   state = {
     loading: true,
     constraints: { minRange: 0, maxRange: 0, weight: {}, level: _.toNumber(this.props.level)},
-    disabledSetWeight: [],
-    defaultOption: 'none'
+    disabledSetWeight: []
   }
 
   componentDidMount() {
     const option = (this.props.option === 'core') ? 'Kms_core' : 'Kms_optional';
     getData(`competencies/${option}/${this.props.index}`)
-      .then((competency) => this.setStateForQuestion(competency))
+      .then((competency) =>{ 
+        this.setState({
+          constraints: _.get(competency.constraints,_.toNumber(this.props.level)-1)       
+        })
+        this.setStateForQuestion(competency)
+      })
   }
 
   setStateForQuestion = (competency) => {
-    let disabledSetWeight = []
-    _.map(competency.questions, () => disabledSetWeight.push(true))
+    let disabledSetWeight = _.fill(Array(competency.questions.length-1), true)
+    let options= _.fill(Array(competency.questions.length-1), 'none')
     this.setState({
       questions: competency.questions,
       competencyName: competency.name,
       disabledSetWeight,
+      options,
       loading: false
     })
   }
@@ -46,9 +51,22 @@ class SetWeight extends Component {
 
   OnCheckUseDefaultForAll = (e) => {
     if (e.target.checked) {
+      let newWeight = {}
+      for(let i = 0 ; i< this.state.options.length;i++) {
+        newWeight = {
+          ...newWeight,
+          [i]: _.toNumber(this.props.level)
+        }
+      }
       this.setState({
-        defaultOption: 'default'
+        options: _.fill(this.state.options,'default'),    
       })
+      this.state.constraints.weight = newWeight
+    } else{
+      this.setState({
+        options: _.fill(this.state.options,'none')
+      })
+      this.state.constraints.weight = {}
     }
 
   }
@@ -105,6 +123,7 @@ class SetWeight extends Component {
   onRadioSetWeightChange(index, e) {
     this.state.disabledSetWeight[index] = true
     if (e.target.value === 'none') {
+      this.state.options[index] = 'none'
       this.setState({
         constraints: {
           ...this.state.constraints,
@@ -116,6 +135,7 @@ class SetWeight extends Component {
       })
     }
     else if (e.target.value === 'default') {
+      this.state.options[index] = 'default'
       this.state.disabledSetWeight[index] = true
       this.setState({
         constraints: {
@@ -127,6 +147,7 @@ class SetWeight extends Component {
         }
       })
     } else {
+      this.state.options[index] = 'customize'
       this.state.disabledSetWeight[index] = false
       this.setState({
         constraints: {
@@ -186,7 +207,7 @@ class SetWeight extends Component {
                 <Row type='flex' justify='left' style={{ padding: '10px 0' }}>
                   <div>
                     <h3>Range</h3>
-                    <InputNumber min={0} defaultValue={0} onChange={(value) => this.changeMin(value)} /><Icon type="arrow-right" />
+                    <InputNumber min={0} defaultValue={0} value={this.state.constraints.minRange} onChange={(value) => this.changeMin(value)} /><Icon type="arrow-right" />
                     <InputNumber min={this.state.constraints.minRange} defaultValue={0} value={this.state.constraints.maxRange} onChange={(value) => this.changeMax(value)} />
                   </div>
                 </Row>
@@ -208,7 +229,7 @@ class SetWeight extends Component {
                                 <p>{question.desc} {!_.isEmpty(question.hint) ? <Button shape="circle" icon="question" size="small" onClick={() => this.openHint(question.hint)} /> : null}</p>
                               </Panel>
                             </Collapse>
-                            <RadioGroup onChange={(e) => this.onRadioSetWeightChange(index, e)} defaultValue={this.state.defaultOption}>
+                            <RadioGroup onChange={(e) => this.onRadioSetWeightChange(index, e)} value={this.state.options[index]}>
                               <Radio value='none'>No constraint</Radio>
                               <Radio value='default'>Use default weight for this question</Radio>
                               <Radio value='customize'>Set another weight</Radio>

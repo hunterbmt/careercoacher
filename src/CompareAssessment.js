@@ -51,7 +51,6 @@ class CompareAssessment extends Component {
     const conflicts = _.mergeWith(selfAnswers, managerAnswers, (selfAnswer, managerAnswer) =>
       _.map(selfAnswer, (answer, index) => [answer, managerAnswer[index]])
     )
-    console.log(conflicts)
     return _.omitBy(
       _.mapValues(conflicts, (answers) => _.omitBy(answers, (answer) => answer[0] === answer[1]))
       , _.isEmpty)
@@ -100,8 +99,8 @@ class CompareAssessment extends Component {
 
   isMatchBaseline = (baselines) => {
     let isMatch = true
-    _.forEach(baselines, (value) => {
-      _.gte(_.toNumber(_.find(this.state.levels, ['name', value.name]).proficiency), _.toNumber(value.proficiency)) ?
+    _.forEach(this.state.levels, (value) => {
+      _.gte(_.toNumber(_.find(baselines, ['name', value.name]).proficiency), _.toNumber(value.proficiency)) ?
         null
         :
         isMatch = false
@@ -168,7 +167,7 @@ class CompareAssessment extends Component {
     switch (currentTitle) {
       case 'SE':
         if (_.isEqual(lastTitle, 'SSE') || _.isEqual(lastTitle, 'SA')) {
-          promotion = 'Demote to SE'
+          promotion = 'SuDemote to SE'
         }
         break;
       case 'SSE':
@@ -231,6 +230,7 @@ class CompareAssessment extends Component {
         changelog,
         time: new Date(_.now()).toLocaleDateString()
       }
+      console.log(history)
       update(`profiles/${this.state.indexProfile}/historical/${newIndex}`, history)
     })
   }
